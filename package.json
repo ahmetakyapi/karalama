@@ -1,0 +1,20 @@
+{
+  "name": "karalama",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev:shared && concurrently \"npm run dev:server\" \"npm run dev:web\"",
+    "dev:web": "npm -w apps/web run dev",
+    "dev:server": "npm -w apps/server run dev",
+    "dev:shared": "npm -w packages/shared run build",
+    "build": "npm -w packages/shared run build && npm -w apps/web run build",
+    "build:shared": "npm -w packages/shared run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1",
+    "typescript": "^5.4.5"
+  }
+}
