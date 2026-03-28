@@ -35,3 +35,18 @@ export const AVATAR_COLORS = [
   '#0ea5e9', // sky
   '#ef4444', // red
 ] as const;
+
+export interface AvatarCharacter {
+  id: string;
+  name: string;
+  color: string;
+  emoji: string;
+}
+
+export const AVATAR_CHARACTERS: AvatarCharacter[] = [
+  { id: 'robot', name: 'Robot', color: '#6366f1', emoji: '🤖' },
+  { id: 'cat', name: 'Kedi', color: '#f59e0b', emoji: '🐱' },
+  { id: 'alien', name: 'Uzaylı', color: '#10b981', emoji: '👽' },
+  { id: 'wizard', name: 'Büyücü', color: '#8b5cf6', emoji: '🧙' },
+  { id: 'ninja', name: 'Ninja', color: '#f43f5e', emoji: '🥷' },
+] as const;

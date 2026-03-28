@@ -12,7 +12,7 @@ import {
   useInView,
 } from 'framer-motion';
 import { Input } from '@/components/ui/Input';
-import { AVATAR_COLORS } from '@karalama/shared';
+import { AVATAR_COLORS, AVATAR_CHARACTERS } from '@karalama/shared';
 import { cn } from '@/lib/utils';
 
 /* ============================================================
@@ -553,8 +553,8 @@ const FEATURES = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
       </svg>
     ),
-    title: '320+ Türkçe Kelime',
-    desc: '8 farklı kategoride, 3 zorluk seviyesinde kelime havuzu.',
+    title: '1070+ Türkçe Kelime',
+    desc: '18 farklı kategoride, 3 zorluk seviyesinde kelime havuzu.',
     glow: 'rgba(34,211,238,0.12)',
   },
   {
@@ -602,12 +602,25 @@ const FEATURES = [
 /* ============================================================
    Main Page
    ============================================================ */
+/* ============================================================
+   Floating drawing elements for hero background
+   ============================================================ */
+const FLOATING_ELEMENTS = [
+  { emoji: '✏️', x: '8%', y: '18%', size: 32, delay: 0 },
+  { emoji: '🎨', x: '88%', y: '15%', size: 36, delay: 0.3 },
+  { emoji: '⭐', x: '15%', y: '72%', size: 24, delay: 0.6 },
+  { emoji: '🎯', x: '82%', y: '68%', size: 28, delay: 0.9 },
+  { emoji: '💡', x: '5%', y: '45%', size: 22, delay: 1.2 },
+  { emoji: '🏆', x: '92%', y: '42%', size: 26, delay: 0.5 },
+] as const;
+
 export default function HomePage() {
   const router = useRouter();
   const spotlight = useSpotlight();
   const [playerName, setPlayerName] = useState('');
   const [roomCode, setRoomCode] = useState('');
-  const [selectedColor, setSelectedColor] = useState<string>(AVATAR_COLORS[0]);
+  const [selectedAvatar, setSelectedAvatar] = useState(AVATAR_CHARACTERS[0]);
+  const [selectedColor, setSelectedColor] = useState<string>(AVATAR_CHARACTERS[0].color);
 
   const handleJoin = () => {
     if (!playerName.trim() || !roomCode.trim()) return;
@@ -639,6 +652,48 @@ export default function HomePage() {
 
       {/* ===== HERO ===== */}
       <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pt-8 pb-20">
+        {/* Radial glow blobs */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-indigo-600/20 blur-[100px]"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+            className="absolute -bottom-32 -right-32 h-[500px] w-[500px] rounded-full bg-cyan-500/15 blur-[100px]"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.3, 1], opacity: [0.08, 0.15, 0.08] }}
+            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-emerald-500/10 blur-[120px]"
+          />
+        </div>
+
+        {/* Floating elements */}
+        {FLOATING_ELEMENTS.map((el, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{
+              opacity: [0, 0.6, 0.6, 0],
+              y: [20, -10, -10, -30],
+            }}
+            transition={{
+              duration: 6,
+              delay: el.delay + 1,
+              repeat: Infinity,
+              repeatDelay: 2,
+              ease: 'easeInOut',
+            }}
+            className="pointer-events-none absolute z-0 select-none"
+            style={{ left: el.x, top: el.y, fontSize: el.size }}
+          >
+            {el.emoji}
+          </motion.div>
+        ))}
+
         <motion.div
           className="relative z-10 w-full max-w-3xl text-center"
           initial="hidden"
@@ -647,114 +702,209 @@ export default function HomePage() {
           {/* Badge */}
           <motion.div variants={fadeUp} custom={0} className="mb-6 flex justify-center">
             <span className="chip">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+              </span>
               Multiplayer Çizim Oyunu
             </span>
           </motion.div>
 
-          {/* Title */}
+          {/* Title with animated underline */}
           <motion.h1
             variants={fadeUp}
             custom={0.06}
-            className="mb-5 text-[2.75rem] font-extrabold leading-[1.1] tracking-tight text-slate-50 sm:text-6xl lg:text-[4.25rem]"
+            className="mb-5 text-[2.75rem] font-extrabold leading-[1.1] tracking-tight text-slate-50 sm:text-6xl lg:text-[4.5rem]"
           >
-            Çiz, Tahmin Et
+            <span className="relative inline-block">
+              Çiz
+              <motion.span
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 0.8, duration: 0.6, ease: EASE }}
+                className="absolute -bottom-1 left-0 h-1 w-full origin-left rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400"
+              />
+            </span>
+            {', '}
+            <span className="relative inline-block">
+              Tahmin Et
+              <motion.span
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 1.0, duration: 0.6, ease: EASE }}
+                className="absolute -bottom-1 left-0 h-1 w-full origin-left rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400"
+              />
+            </span>
             <br />
-            <span className="text-gradient">ve Eğlen!</span>
+            <span className="text-gradient text-[1.15em]">ve Eğlen!</span>
           </motion.h1>
 
           {/* Subtitle */}
           <motion.p
             variants={fadeUp}
             custom={0.12}
-            className="mx-auto mb-10 max-w-lg text-base leading-relaxed text-slate-400 sm:text-lg"
+            className="mx-auto mb-12 max-w-lg text-base leading-relaxed text-slate-400 sm:text-lg"
           >
             Oda oluştur, linki paylaş, saniyeler içinde oynamaya başla.
-            Kayıt yok, indirme yok, tamamen ücretsiz.
+            <br className="hidden sm:block" />
+            Kayıt yok, indirme yok, tamamen <span className="text-slate-200 font-medium">ücretsiz</span>.
           </motion.p>
 
           {/* Player Setup Card */}
           <motion.div
             variants={scaleUp}
             custom={0.2}
-            className="mx-auto max-w-sm"
+            className="mx-auto max-w-md"
           >
-            <div className="glass rounded-2xl p-5 space-y-3">
-              {/* Name input + avatar */}
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-sm font-bold text-white border-2 border-white/10 transition-colors duration-300"
-                  style={{ backgroundColor: selectedColor }}
-                >
-                  {playerName ? playerName[0].toUpperCase() : '?'}
+            <TiltCard className="rounded-3xl p-6 sm:p-7" glowColor="rgba(99,102,241,0.08)">
+              <div className="space-y-4">
+                {/* Avatar character selection */}
+                <div>
+                  <div className="text-xs font-medium text-slate-500 mb-3 text-left">Avatarını Seç</div>
+                  <div className="flex items-center justify-center gap-2 sm:gap-3">
+                    {AVATAR_CHARACTERS.map((avatar, i) => (
+                      <motion.button
+                        key={avatar.id}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 + i * 0.08, duration: 0.4, ease: EASE }}
+                        onClick={() => {
+                          setSelectedAvatar(avatar);
+                          setSelectedColor(avatar.color);
+                        }}
+                        className={cn(
+                          'relative flex flex-col items-center gap-1.5 rounded-2xl p-2.5 sm:p-3 transition-all duration-300',
+                          selectedAvatar.id === avatar.id
+                            ? 'bg-white/[0.08] ring-2 scale-105'
+                            : 'bg-white/[0.02] hover:bg-white/[0.05] hover:scale-105'
+                        )}
+                        style={{
+                          outlineColor: selectedAvatar.id === avatar.id ? avatar.color : 'transparent',
+                          outlineWidth: selectedAvatar.id === avatar.id ? 2 : 0,
+                          outlineStyle: 'solid',
+                          outlineOffset: -1,
+                        }}
+                      >
+                        {/* Avatar circle */}
+                        <div
+                          className="relative w-11 h-11 sm:w-13 sm:h-13 rounded-full flex items-center justify-center text-xl sm:text-2xl transition-all duration-300"
+                          style={{
+                            background: `linear-gradient(135deg, ${avatar.color}30, ${avatar.color}60)`,
+                            boxShadow: selectedAvatar.id === avatar.id
+                              ? `0 0 20px ${avatar.color}40, 0 0 40px ${avatar.color}15`
+                              : 'none',
+                          }}
+                        >
+                          {avatar.emoji}
+                          {selectedAvatar.id === avatar.id && (
+                            <motion.div
+                              layoutId="avatar-ring"
+                              className="absolute inset-0 rounded-full border-2"
+                              style={{ borderColor: avatar.color }}
+                              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                            />
+                          )}
+                        </div>
+                        <span className={cn(
+                          'text-[10px] sm:text-xs font-medium transition-colors duration-200',
+                          selectedAvatar.id === avatar.id ? 'text-slate-200' : 'text-slate-500'
+                        )}>
+                          {avatar.name}
+                        </span>
+                      </motion.button>
+                    ))}
+                  </div>
                 </div>
-                <Input
-                  placeholder="Adını gir..."
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  maxLength={20}
-                  className="flex-1"
-                />
-              </div>
 
-              {/* Color picker - compact single row */}
-              <div className="flex items-center gap-1.5 px-1 overflow-x-auto py-1">
-                {AVATAR_COLORS.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => setSelectedColor(color)}
-                    className={cn(
-                      'w-5 h-5 rounded-full shrink-0 transition-all duration-200',
-                      selectedColor === color
-                        ? 'ring-2 ring-white ring-offset-1 ring-offset-[#0a1021] scale-110'
-                        : 'opacity-50 hover:opacity-100 hover:scale-110'
-                    )}
-                    style={{ backgroundColor: color }}
+                {/* Name input with avatar preview */}
+                <div className="flex items-center gap-3">
+                  <motion.div
+                    layout
+                    className="w-11 h-11 rounded-full shrink-0 flex items-center justify-center text-lg transition-all duration-300"
+                    style={{
+                      background: `linear-gradient(135deg, ${selectedColor}40, ${selectedColor}80)`,
+                      boxShadow: `0 0 16px ${selectedColor}30`,
+                    }}
+                  >
+                    {selectedAvatar.emoji}
+                  </motion.div>
+                  <Input
+                    placeholder="Adını gir..."
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    maxLength={20}
+                    className="flex-1"
                   />
-                ))}
-              </div>
+                </div>
 
-              {/* Divider */}
-              <div className="h-px bg-white/[0.06]" />
+                {/* Divider */}
+                <div className="relative">
+                  <div className="h-px bg-white/[0.06]" />
+                  <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0c1222] px-3 text-[10px] font-medium text-slate-600 uppercase tracking-wider">
+                    veya
+                  </span>
+                </div>
 
-              {/* Join with room code */}
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Oda kodu"
-                  value={roomCode}
-                  onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                  maxLength={6}
-                  className="font-mono tracking-[0.15em] uppercase flex-1 !py-2.5 text-sm"
-                />
+                {/* Join with room code */}
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Oda kodu"
+                    value={roomCode}
+                    onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                    maxLength={6}
+                    className="font-mono tracking-[0.15em] uppercase flex-1 !py-2.5 text-sm"
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={handleJoin}
+                    disabled={!playerName.trim() || roomCode.length < 4}
+                    className="rounded-xl bg-white/[0.06] border border-white/[0.1] px-5 py-2.5 text-sm font-semibold text-slate-300 transition-all hover:text-white hover:border-white/[0.2] hover:bg-white/[0.08] disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    Katıl
+                  </motion.button>
+                </div>
+
+                {/* Create room - big flashy button */}
                 <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={handleJoin}
-                  disabled={!playerName.trim() || roomCode.length < 4}
-                  className="rounded-xl bg-white/[0.06] border border-white/[0.1] px-4 py-2.5 text-sm font-semibold text-slate-300 transition-all hover:text-white hover:border-white/[0.2] disabled:opacity-30 disabled:cursor-not-allowed"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleCreate}
+                  disabled={!playerName.trim()}
+                  className="group relative w-full flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold text-white overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed"
+                  style={{
+                    background: `linear-gradient(135deg, ${selectedColor}, ${selectedColor}cc)`,
+                    boxShadow: `0 8px 32px ${selectedColor}30, 0 2px 8px ${selectedColor}20`,
+                  }}
                 >
-                  Katıl
+                  <span className="relative z-10 flex items-center gap-2">
+                    Yeni Oda Oluştur
+                    <svg
+                      className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
+                  {/* Shimmer effect */}
+                  <motion.div
+                    className="absolute inset-0 z-0"
+                    animate={{
+                      background: [
+                        'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0) 60%, transparent 100%)',
+                        'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0) 60%, transparent 100%)',
+                      ],
+                      backgroundPosition: ['-200% center', '200% center'],
+                      backgroundSize: ['200% 100%', '200% 100%'],
+                    }}
+                    transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1 }}
+                  />
                 </motion.button>
               </div>
-
-              {/* Create room */}
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={handleCreate}
-                disabled={!playerName.trim()}
-                className="group w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:shadow-indigo-500/30 disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                Yeni Oda Oluştur
-                <svg
-                  className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </motion.button>
-            </div>
+            </TiltCard>
           </motion.div>
         </motion.div>
 
@@ -794,7 +944,7 @@ export default function HomePage() {
             custom={0.06}
             className="mb-3 text-3xl font-extrabold tracking-tight text-slate-50 sm:text-4xl"
           >
-            Neden <span className="text-gradient">Çiz Tahmin Et?</span>
+            Neden <span className="text-gradient">Karalama?</span>
           </motion.h2>
           <motion.p
             variants={fadeUp}
@@ -877,7 +1027,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/[0.05] py-8 text-center">
         <p className="text-xs text-slate-500">
-          Çiz Tahmin Et &mdash; Arkadaşlarınla eğlencenin adresi
+          Karalama &mdash; Arkadaşlarınla eğlencenin adresi
         </p>
       </footer>
     </div>
