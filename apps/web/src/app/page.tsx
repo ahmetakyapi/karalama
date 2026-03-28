@@ -135,7 +135,7 @@ function HeroDemo() {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => setStep((s) => (s + 1) % 4), 5000);
+    const timer = setInterval(() => setStep((s) => (s + 1) % 4), 8000);
     return () => clearInterval(timer);
   }, []);
 
@@ -203,7 +203,7 @@ function HeroDemo() {
                   style={{ background: `linear-gradient(90deg, ${s.color}, ${s.color}80)` }}
                   initial={{ width: '0%' }}
                   animate={{ width: '100%' }}
-                  transition={{ duration: 5, ease: 'linear' }}
+                  transition={{ duration: 8, ease: 'linear' }}
                   key={`bar-${step}`}
                 />
               )}
@@ -1194,30 +1194,17 @@ export default function HomePage() {
             <motion.h1
               variants={fadeUp}
               custom={0.06}
-              className="mb-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-50 sm:text-5xl xl:text-6xl"
+              className="mb-2 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-50 sm:text-5xl xl:text-6xl"
             >
-              <span className="relative inline-block">
-                Çiz
-                <motion.span
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ delay: 0.8, duration: 0.6, ease: EASE }}
-                  className="absolute -bottom-1 left-0 h-1 w-full origin-left rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400"
-                />
-              </span>
-              {', '}
-              <span className="relative inline-block">
-                Tahmin Et
-                <motion.span
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ delay: 1.0, duration: 0.6, ease: EASE }}
-                  className="absolute -bottom-1 left-0 h-1 w-full origin-left rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400"
-                />
-              </span>
-              <br />
-              <span className="text-gradient text-[1.15em]">ve Eğlen!</span>
+              <span className="text-gradient text-[1.15em]">Karalama</span>
             </motion.h1>
+            <motion.p
+              variants={fadeUp}
+              custom={0.1}
+              className="mb-5 text-xl font-semibold text-slate-300 sm:text-2xl"
+            >
+              Çiz, Tahmin Et ve Eğlen!
+            </motion.p>
 
             <motion.p
               variants={fadeUp}
