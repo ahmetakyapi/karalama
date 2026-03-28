@@ -80,6 +80,7 @@ export interface ServerToClientEvents {
 
   // Chat
   'chat:message': (data: ChatMessage) => void;
+  'chat:reaction': (data: { emoji: string; playerId: string; playerName: string }) => void;
 
   // Player
   'player:readyChanged': (data: { playerId: string; ready: boolean }) => void;

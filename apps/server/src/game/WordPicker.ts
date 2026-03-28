@@ -7,15 +7,24 @@ import {
 export class WordPicker {
   private usedWords: Set<string> = new Set();
   private enabledCategories: string[];
+  private customWords: string[];
 
-  constructor(enabledCategories: string[]) {
+  constructor(enabledCategories: string[], customWords: string[] = []) {
     this.enabledCategories = enabledCategories.length
       ? enabledCategories
       : Object.keys(categories);
+    this.customWords = customWords.filter((w) => w.trim().length > 0);
   }
 
   pickOptions(count: number): WordOption[] {
     const allWords: WordOption[] = [];
+
+    // Add custom words as medium difficulty
+    for (const w of this.customWords) {
+      if (!this.usedWords.has(w)) {
+        allWords.push({ word: w, difficulty: 2, category: 'ozel' });
+      }
+    }
 
     for (const catKey of this.enabledCategories) {
       const cat = categories[catKey];

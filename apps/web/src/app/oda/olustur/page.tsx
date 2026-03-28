@@ -37,6 +37,7 @@ function CreateRoomContent() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     DEFAULT_ROOM_SETTINGS.categories
   );
+  const [customWordsText, setCustomWordsText] = useState('');
 
   useEffect(() => {
     if (store.roomCode) {
@@ -54,6 +55,11 @@ function CreateRoomContent() {
     const s = socket.current;
     if (!s) return;
 
+    const customWords = customWordsText
+      .split(/[,\n]/)
+      .map((w) => w.trim())
+      .filter((w) => w.length > 0);
+
     s.emit('room:create', {
       playerName,
       avatarColor: playerColor,
@@ -63,6 +69,7 @@ function CreateRoomContent() {
         drawTime,
         maxPlayers,
         categories: selectedCategories,
+        customWords,
       },
     });
   };
@@ -157,10 +164,35 @@ function CreateRoomContent() {
             </div>
           </div>
 
+          {/* Custom Words */}
+          <div>
+            <label className="block text-sm text-white/50 mb-2">
+              Özel Kelimeler <span className="text-white/30">(opsiyonel)</span>
+            </label>
+            <textarea
+              value={customWordsText}
+              onChange={(e) => setCustomWordsText(e.target.value)}
+              placeholder="Virgül veya satır ile ayırarak yaz...&#10;örnek: pizza, astronot, kaykay"
+              rows={3}
+              className={cn(
+                'w-full px-3 py-2 rounded-lg text-sm resize-none',
+                'bg-white/[0.03] border border-white/[0.06]',
+                'text-white placeholder:text-white/20',
+                'focus:outline-none focus:border-accent-indigo/40',
+                'transition-all duration-200'
+              )}
+            />
+            {customWordsText.trim() && (
+              <p className="text-xs text-white/30 mt-1">
+                {customWordsText.split(/[,\n]/).filter((w) => w.trim()).length} özel kelime
+              </p>
+            )}
+          </div>
+
           <Button
             size="lg"
             onClick={handleCreate}
-            disabled={selectedCategories.length === 0}
+            disabled={selectedCategories.length === 0 && !customWordsText.trim()}
             className="w-full"
           >
             Oda Oluştur

@@ -6,6 +6,7 @@ import { useGameStore } from '@/stores/gameStore';
 import { getSocket } from '@/lib/socket';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ReactionBar } from '@/components/game/EmojiReactions';
 
 export function ChatPanel() {
   const { messages } = useChatStore();
@@ -83,8 +84,11 @@ export function ChatPanel() {
         </AnimatePresence>
       </div>
 
-      {/* Input */}
-      <div className="p-2 border-t border-white/[0.06]">
+      {/* Reactions + Input */}
+      <div className="px-2 pt-1.5 border-t border-white/[0.06]">
+        <ReactionBar />
+      </div>
+      <div className="p-2 pt-1">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}

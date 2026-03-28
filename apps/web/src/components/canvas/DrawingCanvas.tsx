@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo, useState } from 'react';
 import { useDrawingStore } from '@/stores/drawingStore';
 import { useGameStore } from '@/stores/gameStore';
 import { getSocket } from '@/lib/socket';
@@ -205,26 +205,76 @@ export function DrawingCanvas() {
     getSocket().emit('draw:clear');
   }, [redrawAll]);
 
+  // Custom cursor based on brush size/color
+  const cursorStyle = useMemo(() => {
+    const size = Math.max(8, brushSize * 1.5);
+    const half = size / 2;
+    const c = document.createElement('canvas');
+    c.width = size + 2;
+    c.height = size + 2;
+    const ctx = c.getContext('2d');
+    if (!ctx) return 'crosshair';
+    ctx.beginPath();
+    ctx.arc(half + 1, half + 1, half, 0, Math.PI * 2);
+    if (tool === 'eraser') {
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = color + 'aa';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    return `url(${c.toDataURL()}) ${half + 1} ${half + 1}, crosshair`;
+  }, [tool, color, brushSize]);
+
   // Expose undo/clear
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__canvasUndo = undo;
     (window as unknown as Record<string, unknown>).__canvasClear = clear;
   }, [undo, clear]);
 
+  const [zoomed, setZoomed] = useState(false);
+
   return (
     <div ref={containerRef} className="relative w-full" style={{ aspectRatio: '4/3' }}>
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full rounded-xl"
-      />
-      <canvas
-        ref={overlayRef}
-        className="absolute inset-0 w-full h-full rounded-xl cursor-crosshair"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
-      />
+      <div
+        className="absolute inset-0 overflow-hidden rounded-xl"
+        style={{
+          transform: zoomed ? 'scale(1.5)' : 'scale(1)',
+          transformOrigin: 'center center',
+          transition: 'transform 0.3s ease',
+        }}
+      >
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full"
+        />
+        <canvas
+          ref={overlayRef}
+          className="absolute inset-0 w-full h-full"
+          style={{ cursor: cursorStyle }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+        />
+      </div>
+      {/* Zoom toggle - visible on mobile */}
+      <button
+        onClick={() => setZoomed((z) => !z)}
+        className="absolute top-2 right-2 lg:hidden w-8 h-8 rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/60 hover:text-white z-10"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          {zoomed ? (
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+          )}
+        </svg>
+      </button>
     </div>
   );
 }

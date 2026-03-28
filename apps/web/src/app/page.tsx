@@ -1124,16 +1124,37 @@ const FEATURES = [
 /* ============================================================
    Main Page
    ============================================================ */
+function loadSavedPlayer() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const saved = localStorage.getItem('karalama_player');
+    return saved ? JSON.parse(saved) : null;
+  } catch { return null; }
+}
+
+function savePlayer(name: string, avatarId: string, color: string) {
+  try {
+    localStorage.setItem('karalama_player', JSON.stringify({ name, avatarId, color }));
+  } catch { /* quota exceeded */ }
+}
+
 export default function HomePage() {
   const router = useRouter();
   const spotlight = useSpotlight();
-  const [playerName, setPlayerName] = useState('');
+
+  const saved = useRef(loadSavedPlayer());
+  const [playerName, setPlayerName] = useState(saved.current?.name || '');
   const [roomCode, setRoomCode] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState(AVATAR_CHARACTERS[0]);
-  const [selectedColor, setSelectedColor] = useState<string>(AVATAR_CHARACTERS[0].color);
+  const [selectedAvatar, setSelectedAvatar] = useState(
+    () => AVATAR_CHARACTERS.find((a) => a.id === saved.current?.avatarId) || AVATAR_CHARACTERS[0]
+  );
+  const [selectedColor, setSelectedColor] = useState<string>(
+    () => saved.current?.color || AVATAR_CHARACTERS[0].color
+  );
 
   const handleJoin = () => {
     if (!playerName.trim() || !roomCode.trim()) return;
+    savePlayer(playerName.trim(), selectedAvatar.id, selectedColor);
     const params = new URLSearchParams({
       name: playerName.trim(),
       color: selectedColor,
@@ -1143,6 +1164,7 @@ export default function HomePage() {
 
   const handleCreate = () => {
     if (!playerName.trim()) return;
+    savePlayer(playerName.trim(), selectedAvatar.id, selectedColor);
     const params = new URLSearchParams({
       name: playerName.trim(),
       color: selectedColor,

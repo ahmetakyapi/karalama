@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { easeCurve } from '@/styles/animations';
 import { Avatar } from '@/components/ui/Avatar';
+import { CANVAS_WIDTH, CANVAS_HEIGHT, type DrawStroke, type DrawPoint } from '@karalama/shared';
 
 const MEDALS = ['🥇', '🥈', '🥉'] as const;
 
@@ -31,8 +32,68 @@ function AnimatedScore({ target, duration = 1.2 }: { target: number; duration?: 
   return <>{current}</>;
 }
 
+function MiniReplay({ strokes }: { strokes: DrawStroke[] }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || strokes.length === 0) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    let strokeIdx = 0;
+    const totalTime = 2000; // replay in 2 seconds
+    const interval = totalTime / strokes.length;
+
+    const timer = setInterval(() => {
+      if (strokeIdx >= strokes.length) {
+        clearInterval(timer);
+        return;
+      }
+      const s = strokes[strokeIdx];
+      if (s.points.length >= 2) {
+        ctx.save();
+        if (s.tool === 'eraser') {
+          ctx.globalCompositeOperation = 'destination-out';
+        }
+        ctx.strokeStyle = s.color;
+        ctx.lineWidth = s.size;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(s.points[0].x * CANVAS_WIDTH, s.points[0].y * CANVAS_HEIGHT);
+        for (let i = 1; i < s.points.length; i++) {
+          ctx.lineTo(s.points[i].x * CANVAS_WIDTH, s.points[i].y * CANVAS_HEIGHT);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+      strokeIdx++;
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [strokes]);
+
+  if (strokes.length === 0) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, delay: 0.1 }}
+      className="w-32 h-24 rounded-lg overflow-hidden border border-white/[0.08] bg-white/[0.02] mb-3"
+    >
+      <canvas ref={canvasRef} className="w-full h-full" />
+    </motion.div>
+  );
+}
+
 export function RoundTransition() {
-  const { phase, lastRoundData, players, playerId, currentRound, totalRounds } =
+  const { phase, lastRoundData, players, playerId, currentRound, totalRounds, drawHistory } =
     useGameStore();
 
   const show = phase === 'ROUND_RESULT' && !!lastRoundData;
@@ -64,6 +125,9 @@ export function RoundTransition() {
 
           {/* Content */}
           <div className="relative z-10 flex flex-col items-center w-full max-w-md px-6 py-8">
+
+            {/* Mini Replay */}
+            <MiniReplay strokes={drawHistory} />
 
             {/* Revealed Word Section */}
             <motion.div

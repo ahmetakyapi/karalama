@@ -175,6 +175,19 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
       socket.to(room.code).emit('draw:clear');
     });
 
+    // --- Reactions ---
+    socket.on('chat:reaction', ({ emoji }) => {
+      const room = manager.getSocketRoom(socket.id);
+      if (!room) return;
+      const player = room.players.get(socket.id);
+      if (!player) return;
+      socket.to(room.code).emit('chat:reaction', {
+        emoji,
+        playerId: player.id,
+        playerName: player.name,
+      });
+    });
+
     // --- Chat ---
     socket.on('chat:message', ({ text }) => {
       const room = manager.getSocketRoom(socket.id);

@@ -13,6 +13,7 @@ import { WordSelection } from './WordSelection';
 import { RoundTransition } from './RoundTransition';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
+import { EmojiReactions } from './EmojiReactions';
 import { cn } from '@/lib/utils';
 
 type MobileTab = 'canvas' | 'chat' | 'scores';
@@ -34,6 +35,7 @@ export function GameView() {
 
   return (
     <div className="h-screen flex flex-col bg-bg-primary">
+      <EmojiReactions />
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.06] bg-bg-secondary/50">
         <div className="flex items-center gap-3">

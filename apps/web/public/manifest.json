@@ -1,0 +1,17 @@
+{
+  "name": "Karalama - Çiz, Tahmin Et ve Eğlen!",
+  "short_name": "Karalama",
+  "description": "Arkadaşlarınla çiz, tahmin et, eğlen! Multiplayer Türkçe çizim oyunu.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#04070d",
+  "theme_color": "#04070d",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useSocket } from '@/hooks/useSocket';
 import { useGameStore } from '@/stores/gameStore';
@@ -32,23 +32,24 @@ function RoomContent() {
       s.connect();
     }
 
-    // Wait for connection then join
-    const onConnect = () => {
-      if (!store.playerId) {
-        s.emit('room:join', {
-          roomCode: roomCode.toUpperCase(),
-          playerName,
-          avatarColor: playerColor,
-        });
-        store.setRoomCode(roomCode.toUpperCase());
-      }
+    const joinRoom = () => {
+      s.emit('room:join', {
+        roomCode: roomCode.toUpperCase(),
+        playerName,
+        avatarColor: playerColor,
+      });
+      store.setRoomCode(roomCode.toUpperCase());
     };
 
-    if (s.connected) {
-      onConnect();
-    } else {
-      s.on('connect', onConnect);
+    // Join on connect (initial + reconnect)
+    const onConnect = () => {
+      joinRoom();
+    };
+
+    if (s.connected && !store.playerId) {
+      joinRoom();
     }
+    s.on('connect', onConnect);
 
     return () => {
       s.off('connect', onConnect);
@@ -56,8 +57,14 @@ function RoomContent() {
   }, [roomCode, playerName, playerColor]);
 
   const { phase, isConnected } = store;
+  const [wasConnected, setWasConnected] = useState(false);
 
-  if (!isConnected) {
+  useEffect(() => {
+    if (isConnected) setWasConnected(true);
+  }, [isConnected]);
+
+  // First time connecting
+  if (!isConnected && !wasConnected) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -68,13 +75,24 @@ function RoomContent() {
     );
   }
 
-  if (phase === 'GAME_OVER') {
-    return <GameOverScreen />;
-  }
-
-  if (phase === 'WAITING') {
-    return <LobbyView />;
-  }
-
-  return <GameView />;
+  return (
+    <>
+      {/* Reconnecting banner */}
+      {!isConnected && wasConnected && (
+        <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500/90 text-center py-2 px-4">
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm font-medium text-white">Bağlantı koptu, yeniden bağlanılıyor...</span>
+          </div>
+        </div>
+      )}
+      {phase === 'GAME_OVER' ? (
+        <GameOverScreen />
+      ) : phase === 'WAITING' ? (
+        <LobbyView />
+      ) : (
+        <GameView />
+      )}
+    </>
+  );
 }

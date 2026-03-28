@@ -78,7 +78,7 @@ export class Room {
     this.timeLeft = 0;
 
     this.timerRef = null;
-    this.wordPicker = new WordPicker(this.settings.categories);
+    this.wordPicker = new WordPicker(this.settings.categories, this.settings.customWords);
     this.hintRevealed1 = false;
     this.hintRevealed2 = false;
     this.lastActivity = Date.now();
@@ -448,8 +448,19 @@ export class Room {
     this.currentWord = null;
     this.drawHistory = [];
     for (const p of this.players.values()) {
+      p.score = 0;
       p.isReady = false;
       p.guessedThisRound = false;
+    }
+    // Broadcast state so clients return to lobby
+    for (const p of this.players.values()) {
+      const sock = this.io.sockets.sockets.get(p.socketId);
+      if (sock) {
+        sock.emit('room:joined', {
+          room: this.toState(),
+          playerId: p.id,
+        });
+      }
     }
   }
 
@@ -564,7 +575,7 @@ export class Room {
 
   updateSettings(partial: Partial<RoomSettings>): void {
     Object.assign(this.settings, partial);
-    this.wordPicker = new WordPicker(this.settings.categories);
+    this.wordPicker = new WordPicker(this.settings.categories, this.settings.customWords);
   }
 
   // --- Serialization ---

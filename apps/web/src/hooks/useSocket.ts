@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { getSocket, type GameSocket } from '@/lib/socket';
 import { useGameStore } from '@/stores/gameStore';
 import { useChatStore } from '@/stores/chatStore';
+import { playSfx } from '@/hooks/useSoundEffects';
 
 export function useSocket() {
   const socketRef = useRef<GameSocket | null>(null);
@@ -40,6 +41,7 @@ export function useSocket() {
 
     socket.on('room:playerJoined', ({ player }) => {
       store.addPlayer(player);
+      playSfx('playerJoin');
     });
 
     socket.on('room:playerLeft', ({ playerId, newHostId }) => {
@@ -67,6 +69,9 @@ export function useSocket() {
 
     socket.on('game:roundStart', ({ round, drawerId, turnDuration }) => {
       store.setRoundStart(round, drawerId, turnDuration);
+      if (drawerId === socket.id) {
+        playSfx('yourTurn');
+      }
     });
 
     socket.on('game:wordOptions', ({ words }) => {
@@ -83,10 +88,14 @@ export function useSocket() {
 
     socket.on('game:tick', ({ timeLeft }) => {
       store.setTimeLeft(timeLeft);
+      if (timeLeft <= 5 && timeLeft > 0) {
+        playSfx('tick');
+      }
     });
 
     socket.on('game:correctGuess', ({ playerId, playerName, score }) => {
       store.setCorrectGuess(playerId, score);
+      playSfx('correctGuess');
     });
 
     socket.on('game:closeGuess', () => {
@@ -100,10 +109,12 @@ export function useSocket() {
 
     socket.on('game:roundEnd', (data) => {
       store.setRoundEnd(data);
+      playSfx('roundEnd');
     });
 
     socket.on('game:ended', ({ podium, finalScores }) => {
       store.setGameEnd(podium, finalScores);
+      playSfx('gameOver');
     });
 
     // Drawing events
