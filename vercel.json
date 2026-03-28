@@ -1,6 +1,6 @@
 {
   "installCommand": "npm install",
-  "buildCommand": "bash scripts/build-vercel.sh",
+  "buildCommand": "cd packages/shared && npx tsc && cd ../../apps/web && npx next build",
   "outputDirectory": "apps/web/.next",
   "framework": "nextjs"
 }
