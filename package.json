@@ -11,6 +11,8 @@
     "dev:server": "npm -w apps/server run dev",
     "dev:shared": "npm -w packages/shared run build",
     "build": "npm -w packages/shared run build && npm -w apps/web run build",
+    "build:server": "npm -w packages/shared run build && npm -w apps/server run build",
+    "start:server": "npm -w apps/server run start",
     "build:shared": "npm -w packages/shared run build"
   },
   "devDependencies": {
