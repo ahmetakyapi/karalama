@@ -135,7 +135,7 @@ function HeroDemo() {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => setStep((s) => (s + 1) % 4), 8000);
+    const timer = setInterval(() => setStep((s) => (s + 1) % 4), 6000);
     return () => clearInterval(timer);
   }, []);
 
@@ -144,7 +144,7 @@ function HeroDemo() {
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.8, ease: EASE, delay: 0.3 }}
-      className="relative hidden lg:block"
+      className="relative hidden lg:flex lg:flex-col"
     >
       {/* Step indicators */}
       <div className="flex items-center gap-2 mb-4">
@@ -176,8 +176,8 @@ function HeroDemo() {
       </div>
 
       {/* Preview screen */}
-      <div className="glass rounded-3xl p-1.5 overflow-hidden">
-        <div className="rounded-[20px] bg-[#060a14] overflow-hidden aspect-[4/3] relative">
+      <div className="glass rounded-3xl p-1.5 overflow-hidden flex-1 flex flex-col">
+        <div className="rounded-[20px] bg-[#060a14] overflow-hidden flex-1 relative min-h-[320px]">
           {/* Window dots */}
           <div className="absolute top-3 left-4 flex gap-1.5 z-20">
             <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
@@ -203,7 +203,7 @@ function HeroDemo() {
                   style={{ background: `linear-gradient(90deg, ${s.color}, ${s.color}80)` }}
                   initial={{ width: '0%' }}
                   animate={{ width: '100%' }}
-                  transition={{ duration: 8, ease: 'linear' }}
+                  transition={{ duration: 6, ease: 'linear' }}
                   key={`bar-${step}`}
                 />
               )}
@@ -1176,9 +1176,9 @@ export default function HomePage() {
           />
         </div>
 
-        <div className="relative z-10 mx-auto w-full max-w-7xl grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="relative z-10 mx-auto w-full max-w-7xl grid lg:grid-cols-2 gap-12 lg:gap-16 items-stretch">
           {/* LEFT: Hero + Form */}
-          <motion.div initial="hidden" animate="visible">
+          <motion.div initial="hidden" animate="visible" className="flex flex-col justify-center">
             {/* Badge */}
             <motion.div variants={fadeUp} custom={0} className="mb-6 flex justify-start">
               <span className="chip">
