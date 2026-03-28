@@ -1,13 +1,14 @@
 FROM node:20-slim AS base
 WORKDIR /app
 
-# Copy root package files
+# Copy everything needed for install
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY apps/server/package.json ./apps/server/
+COPY apps/web/package.json ./apps/web/
 
-# Install all deps
-RUN npm ci --workspace=packages/shared --workspace=apps/server --include-workspace-root
+# Install all workspaces (lockfile expects all to exist)
+RUN npm ci
 
 # Copy source
 COPY packages/shared/ ./packages/shared/
@@ -15,18 +16,19 @@ COPY apps/server/ ./apps/server/
 COPY tsconfig.base.json ./
 
 # Build shared + server
-RUN npm -w packages/shared run build
-RUN npm -w apps/server run build
+RUN cd packages/shared && npx tsc
+RUN cd apps/server && npx tsc
 
 # Production
 FROM node:20-slim
 WORKDIR /app
 
-COPY --from=base /app/package.json /app/package-lock.json ./
-COPY --from=base /app/packages/shared/package.json ./packages/shared/
-COPY --from=base /app/apps/server/package.json ./apps/server/
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY apps/server/package.json ./apps/server/
+COPY apps/web/package.json ./apps/web/
 
-RUN npm ci --workspace=packages/shared --workspace=apps/server --include-workspace-root --omit=dev
+RUN npm ci --omit=dev
 
 COPY --from=base /app/packages/shared/dist/ ./packages/shared/dist/
 COPY --from=base /app/packages/shared/package.json ./packages/shared/
