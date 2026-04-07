@@ -5,11 +5,13 @@ import { getSocket, type GameSocket } from '@/lib/socket';
 import { useGameStore } from '@/stores/gameStore';
 import { useChatStore } from '@/stores/chatStore';
 import { playSfx } from '@/hooks/useSoundEffects';
+import { useProgressStore } from '@/stores/progressStore';
 
 export function useSocket() {
   const socketRef = useRef<GameSocket | null>(null);
   const store = useGameStore();
   const chat = useChatStore();
+  const progress = useProgressStore();
 
   useEffect(() => {
     const socket = getSocket();
@@ -54,6 +56,7 @@ export function useSocket() {
 
     socket.on('room:error', ({ message }) => {
       console.error('Room error:', message);
+      store.setRoomError(message);
     });
 
     // Player events
@@ -96,6 +99,12 @@ export function useSocket() {
     socket.on('game:correctGuess', ({ playerId, playerName, score }) => {
       store.setCorrectGuess(playerId, score);
       playSfx('correctGuess');
+      // XP & streak for local player
+      if (playerId === socket.id) {
+        progress.addXP(score);
+        progress.incrementStreak();
+        progress.recordCorrectGuess();
+      }
     });
 
     socket.on('game:closeGuess', () => {
@@ -110,11 +119,47 @@ export function useSocket() {
     socket.on('game:roundEnd', (data) => {
       store.setRoundEnd(data);
       playSfx('roundEnd');
+      // Reset streak if player didn't guess this round
+      const myId = socket.id;
+      if (myId && !data.roundScores[myId]) {
+        progress.resetStreak();
+      }
     });
 
     socket.on('game:ended', ({ podium, finalScores }) => {
       store.setGameEnd(podium, finalScores);
       playSfx('gameOver');
+      progress.recordGame();
+      // Award bonus XP for game completion
+      progress.addXP(50);
+    });
+
+    // Vote kick events
+    socket.on('room:voteKickStarted' as any, (data: any) => {
+      chat.addMessage({
+        id: Date.now().toString(),
+        type: 'system',
+        text: `${data.voterName}, ${data.targetName} oyuncusunun atılması için oy başlattı (${data.currentVotes}/${data.votesNeeded})`,
+        timestamp: Date.now(),
+      });
+    });
+
+    socket.on('room:voteKickUpdate' as any, (data: any) => {
+      chat.addMessage({
+        id: Date.now().toString(),
+        type: 'system',
+        text: `Oylama güncellendi: ${data.currentVotes}/${data.votesNeeded} oy`,
+        timestamp: Date.now(),
+      });
+    });
+
+    socket.on('room:playerKicked' as any, (data: any) => {
+      chat.addMessage({
+        id: Date.now().toString(),
+        type: 'system',
+        text: `${data.playerName} oylama ile odadan atıldı`,
+        timestamp: Date.now(),
+      });
     });
 
     // Drawing events

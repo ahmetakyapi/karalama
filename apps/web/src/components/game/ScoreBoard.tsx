@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { Avatar } from '@/components/ui/Avatar';
+import { getSocket } from '@/lib/socket';
 import { cn } from '@/lib/utils';
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -42,7 +43,7 @@ export function ScoreBoard() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.35, ease: EASE, delay: i * 0.03 }}
                 className={cn(
-                  'flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition-colors duration-300',
+                  'group flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition-colors duration-300',
                   isDrawer && 'bg-indigo-500/[0.08] border border-indigo-500/20',
                   hasGuessed && !isDrawer && 'bg-emerald-500/[0.08] border border-emerald-500/20',
                   isMe && !isDrawer && !hasGuessed && 'bg-white/[0.03] border border-white/[0.08]',
@@ -75,6 +76,9 @@ export function ScoreBoard() {
                     {isMe && (
                       <span className="text-[9px] text-white/20 font-medium">(sen)</span>
                     )}
+                    {player.isBot && (
+                      <span className="text-[9px] text-accent-cyan/40 font-medium ml-0.5">bot</span>
+                    )}
                   </div>
                   {isDrawer && (
                     <span className="text-[10px] text-indigo-400 font-medium">Çiziyor ✏️</span>
@@ -83,6 +87,19 @@ export function ScoreBoard() {
                     <span className="text-[10px] text-emerald-400 font-medium">Bildi ✓</span>
                   )}
                 </div>
+
+                {/* Vote kick button */}
+                {!isMe && !player.isBot && !isDrawer && (
+                  <button
+                    onClick={() => getSocket().emit('room:voteKick', { targetId: player.id })}
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                    title={`${player.name} oyuncusunu at`}
+                  >
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                  </button>
+                )}
 
                 {/* Score */}
                 <div className="flex flex-col items-end shrink-0">

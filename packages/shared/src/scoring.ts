@@ -32,11 +32,13 @@ export function calculateDrawerScore(p: DrawerScoreParams): number {
 }
 
 export function normalizeGuess(text: string): string {
+  // Turkish-aware lowering: İ→i, I→ı, Ş→ş, etc.
+  // Must replace Turkish chars BEFORE calling toLowerCase
   return text
-    .toLowerCase()
     .replace(/İ/g, 'i')
     .replace(/I/g, 'ı')
-    .replace(/[^a-zA-ZçÇğĞıİöÖşŞüÜ\s]/g, '')
+    .toLowerCase()
+    .replace(/[^a-zçğıöşüâîû\s]/g, '')
     .trim();
 }
 

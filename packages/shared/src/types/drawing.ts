@@ -12,12 +12,16 @@ export interface DrawStroke {
   points: DrawPoint[];
 }
 
-export type DrawTool = 'pen' | 'eraser';
+export type DrawTool = 'pen' | 'eraser' | 'fill' | 'rect' | 'circle' | 'line' | 'filledRect' | 'filledCircle';
+
+export type ShapeType = 'rect' | 'circle' | 'line' | 'filledRect' | 'filledCircle';
+
+export const SHAPE_TOOLS: ShapeType[] = ['rect', 'circle', 'line', 'filledRect', 'filledCircle'];
 
 export const CANVAS_WIDTH = 800;
 export const CANVAS_HEIGHT = 600;
 
-export const BRUSH_SIZES = [2, 6, 14, 30] as const;
+export const BRUSH_SIZES = [2, 4, 8, 16, 30] as const;
 
 export const COLOR_PALETTE = [
   // Row 1

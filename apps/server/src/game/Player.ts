@@ -9,6 +9,7 @@ export class Player implements PlayerType {
   isReady: boolean;
   isConnected: boolean;
   guessedThisRound: boolean;
+  isBot: boolean;
   socketId: string;
 
   constructor(
@@ -16,7 +17,8 @@ export class Player implements PlayerType {
     socketId: string,
     name: string,
     avatarColor: string,
-    isHost: boolean
+    isHost: boolean,
+    isBot: boolean = false
   ) {
     this.id = id;
     this.socketId = socketId;
@@ -27,6 +29,7 @@ export class Player implements PlayerType {
     this.isReady = false;
     this.isConnected = true;
     this.guessedThisRound = false;
+    this.isBot = isBot;
   }
 
   toPublic(): PlayerType {
@@ -39,6 +42,7 @@ export class Player implements PlayerType {
       isReady: this.isReady,
       isConnected: this.isConnected,
       guessedThisRound: this.guessedThisRound,
+      isBot: this.isBot,
     };
   }
 }

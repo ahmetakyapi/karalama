@@ -7,11 +7,13 @@ import { getSocket } from '@/lib/socket';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReactionBar } from '@/components/game/EmojiReactions';
+import { useProgressStore } from '@/stores/progressStore';
 
 export function ChatPanel() {
   const { messages } = useChatStore();
   const { playerId, currentDrawerId, phase, hasGuessedCorrectly } =
     useGameStore();
+  const { currentStreak } = useProgressStore();
   const [text, setText] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -65,9 +67,14 @@ export function ChatPanel() {
                   {msg.text}
                 </p>
               ) : msg.type === 'close' ? (
-                <p className="text-xs text-amber-400 bg-amber-500/10 rounded-lg px-2 py-1">
+                <motion.p
+                  initial={{ scale: 1.1 }}
+                  animate={{ scale: 1 }}
+                  className="text-xs text-amber-400 font-medium bg-amber-500/10 rounded-lg px-2.5 py-1.5 border border-amber-500/20 flex items-center gap-1.5"
+                >
+                  <span className="text-base">&#x1F525;</span>
                   {msg.text}
-                </p>
+                </motion.p>
               ) : (
                 <p className="text-sm">
                   <span
@@ -99,7 +106,9 @@ export function ChatPanel() {
             disableInput
               ? 'Çizim yapıyorsun...'
               : hasGuessedCorrectly
-                ? 'Doğru bildin!'
+                ? currentStreak > 1
+                  ? `Doğru bildin! (${currentStreak} seri)`
+                  : 'Doğru bildin!'
                 : 'Tahminini yaz...'
           }
           className={cn(

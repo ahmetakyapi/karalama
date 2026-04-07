@@ -56,12 +56,34 @@ function RoomContent() {
     };
   }, [roomCode, playerName, playerColor]);
 
-  const { phase, isConnected } = store;
+  const { phase, isConnected, roomError } = store;
   const [wasConnected, setWasConnected] = useState(false);
 
   useEffect(() => {
     if (isConnected) setWasConnected(true);
   }, [isConnected]);
+
+  // Room error (e.g. game in progress, room full, kicked)
+  if (roomError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto">
+            <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+          </div>
+          <p className="text-white/70 text-lg font-medium">{roomError}</p>
+          <a
+            href="/"
+            className="inline-block px-6 py-2.5 rounded-xl bg-accent-indigo text-white font-medium text-sm hover:bg-accent-indigo/80 transition-colors"
+          >
+            Ana Sayfaya Dön
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   // First time connecting
   if (!isConnected && !wasConnected) {

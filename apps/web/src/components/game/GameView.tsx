@@ -14,7 +14,24 @@ import { RoundTransition } from './RoundTransition';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { EmojiReactions } from './EmojiReactions';
+import { CorrectGuessEffect } from './CorrectGuessEffect';
+import { DrawingRules } from './DrawingRules';
+import { SettingsPanel } from './SettingsPanel';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/lib/utils';
+
+const COLORBLIND_FILTERS: Record<string, string> = {
+  none: 'none',
+  protanopia: 'url(#protanopia)',
+  deuteranopia: 'url(#deuteranopia)',
+  tritanopia: 'url(#tritanopia)',
+};
+
+const FONT_SIZE_CLASSES: Record<string, string> = {
+  normal: '',
+  large: 'text-lg',
+  xl: 'text-xl',
+};
 
 type MobileTab = 'canvas' | 'chat' | 'scores';
 
@@ -29,13 +46,32 @@ export function GameView() {
   } = useGameStore();
 
   const [mobileTab, setMobileTab] = useState<MobileTab>('canvas');
+  const { colorblindMode, fontSize } = useSettingsStore();
 
   const isDrawer = playerId === currentDrawerId;
   const drawer = currentDrawerId ? players[currentDrawerId] : null;
 
   return (
-    <div className="h-screen flex flex-col bg-bg-primary">
+    <div
+      className={cn('h-screen flex flex-col bg-bg-primary', FONT_SIZE_CLASSES[fontSize])}
+      style={{ filter: COLORBLIND_FILTERS[colorblindMode] !== 'none' ? COLORBLIND_FILTERS[colorblindMode] : undefined }}
+    >
+      {/* SVG filters for colorblind modes */}
+      <svg className="absolute w-0 h-0">
+        <defs>
+          <filter id="protanopia">
+            <feColorMatrix type="matrix" values="0.567,0.433,0,0,0 0.558,0.442,0,0,0 0,0.242,0.758,0,0 0,0,0,1,0" />
+          </filter>
+          <filter id="deuteranopia">
+            <feColorMatrix type="matrix" values="0.625,0.375,0,0,0 0.7,0.3,0,0,0 0,0.3,0.7,0,0 0,0,0,1,0" />
+          </filter>
+          <filter id="tritanopia">
+            <feColorMatrix type="matrix" values="0.95,0.05,0,0,0 0,0.433,0.567,0,0 0,0.475,0.525,0,0 0,0,0,1,0" />
+          </filter>
+        </defs>
+      </svg>
       <EmojiReactions />
+      <CorrectGuessEffect />
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.06] bg-bg-secondary/50">
         <div className="flex items-center gap-3">
@@ -58,6 +94,7 @@ export function GameView() {
         <div className="flex items-center gap-3">
           <WordHint />
           <Timer />
+          <SettingsPanel />
         </div>
       </div>
 
@@ -72,6 +109,7 @@ export function GameView() {
         <div className="flex-1 flex flex-col min-w-0">
           <div className="flex-1 relative">
             {isDrawer ? <DrawingCanvas /> : <SpectatorCanvas />}
+            {phase === 'DRAWING' && isDrawer && <DrawingRules />}
             {phase === 'PICKING' && isDrawer && <WordSelection />}
             {phase === 'ROUND_RESULT' && <RoundTransition />}
           </div>

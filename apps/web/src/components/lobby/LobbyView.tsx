@@ -10,16 +10,18 @@ import { getSocket } from '@/lib/socket';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { easeCurve } from '@/styles/animations';
+import { MAX_BOTS } from '@karalama/shared';
 
 export function LobbyView() {
   const { players, hostId, playerId, roomCode, settings } = useGameStore();
   const [copied, setCopied] = useState(false);
 
   const playerList = Object.values(players);
+  const botList = playerList.filter((p) => p.isBot);
   const isHost = playerId === hostId;
   const allReady =
     playerList.length >= 2 &&
-    playerList.filter((p) => p.id !== hostId).every((p) => p.isReady);
+    playerList.filter((p) => p.id !== hostId && !p.isBot).every((p) => p.isReady);
 
   const handleReady = () => {
     getSocket().emit('player:ready');
@@ -27,6 +29,14 @@ export function LobbyView() {
 
   const handleStart = () => {
     getSocket().emit('game:start');
+  };
+
+  const handleAddBot = () => {
+    getSocket().emit('room:addBot');
+  };
+
+  const handleRemoveBot = (botId: string) => {
+    getSocket().emit('room:removeBot', { botId });
   };
 
   const handleCopy = async () => {
@@ -97,9 +107,22 @@ export function LobbyView() {
                   {player.id === playerId && (
                     <span className="text-white/30 text-sm ml-1">(Sen)</span>
                   )}
+                  {player.isBot && (
+                    <span className="text-accent-cyan/60 text-sm ml-1">Bot</span>
+                  )}
                 </span>
+                {player.isBot && isHost ? (
+                  <button
+                    onClick={() => handleRemoveBot(player.id)}
+                    className="text-red-400/60 hover:text-red-400 text-xs transition-colors px-1.5 py-0.5 rounded hover:bg-red-500/10"
+                  >
+                    Kaldır
+                  </button>
+                ) : null}
                 {player.isHost ? (
                   <Badge variant="warning">Host</Badge>
+                ) : player.isBot ? (
+                  <Badge variant="info">Bot</Badge>
                 ) : player.isReady ? (
                   <Badge variant="success">Hazır</Badge>
                 ) : (
@@ -108,6 +131,32 @@ export function LobbyView() {
               </motion.div>
             ))}
           </div>
+
+          {/* Bot controls */}
+          {isHost && (
+            <div className="mt-3 pt-3 border-t border-white/[0.06]">
+              <button
+                onClick={handleAddBot}
+                disabled={botList.length >= MAX_BOTS || playerList.length >= settings.maxPlayers}
+                className={cn(
+                  'w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all',
+                  'bg-accent-cyan/[0.06] border border-accent-cyan/20 text-accent-cyan/80',
+                  'hover:bg-accent-cyan/[0.12] hover:text-accent-cyan',
+                  'disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-accent-cyan/[0.06]'
+                )}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Bot Ekle ({botList.length}/{MAX_BOTS})
+              </button>
+              {botList.length === 0 && (
+                <p className="text-[11px] text-white/25 text-center mt-1.5">
+                  Tek başına oynamak için bot ekleyebilirsin
+                </p>
+              )}
+            </div>
+          )}
         </GlassCard>
 
         {/* Actions */}

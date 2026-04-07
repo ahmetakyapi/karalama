@@ -41,6 +41,16 @@ export interface ClientToServerEvents {
 
   // Player
   'player:ready': () => void;
+
+  // Lobby
+  'game:backToLobby': () => void;
+
+  // Bots
+  'room:addBot': () => void;
+  'room:removeBot': (data: { botId: string }) => void;
+
+  // Vote kick
+  'room:voteKick': (data: { targetId: string }) => void;
 }
 
 export interface ServerToClientEvents {
@@ -84,4 +94,23 @@ export interface ServerToClientEvents {
 
   // Player
   'player:readyChanged': (data: { playerId: string; ready: boolean }) => void;
+
+  // Vote kick
+  'room:voteKickStarted': (data: {
+    targetId: string;
+    targetName: string;
+    voterId: string;
+    voterName: string;
+    votesNeeded: number;
+    currentVotes: number;
+  }) => void;
+  'room:voteKickUpdate': (data: {
+    targetId: string;
+    currentVotes: number;
+    votesNeeded: number;
+  }) => void;
+  'room:playerKicked': (data: {
+    playerId: string;
+    playerName: string;
+  }) => void;
 }

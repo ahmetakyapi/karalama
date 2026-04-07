@@ -7,6 +7,7 @@ export interface Player {
   isReady: boolean;
   isConnected: boolean;
   guessedThisRound: boolean;
+  isBot: boolean;
 }
 
 export type PlayerPublic = Omit<Player, 'guessedThisRound'> & {

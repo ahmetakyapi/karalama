@@ -14,9 +14,9 @@ interface DrawingStore {
 export const useDrawingStore = create<DrawingStore>((set) => ({
   tool: 'pen',
   color: '#000000',
-  brushSize: 6,
+  brushSize: 8,
   setTool: (tool) => set({ tool }),
   setColor: (color) => set({ color, tool: 'pen' }),
   setBrushSize: (brushSize) => set({ brushSize }),
-  reset: () => set({ tool: 'pen', color: '#000000', brushSize: 6 }),
+  reset: () => set({ tool: 'pen', color: '#000000', brushSize: 8 }),
 }));

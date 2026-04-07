@@ -8,6 +8,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { getSocket } from '@/lib/socket';
 import { easeCurve } from '@/styles/animations';
+import { useProgressStore, getXPForNextLevel } from '@/stores/progressStore';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -227,12 +228,12 @@ export function GameOverScreen() {
   const isHost = playerId === hostId;
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handlePlayAgain = () => {
-    getSocket().emit('game:start');
-  };
+  const { xp, level, gamesPlayed, totalCorrectGuesses, currentStreak, bestStreak } = useProgressStore();
+  const xpForNext = getXPForNextLevel(level);
+  const xpPercent = Math.min((xp / xpForNext) * 100, 100);
 
   const handleBackToLobby = () => {
-    (getSocket() as any).emit('game:backToLobby');
+    getSocket().emit('game:backToLobby');
   };
 
   const sortedPlayers = useMemo(
@@ -629,6 +630,54 @@ export function GameOverScreen() {
           </motion.div>
         )}
 
+        {/* ---- Player Progress ---- */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 3, duration: 0.5, ease: easeCurve as unknown as EaseCurve }}
+          className="w-full mb-6"
+        >
+          <GlassCard className="p-5" glowColor="rgba(139, 92, 246, 0.06)">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider">
+                Seviye {level}
+              </h2>
+              <div className="flex items-center gap-2">
+                {currentStreak > 1 && (
+                  <span className="text-xs font-bold text-amber-400 flex items-center gap-1">
+                    &#x1F525; {currentStreak} seri
+                  </span>
+                )}
+                <span className="text-xs text-white/30 font-mono">
+                  {xp}/{xpForNext} XP
+                </span>
+              </div>
+            </div>
+            <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden mb-3">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${xpPercent}%` }}
+                transition={{ duration: 1.2, delay: 3.2, ease: easeCurve as unknown as [number, number, number, number] }}
+                className="h-full rounded-full bg-gradient-to-r from-violet-500 via-indigo-400 to-cyan-400"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div>
+                <p className="text-lg font-bold text-white/80">{gamesPlayed}</p>
+                <p className="text-[10px] text-white/30 uppercase">Oyun</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-white/80">{totalCorrectGuesses}</p>
+                <p className="text-[10px] text-white/30 uppercase">Bilinen</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-amber-400">{bestStreak}</p>
+                <p className="text-[10px] text-white/30 uppercase">En iyi seri</p>
+              </div>
+            </div>
+          </GlassCard>
+        </motion.div>
+
         {/* ---- Action Buttons ---- */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -636,11 +685,11 @@ export function GameOverScreen() {
           transition={{ delay: 3, duration: 0.5, ease: easeCurve as unknown as EaseCurve }}
           className="flex flex-col sm:flex-row gap-3 w-full max-w-sm"
         >
-          {isHost && (
+          {isHost ? (
             <Button
               size="lg"
               variant="primary"
-              onClick={handlePlayAgain}
+              onClick={handleBackToLobby}
               className="flex-1 relative overflow-hidden"
             >
               <motion.span
@@ -650,15 +699,16 @@ export function GameOverScreen() {
               />
               <span className="relative">Tekrar Oyna</span>
             </Button>
+          ) : (
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={handleBackToLobby}
+              className="flex-1"
+            >
+              Lobiye Dön
+            </Button>
           )}
-          <Button
-            size="lg"
-            variant="secondary"
-            onClick={handleBackToLobby}
-            className="flex-1"
-          >
-            Lobiye Dön
-          </Button>
         </motion.div>
 
         {/* Host hint */}

@@ -42,10 +42,14 @@ interface GameStore {
   // Flags
   hasGuessedCorrectly: boolean;
 
+  // Error
+  roomError: string | null;
+
   // Actions
   setConnected: (connected: boolean) => void;
   setPlayerId: (id: string) => void;
   setRoomCode: (code: string) => void;
+  setRoomError: (error: string | null) => void;
   syncRoomState: (state: RoomState) => void;
   setPhase: (phase: GamePhase) => void;
   setPlayers: (players: Record<string, Player>) => void;
@@ -90,10 +94,12 @@ export const useGameStore = create<GameStore>((set) => ({
   podium: [],
   wordOptions: [],
   hasGuessedCorrectly: false,
+  roomError: null,
 
   setConnected: (connected) => set({ isConnected: connected }),
   setPlayerId: (id) => set({ playerId: id }),
   setRoomCode: (code) => set({ roomCode: code }),
+  setRoomError: (error) => set({ roomError: error }),
 
   syncRoomState: (state) =>
     set({
