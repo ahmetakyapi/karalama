@@ -152,6 +152,7 @@ function TopNav() {
 
   return (
     <motion.nav
+      aria-label="Ana gezinme"
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: EASE }}
@@ -170,10 +171,10 @@ function TopNav() {
             : 'bg-transparent border border-transparent'
         )}>
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2 group">
+          <a href="/" className="flex items-center gap-2 group" aria-label="Karalama ana sayfa">
             <div className="relative w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 via-cyan-400 to-emerald-400 p-[1.5px]">
               <div className="w-full h-full rounded-[10px] bg-[#04070d] flex items-center justify-center">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                <svg aria-hidden="true" className="w-4 h-4" viewBox="0 0 24 24" fill="none">
                   <path
                     d="M4 18c4-8 12-10 16-4M7 13c3-5 8-6 11-3"
                     stroke="url(#logoGrad)"
@@ -204,7 +205,7 @@ function TopNav() {
             {[
               { href: '#ozellikler', label: 'Özellikler' },
               { href: '#nasil', label: 'Nasıl Oynanır' },
-              { href: '#topluluk', label: 'Topluluk' },
+              { href: '#topluluk', label: 'SSS' },
             ].map((l) => (
               <a
                 key={l.href}
@@ -222,7 +223,7 @@ function TopNav() {
               href="/profil"
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/[0.04] transition-all"
             >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <svg aria-hidden="true" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               Profil
@@ -260,10 +261,11 @@ function HeroDemo() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 40 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: EASE, delay: 0.3 }}
-      className="relative hidden lg:flex lg:flex-col"
+      className="relative flex flex-col mt-8 lg:mt-0"
+      aria-label="Oyun önizlemesi"
     >
       {/* Step indicators */}
       <div className="flex items-center gap-2 mb-4">
@@ -430,7 +432,7 @@ function HeroDraw() {
       </div>
 
       <div className="flex-1 rounded-xl bg-white/[0.02] border border-white/[0.05] relative overflow-hidden">
-        <svg viewBox="0 0 300 200" className="w-full h-full" fill="none">
+        <svg aria-hidden="true" viewBox="0 0 300 200" className="w-full h-full" fill="none">
           <path
             ref={pathRef}
             d="M 80 160 Q 80 90 100 80 Q 88 50 95 40 L 105 65 Q 125 55 150 55 Q 175 55 180 65 L 190 40 Q 200 50 190 80 Q 215 90 220 160 Z"
@@ -487,7 +489,7 @@ function HeroGuess() {
   return (
     <motion.div {...heroTransition} className="absolute inset-0 flex flex-col p-5 pt-10">
       <div className="h-24 rounded-xl bg-white/[0.02] border border-white/[0.06] mb-3 flex items-center justify-center overflow-hidden relative">
-        <svg viewBox="0 0 200 80" className="w-40 h-16" fill="none">
+        <svg aria-hidden="true" viewBox="0 0 200 80" className="w-40 h-16" fill="none">
           <path
             d="M40 70 L60 30 L80 50 L100 15 L120 50 L140 30 L160 70"
             stroke="rgba(16,185,129,0.7)"
@@ -1037,7 +1039,7 @@ function DemoDraw() {
     <motion.div {...demoTransition} className="absolute inset-0 flex items-center justify-center p-6">
       <div className="w-full h-full relative">
         <div className="absolute inset-0 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-          <svg viewBox="0 0 300 220" className="w-full h-full" fill="none">
+          <svg aria-hidden="true" viewBox="0 0 300 220" className="w-full h-full" fill="none">
             <path
               ref={pathRef}
               d="M 100 160 Q 100 100 120 90 Q 110 60 115 50 L 125 75 Q 140 65 160 65 Q 180 65 185 75 L 195 50 Q 200 60 190 90 Q 210 100 210 160 Z"
@@ -1168,7 +1170,7 @@ function DemoGuess() {
           </motion.span>
         </div>
         <div className="h-9 w-9 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center">
-          <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg aria-hidden="true" className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-7-7l7 7-7 7" />
           </svg>
         </div>
@@ -1222,7 +1224,7 @@ function BentoFeatures() {
           <TiltCard className="rounded-3xl p-8 h-full relative" glowColor="rgba(99,102,241,0.15)">
             <div className="flex flex-col h-full">
               <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <svg aria-hidden="true" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
                 </svg>
               </div>
@@ -1244,7 +1246,7 @@ function BentoFeatures() {
                     />
                   ))}
                 </div>
-                <svg viewBox="0 0 300 120" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+                <svg aria-hidden="true" viewBox="0 0 300 120" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
                   <motion.path
                     d="M 30 80 Q 60 20 100 60 T 170 55 T 260 70"
                     fill="none"
@@ -1273,7 +1275,7 @@ function BentoFeatures() {
         <motion.div variants={fadeUp} custom={0.08} className="md:col-span-2">
           <TiltCard className="rounded-3xl p-6 h-full" glowColor="rgba(34,211,238,0.15)">
             <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502" />
               </svg>
             </div>
@@ -1291,7 +1293,7 @@ function BentoFeatures() {
         <motion.div variants={fadeUp} custom={0.12} className="md:col-span-2">
           <TiltCard className="rounded-3xl p-6 h-full" glowColor="rgba(16,185,129,0.15)">
             <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
               </svg>
             </div>
@@ -1308,7 +1310,7 @@ function BentoFeatures() {
             <div className="flex items-start justify-between">
               <div>
                 <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                   </svg>
                 </div>
@@ -1340,7 +1342,7 @@ function BentoFeatures() {
           <TiltCard className="rounded-3xl p-6 h-full" glowColor="rgba(168,85,247,0.15)">
             <div className="flex items-start gap-4">
               <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl border border-violet-500/20 bg-violet-500/10 text-violet-400">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
                 </svg>
               </div>
@@ -1378,92 +1380,124 @@ function BentoFeatures() {
 }
 
 /* ============================================================
-   Testimonials / Community
+   FAQ Section
    ============================================================ */
-function Testimonials() {
-  const testimonials = [
-    {
-      name: 'Zeynep Kaya',
-      role: 'Üniversite Öğrencisi',
-      emoji: '🧙',
-      color: '#8b5cf6',
-      text: 'Arkadaşlarla online takılırken en çok eğlendiğim oyun. Türkçe kelime hazinesi inanılmaz.',
-    },
-    {
-      name: 'Emre Demir',
-      role: 'Yazılım Geliştirici',
-      emoji: '🥷',
-      color: '#f43f5e',
-      text: 'Skribbl\'i bırakıp buna geçtik. Arayüz çok daha modern, bot desteği harika.',
-    },
-    {
-      name: 'Ayşe Yıldız',
-      role: 'Öğretmen',
-      emoji: '🐱',
-      color: '#f59e0b',
-      text: 'Sınıfımla online ders sonunda oynuyoruz. Kategoriler çok zengin, çocuklar bayılıyor.',
-    },
-  ];
+const FAQS = [
+  {
+    q: 'Oyun nasıl çalışıyor?',
+    a: 'Bir oda oluştur, 6 karakterlik kodu veya linki arkadaşlarına gönder. Herkes katıldığında tura başlarsın. Sırası gelen oyuncu bir kelime seçer ve çizer, diğerleri sohbet üzerinden tahmin eder. Hızlı bilen daha çok puan kazanır.',
+  },
+  {
+    q: 'Kayıt olmam gerekir mi?',
+    a: 'Hayır. İsmini ve avatarını seçmen yeterli. İstersen tarayıcıda saklı kalır, bir sonraki gelişinde hazır olur.',
+  },
+  {
+    q: 'Kaç kişi oynayabilir?',
+    a: 'Bir odada 2 ile 12 oyuncu arasında oynayabilirsin. Az kişiyseniz bot ekleyerek maçı renklendirebilirsiniz.',
+  },
+  {
+    q: 'Özel kelime listesi ekleyebilir miyim?',
+    a: 'Evet. Oda oluşturma ekranında kendi kelimelerini virgül ya da satır ile ayırarak yapıştırabilirsin. İsterseniz tamamen kendi listenizle de oynayabilirsiniz.',
+  },
+  {
+    q: 'Mobilde çalışıyor mu?',
+    a: 'Evet. Telefon ve tablette parmakla çizim, sohbet ve tahmin tam olarak çalışır. Tarayıcıdan açman yeterli, indirme gerekmez.',
+  },
+  {
+    q: 'Reklamsız ve ücretsiz mi?',
+    a: 'Evet — reklam yok, mikro-ödeme yok, hesap yok. Açık kaynak ruhlu, keyif odaklı bir proje.',
+  },
+];
+
+function FAQSection() {
+  const [open, setOpen] = useState<number | null>(0);
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQS.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  };
 
   return (
-    <section id="topluluk" className="relative z-10 mx-auto max-w-6xl px-6 py-28">
+    <section id="topluluk" aria-labelledby="faq-title" className="relative z-10 mx-auto max-w-3xl px-6 py-28">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <motion.div
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-80px' }}
-        className="mb-14 text-center"
+        className="mb-12 text-center"
       >
         <motion.div variants={fadeUp} custom={0} className="mb-4 flex justify-center">
           <span className="chip">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Topluluk
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            Sıkça Sorulanlar
           </span>
         </motion.div>
         <motion.h2
+          id="faq-title"
           variants={fadeUp}
           custom={0.06}
           className="text-4xl font-extrabold tracking-tight text-slate-50 sm:text-5xl"
         >
-          Oyuncular <span className="text-gradient">Ne Diyor?</span>
+          Merak <span className="text-gradient">Edilenler</span>
         </motion.h2>
       </motion.div>
 
-      <motion.div
+      <motion.ul
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-80px' }}
-        className="grid md:grid-cols-3 gap-4"
+        className="space-y-2"
       >
-        {testimonials.map((t, i) => (
-          <motion.div key={t.name} variants={fadeUp} custom={i * 0.08}>
-            <TiltCard
-              className="rounded-3xl p-6 h-full flex flex-col"
-              glowColor={`${t.color}26`}
-              tiltStrength={4}
-            >
-              <div className="mb-4 text-2xl opacity-20 leading-none">&ldquo;</div>
-              <p className="text-sm leading-relaxed text-slate-300 mb-6 flex-1">
-                {t.text}
-              </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-white/[0.05]">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
-                  style={{
-                    background: `linear-gradient(135deg, ${t.color}40, ${t.color}70)`,
-                    boxShadow: `0 0 12px ${t.color}30`,
-                  }}
+        {FAQS.map((f, i) => {
+          const isOpen = open === i;
+          return (
+            <motion.li key={f.q} variants={fadeUp} custom={i * 0.05}>
+              <div className="glass rounded-2xl overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setOpen(isOpen ? null : i)}
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-panel-${i}`}
+                  className="w-full flex items-center justify-between gap-4 p-5 text-left hover:bg-white/[0.02] transition-colors"
                 >
-                  {t.emoji}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-slate-100">{t.name}</div>
-                  <div className="text-xs text-slate-500">{t.role}</div>
-                </div>
+                  <span className="text-base font-semibold text-slate-100">{f.q}</span>
+                  <motion.span
+                    aria-hidden="true"
+                    animate={{ rotate: isOpen ? 45 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="shrink-0 w-7 h-7 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-slate-300 text-lg leading-none"
+                  >
+                    +
+                  </motion.span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      id={`faq-panel-${i}`}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: EASE }}
+                      className="overflow-hidden"
+                    >
+                      <p className="px-5 pb-5 text-sm leading-relaxed text-slate-400">
+                        {f.a}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            </TiltCard>
-          </motion.div>
-        ))}
-      </motion.div>
+            </motion.li>
+          );
+        })}
+      </motion.ul>
     </section>
   );
 }
@@ -1534,14 +1568,17 @@ function PlayerSetup({
       <div className="space-y-5">
         {/* Name input — the centerpiece */}
         <div>
-          <label className="flex items-center justify-between mb-2">
+          <label htmlFor="player-name-input" className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em]">
               Oyuncu Adın
             </span>
-            <span className="text-[10px] text-slate-600 tabular-nums">
+            <span className="text-[10px] text-slate-600 tabular-nums" aria-live="polite">
               {playerName.length}/20
             </span>
           </label>
+          <span id="player-name-help" className="sr-only">
+            En az bir karakter yazarak başla. Enter tuşuna basıp oda oluşturabilirsin.
+          </span>
           <div className="relative">
             <motion.div
               layout
@@ -1554,11 +1591,15 @@ function PlayerSetup({
               {selectedAvatar.emoji}
             </motion.div>
             <input
+              id="player-name-input"
               type="text"
               autoComplete="off"
               placeholder="örn: Ahmet"
+              aria-label="Oyuncu adı"
+              aria-describedby="player-name-help"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value.slice(0, 20))}
+              onKeyDown={(e) => { if (e.key === 'Enter' && playerName.trim()) onCreate(); }}
               maxLength={20}
               className={cn(
                 'w-full pl-[64px] pr-4 h-14 rounded-2xl',
@@ -1579,15 +1620,19 @@ function PlayerSetup({
 
         {/* Avatar picker — compact, premium */}
         <div>
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em] mb-2.5">
+          <div id="avatar-label" className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em] mb-2.5">
             Karakter Seç
           </div>
-          <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2" role="radiogroup" aria-labelledby="avatar-label">
             {AVATAR_CHARACTERS.map((avatar, i) => {
               const active = selectedAvatar.id === avatar.id;
               return (
                 <motion.button
                   key={avatar.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  aria-label={`Karakter seç: ${avatar.name}`}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.05 * i, duration: 0.3, ease: EASE }}
@@ -1613,6 +1658,7 @@ function PlayerSetup({
                     />
                   )}
                   <div
+                    aria-hidden="true"
                     className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-lg relative"
                     style={{
                       background: `linear-gradient(135deg, ${avatar.color}30, ${avatar.color}60)`,
@@ -1655,13 +1701,13 @@ function PlayerSetup({
               {nameReady ? (
                 <>
                   Yeni Oda Oluştur
-                  <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <svg aria-hidden="true" className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </>
               ) : (
                 <>
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
                   </svg>
                   Önce adını yaz
@@ -1715,6 +1761,7 @@ function PlayerSetup({
                   <input
                     type="text"
                     placeholder="Oda kodu"
+                    aria-label="Oda kodu (6 karakter)"
                     value={roomCode}
                     onChange={(e) => setRoomCode(e.target.value.toUpperCase().slice(0, 6))}
                     maxLength={6}
@@ -1786,7 +1833,21 @@ export default function HomePage() {
 
   const [liveCount, setLiveCount] = useState<number | null>(null);
   useEffect(() => {
-    setLiveCount(140 + Math.floor(Math.random() * 80));
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://karalama-server.up.railway.app';
+    let stopped = false;
+    const poll = async () => {
+      try {
+        const r = await fetch(`${socketUrl}/health`, { cache: 'no-store' });
+        if (!r.ok) return;
+        const data = (await r.json()) as { players?: number };
+        if (!stopped && typeof data.players === 'number') {
+          setLiveCount(data.players);
+        }
+      } catch { /* network error, keep last */ }
+    };
+    poll();
+    const id = setInterval(poll, 30_000);
+    return () => { stopped = true; clearInterval(id); };
   }, []);
 
   return (
@@ -1801,8 +1862,9 @@ export default function HomePage() {
 
       <TopNav />
 
+      <main id="main-content">
       {/* ===== HERO ===== */}
-      <section id="oyna" className="relative z-10 pt-32 pb-16 lg:pt-36 lg:pb-24 px-6">
+      <section id="oyna" aria-label="Başlangıç" className="relative z-10 pt-32 pb-16 lg:pt-36 lg:pb-24 px-6">
         <div className="relative mx-auto w-full max-w-7xl grid lg:grid-cols-[1.15fr_1fr] gap-12 lg:gap-16 items-center">
           {/* LEFT: Hero copy + Form */}
           <motion.div initial="hidden" animate="visible" className="flex flex-col justify-center max-w-2xl">
@@ -1817,10 +1879,12 @@ export default function HomePage() {
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                 </span>
                 <span className="text-slate-200 font-semibold tabular-nums">
-                  {liveCount ?? '—'}
+                  {liveCount ?? '…'}
                 </span>
-                <span className="text-slate-500">oyuncu şu an aktif</span>
-                <svg className="w-3 h-3 text-slate-500 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <span className="text-slate-500">
+                  {liveCount === 0 ? 'ilk oyuncu sen ol' : 'oyuncu çevrimiçi'}
+                </span>
+                <svg aria-hidden="true" className="w-3 h-3 text-slate-500 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </a>
@@ -1894,13 +1958,13 @@ export default function HomePage() {
               className="mt-6 flex items-center gap-4 text-xs text-slate-500"
             >
               <div className="flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <svg aria-hidden="true" className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
                 Güvenli bağlantı
               </div>
               <div className="flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <svg aria-hidden="true" className="w-3.5 h-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 &lt;100ms gecikme
@@ -1926,7 +1990,7 @@ export default function HomePage() {
       <BentoFeatures />
 
       {/* ===== TESTIMONIALS ===== */}
-      <Testimonials />
+      <FAQSection />
 
       {/* ===== BIG CTA ===== */}
       <section className="relative z-10 mx-auto max-w-5xl px-6 pb-32 pt-8">
@@ -1988,7 +2052,7 @@ export default function HomePage() {
             >
               <span className="relative z-10 flex items-center gap-2">
                 Şimdi Oyna
-                <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <svg aria-hidden="true" className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </span>
@@ -2008,13 +2072,15 @@ export default function HomePage() {
         </motion.div>
       </section>
 
+      </main>
+
       {/* ===== FOOTER ===== */}
       <footer className="relative z-10 border-t border-white/[0.05] py-10">
         <div className="mx-auto max-w-6xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 via-cyan-400 to-emerald-400 p-[1.5px]">
               <div className="w-full h-full rounded-[7px] bg-[#04070d] flex items-center justify-center">
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
+                <svg aria-hidden="true" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
                   <path d="M4 18c4-8 12-10 16-4" stroke="#22d3ee" strokeWidth="2.2" strokeLinecap="round" />
                 </svg>
               </div>

@@ -6,6 +6,15 @@ import type {
 import { categories, CHAT_RATE_LIMIT_MS, DRAW_RATE_LIMIT_MS, MAX_BOTS } from '@karalama/shared';
 import { GameManager } from '../game/GameManager';
 import { nanoid } from 'nanoid';
+import { sanitizePlayerName, sanitizeAvatarColor } from '../utils/nameFilter';
+
+const NAME_ERROR_MESSAGES: Record<string, string> = {
+  INVALID: 'Geçersiz isim',
+  TOO_SHORT: 'İsim boş olamaz',
+  TOO_LONG: 'İsim çok uzun (maks 20)',
+  INVALID_CHARS: 'İsimde sadece harf, rakam, boşluk ve - _ olabilir',
+  PROFANITY: 'Bu isim kullanılamaz',
+};
 
 // Per-socket rate limit tracking
 const lastChatTime = new Map<string, number>();
@@ -20,8 +29,18 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
 
     // --- Room: Create ---
     socket.on('room:create', ({ playerName, avatarColor, settings }) => {
+      const nameCheck = sanitizePlayerName(playerName);
+      if (!nameCheck.ok) {
+        socket.emit('room:error', {
+          code: 'INVALID_NAME',
+          message: NAME_ERROR_MESSAGES[nameCheck.reason ?? 'INVALID'] ?? 'Geçersiz isim',
+        });
+        return;
+      }
+      const color = sanitizeAvatarColor(avatarColor);
+
       const room = manager.createRoom(settings);
-      const player = room.addPlayer(socket, playerName, avatarColor);
+      const player = room.addPlayer(socket, nameCheck.name, color);
       manager.setSocketRoom(socket.id, room.code);
 
       socket.emit('room:created', {
@@ -32,6 +51,16 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
 
     // --- Room: Join ---
     socket.on('room:join', ({ roomCode, playerName, avatarColor }) => {
+      const nameCheck = sanitizePlayerName(playerName);
+      if (!nameCheck.ok) {
+        socket.emit('room:error', {
+          code: 'INVALID_NAME',
+          message: NAME_ERROR_MESSAGES[nameCheck.reason ?? 'INVALID'] ?? 'Geçersiz isim',
+        });
+        return;
+      }
+      const cleanName = nameCheck.name;
+      const cleanColor = sanitizeAvatarColor(avatarColor);
       const room = manager.getRoom(roomCode);
       if (!room) {
         socket.emit('room:error', {
@@ -57,7 +86,7 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
         return;
       }
 
-      const player = room.addPlayer(socket, playerName, avatarColor);
+      const player = room.addPlayer(socket, cleanName, cleanColor);
       manager.setSocketRoom(socket.id, room.code);
 
       socket.emit('room:joined', {
@@ -73,7 +102,7 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
       io.to(room.code).emit('chat:message', {
         id: nanoid(10),
         type: 'system',
-        text: `${playerName} odaya katıldı`,
+        text: `${cleanName} odaya katıldı`,
         timestamp: Date.now(),
       });
     });

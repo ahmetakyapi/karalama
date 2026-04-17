@@ -15,6 +15,7 @@ import { MAX_BOTS } from '@karalama/shared';
 export function LobbyView() {
   const { players, hostId, playerId, roomCode, settings } = useGameStore();
   const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   const playerList = Object.values(players);
   const botList = playerList.filter((p) => p.isBot);
@@ -41,9 +42,31 @@ export function LobbyView() {
 
   const handleCopy = async () => {
     const url = window.location.href;
-    await navigator.clipboard.writeText(url);
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // Clipboard API blocked — fall back to selection
+      const el = document.createElement('textarea');
+      el.value = url;
+      document.body.appendChild(el);
+      el.select();
+      try { document.execCommand('copy'); } catch { /* ignore */ }
+      document.body.removeChild(el);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleNativeShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const text = `Karalama'da çizim oyunu oynayalım! Oda: ${roomCode}`;
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title: 'Karalama', text, url });
+        return;
+      } catch { /* user dismissed */ }
+    }
+    handleCopy();
   };
 
   return (
@@ -66,10 +89,48 @@ export function LobbyView() {
             <span className="text-4xl font-bold font-mono tracking-[0.3em] gradient-text">
               {roomCode}
             </span>
-            <Button variant="ghost" size="sm" onClick={handleCopy}>
-              {copied ? 'Kopyalandı!' : 'Kopyala'}
+            <Button variant="ghost" size="sm" onClick={handleNativeShare} aria-label="Oda linkini paylaş">
+              {copied ? 'Kopyalandı!' : 'Paylaş'}
             </Button>
+            <button
+              type="button"
+              onClick={() => setShowQR((v) => !v)}
+              aria-expanded={showQR}
+              aria-label={showQR ? 'QR kodu gizle' : 'QR kodu göster'}
+              className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08] hover:text-white transition-colors"
+            >
+              <svg className="w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <path d="M14 14h3v3h-3zM19 14h2M14 19h2M17 17v4M19 17v2" />
+              </svg>
+            </button>
           </div>
+
+          {/* QR panel */}
+          {showQR && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-4 flex flex-col items-center gap-2"
+            >
+              <div className="p-3 rounded-2xl bg-white">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&data=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
+                  alt={`Oda ${roomCode} için QR kodu`}
+                  width={200}
+                  height={200}
+                  className="block"
+                  loading="lazy"
+                />
+              </div>
+              <p className="text-[11px] text-white/40">
+                Telefonla tara ve direkt katıl
+              </p>
+            </motion.div>
+          )}
         </div>
 
         {/* Settings summary */}
@@ -145,7 +206,7 @@ export function LobbyView() {
                   'disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-accent-cyan/[0.06]'
                 )}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
                 Bot Ekle ({botList.length}/{MAX_BOTS})

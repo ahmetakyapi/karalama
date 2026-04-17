@@ -45,6 +45,17 @@ function CreateRoomContent() {
     }
   }, [store.roomCode, router]);
 
+  useEffect(() => {
+    if (store.roomError) {
+      // Give user a chance to read, then bounce home
+      const t = setTimeout(() => {
+        store.setRoomError(null);
+        router.push('/');
+      }, 3500);
+      return () => clearTimeout(t);
+    }
+  }, [store.roomError, router, store]);
+
   const toggleCategory = (key: string) => {
     setSelectedCategories((prev) =>
       prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]
@@ -90,6 +101,17 @@ function CreateRoomContent() {
         <h1 className="text-3xl font-bold gradient-text text-center mb-8">
           Oda Oluştur
         </h1>
+
+        {store.roomError && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            role="alert"
+            className="mb-4 rounded-xl bg-rose-500/10 border border-rose-500/30 px-4 py-3 text-sm text-rose-300"
+          >
+            {store.roomError} — Ana sayfaya yönlendiriliyorsun...
+          </motion.div>
+        )}
 
         <GlassCard className="p-6 space-y-6">
           {/* Rounds */}
