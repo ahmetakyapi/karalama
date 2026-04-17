@@ -12,7 +12,16 @@ export interface DrawStroke {
   points: DrawPoint[];
 }
 
-export type DrawTool = 'pen' | 'eraser' | 'fill' | 'rect' | 'circle' | 'line' | 'filledRect' | 'filledCircle';
+export type DrawTool =
+  | 'pen'
+  | 'eraser'
+  | 'fill'
+  | 'rect'
+  | 'circle'
+  | 'line'
+  | 'filledRect'
+  | 'filledCircle'
+  | 'eyedropper';
 
 export type ShapeType = 'rect' | 'circle' | 'line' | 'filledRect' | 'filledCircle';
 

@@ -224,9 +224,10 @@ function Sparkle({ delay, x, y }: { delay: number; x: string; y: string }) {
 // Main component
 // ---------------------------------------------------------------------------
 export function GameOverScreen() {
-  const { podium, players, scores, playerId, hostId } = useGameStore();
+  const { podium, players, scores, playerId, hostId, roomCode } = useGameStore();
   const isHost = playerId === hostId;
   const containerRef = useRef<HTMLDivElement>(null);
+  const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
 
   const { xp, level, gamesPlayed, totalCorrectGuesses, currentStreak, bestStreak } = useProgressStore();
   const xpForNext = getXPForNextLevel(level);
@@ -234,6 +235,21 @@ export function GameOverScreen() {
 
   const handleBackToLobby = () => {
     getSocket().emit('game:backToLobby');
+  };
+
+  const handleShare = async () => {
+    if (typeof window === 'undefined') return;
+    const url = roomCode ? `${window.location.origin}/oda/${roomCode}` : window.location.href;
+    const text = `Karalama'da oynadım! Katıl: ${url}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Karalama', text, url });
+      } else {
+        await navigator.clipboard.writeText(text);
+        setShareStatus('copied');
+        setTimeout(() => setShareStatus('idle'), 1800);
+      }
+    } catch {}
   };
 
   const sortedPlayers = useMemo(
@@ -244,47 +260,61 @@ export function GameOverScreen() {
     [players, scores]
   );
 
-  // Derive fun stats from the available data
-  const stats = useMemo(() => {
+  // Derive MVP cards (fastest guesser, most points, etc.)
+  const mvpCards = useMemo(() => {
     const entries = Object.values(players);
-    if (entries.length === 0) return [];
+    if (entries.length === 0) return [] as { title: string; playerName: string; subtitle: string; icon: string; tint: string }[];
 
-    const topScorer = entries.reduce((best, p) =>
-      (scores[p.id] || 0) > (scores[best.id] || 0) ? p : best
-    );
+    const sorted = [...entries].sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0));
+    const topScorer = sorted[0];
 
-    const result: { label: string; value: string; icon: string }[] = [];
+    const cards: { title: string; playerName: string; subtitle: string; icon: string; tint: string }[] = [];
 
-    result.push({
-      label: 'En Yüksek Skor',
-      value: `${topScorer.name} (${scores[topScorer.id] || 0})`,
-      icon: '\u{1F3AF}',
-    });
-
-    if (entries.length >= 2) {
-      const sorted = [...entries].sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0));
-      const diff = (scores[sorted[0].id] || 0) - (scores[sorted[1].id] || 0);
-      result.push({
-        label: 'Fark',
-        value: diff === 0 ? 'Başabaş!' : `${diff} puan`,
-        icon: '\u{26A1}',
+    if (topScorer) {
+      cards.push({
+        title: 'Şampiyon',
+        playerName: topScorer.name,
+        subtitle: `${scores[topScorer.id] || 0} puan`,
+        icon: '🏆',
+        tint: 'from-amber-400/30 to-yellow-600/20 border-amber-400/40',
       });
     }
 
-    const totalScore = entries.reduce((sum, p) => sum + (scores[p.id] || 0), 0);
-    result.push({
-      label: 'Toplam Puan',
-      value: `${totalScore}`,
-      icon: '\u{1F4CA}',
+    if (sorted.length >= 2) {
+      const diff = (scores[sorted[0].id] || 0) - (scores[sorted[1].id] || 0);
+      cards.push({
+        title: 'En Yakın Rakip',
+        playerName: sorted[1].name,
+        subtitle: diff === 0 ? 'Başabaş!' : `${diff} puan fark`,
+        icon: '⚔️',
+        tint: 'from-slate-400/20 to-slate-700/10 border-slate-300/30',
+      });
+    }
+
+    // Most improved: the player who ends highest above average
+    const avg = sorted.reduce((s, p) => s + (scores[p.id] || 0), 0) / Math.max(1, sorted.length);
+    const mostAboveAvg = sorted.find((p) => (scores[p.id] || 0) > avg * 1.2);
+    if (mostAboveAvg && mostAboveAvg.id !== topScorer?.id) {
+      cards.push({
+        title: 'Yıldız',
+        playerName: mostAboveAvg.name,
+        subtitle: 'Ortalamanın çok üstü',
+        icon: '⭐',
+        tint: 'from-cyan-400/20 to-violet-500/10 border-cyan-300/30',
+      });
+    }
+
+    // Consistent players (any non-zero scorer)
+    const participants = sorted.filter((p) => (scores[p.id] || 0) > 0).length;
+    cards.push({
+      title: 'Katılım',
+      playerName: `${participants} oyuncu`,
+      subtitle: 'puan kazandı',
+      icon: '👥',
+      tint: 'from-emerald-400/20 to-emerald-700/10 border-emerald-400/30',
     });
 
-    result.push({
-      label: 'Oyuncu Sayısı',
-      value: `${entries.length}`,
-      icon: '\u{1F465}',
-    });
-
-    return result;
+    return cards;
   }, [players, scores]);
 
   const winner = podium[0];
@@ -591,42 +621,41 @@ export function GameOverScreen() {
           </GlassCard>
         </motion.div>
 
-        {/* ---- Fun Stats ---- */}
-        {stats.length > 0 && (
+        {/* ---- MVP Highlights ---- */}
+        {mvpCards.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 2.6, duration: 0.5, ease: easeCurve as unknown as EaseCurve }}
             className="w-full mb-8"
           >
-            <GlassCard className="p-5" glowColor="rgba(16, 185, 129, 0.06)">
-              <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-4">
-                İstatistikler
-              </h2>
-              <div className="grid grid-cols-2 gap-3">
-                {stats.map((stat, i) => (
-                  <motion.div
-                    key={stat.label}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      delay: 2.8 + i * 0.1,
-                      duration: 0.4,
-                      ease: easeCurve as unknown as EaseCurve,
-                    }}
-                    className="flex items-start gap-2.5 bg-white/[0.03] rounded-lg p-3"
-                  >
-                    <span className="text-xl leading-none mt-0.5">{stat.icon}</span>
+            <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-3 text-center">
+              Bu Oyunun Öne Çıkanları
+            </h2>
+            <div className="grid grid-cols-2 gap-3">
+              {mvpCards.map((card, i) => (
+                <motion.div
+                  key={card.title}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    delay: 2.8 + i * 0.1,
+                    duration: 0.4,
+                    ease: easeCurve as unknown as EaseCurve,
+                  }}
+                  className={`relative overflow-hidden rounded-xl p-3 border bg-gradient-to-br ${card.tint}`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="text-2xl leading-none">{card.icon}</div>
                     <div className="min-w-0">
-                      <p className="text-xs text-white/40 mb-0.5">{stat.label}</p>
-                      <p className="text-sm font-semibold text-white/80 truncate">
-                        {stat.value}
-                      </p>
+                      <p className="text-[10px] text-white/50 uppercase tracking-wider">{card.title}</p>
+                      <p className="text-sm font-bold text-white truncate">{card.playerName}</p>
+                      <p className="text-[10px] text-white/60 truncate">{card.subtitle}</p>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
-            </GlassCard>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
         )}
 
@@ -709,6 +738,14 @@ export function GameOverScreen() {
               Lobiye Dön
             </Button>
           )}
+          <Button
+            size="lg"
+            variant="secondary"
+            onClick={handleShare}
+            className="flex-1"
+          >
+            {shareStatus === 'copied' ? 'Kopyalandı ✓' : 'Paylaş'}
+          </Button>
         </motion.div>
 
         {/* Host hint */}

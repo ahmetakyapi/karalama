@@ -122,3 +122,95 @@ canvas {
   -webkit-user-select: none;
   user-select: none;
 }
+
+/* Accessibility: reduce-motion */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Accessibility: high contrast */
+html.high-contrast {
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+}
+html.high-contrast body {
+  background: #000000;
+  color: #ffffff;
+}
+html.high-contrast .glass {
+  background: rgba(0,0,0,0.9);
+  border-color: rgba(255,255,255,0.4);
+  backdrop-filter: none;
+}
+html.high-contrast .text-white\/40,
+html.high-contrast .text-white\/50,
+html.high-contrast .text-white\/60,
+html.high-contrast .text-white\/70 {
+  color: rgba(255,255,255,0.95) !important;
+}
+html.high-contrast button,
+html.high-contrast input {
+  border-color: rgba(255,255,255,0.5) !important;
+}
+
+/* Accessibility: dyslexic font */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+html.font-dyslexic body,
+html.font-dyslexic button,
+html.font-dyslexic input,
+html.font-dyslexic textarea,
+html.font-dyslexic h1,
+html.font-dyslexic h2,
+html.font-dyslexic h3,
+html.font-dyslexic h4,
+html.font-dyslexic p,
+html.font-dyslexic span {
+  font-family: 'OpenDyslexic', ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+  letter-spacing: 0.02em;
+}
+
+/* Focus-visible polish for keyboard users */
+:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Shimmer animation for level-up / MVP banners */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer-bg {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s linear infinite;
+}
+
+/* Keyboard hint kbd styling */
+kbd {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.35rem;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+}

@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { ThemeApplier } from '@/components/ui/ThemeApplier';
+import { ToastStack } from '@/components/ui/ToastStack';
 
 export const metadata: Metadata = {
   title: 'Karalama - Çiz, Tahmin Et ve Eğlen!',
@@ -32,7 +34,9 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon.svg" />
       </head>
       <body className="bg-bg-primary text-white antialiased min-h-screen">
+        <ThemeApplier />
         {children}
+        <ToastStack />
       </body>
     </html>
   );

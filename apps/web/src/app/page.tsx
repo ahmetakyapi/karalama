@@ -1182,6 +1182,20 @@ export default function HomePage() {
       {/* Grid */}
       <div className="pointer-events-none fixed inset-0 bg-grid opacity-60" />
 
+      {/* Top-right quick actions: profile link */}
+      <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+        <a
+          href="/profil"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 backdrop-blur hover:bg-white/[0.08] text-xs font-medium text-white/70 hover:text-white transition-all"
+          title="Profilim"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          Profilim
+        </a>
+      </div>
+
       {/* ===== HERO (Split Layout) ===== */}
       <section className="relative flex min-h-screen items-center overflow-hidden px-6 py-16 lg:py-0">
         {/* Radial glow blobs */}

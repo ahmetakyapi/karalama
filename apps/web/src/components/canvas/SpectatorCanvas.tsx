@@ -138,6 +138,18 @@ export function SpectatorCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { drawHistory } = useGameStore();
 
+  const savePNG = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    try {
+      const link = document.createElement('a');
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      link.download = `karalama-${stamp}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch {}
+  }, []);
+
   const drawStroke = useCallback(
     (
       ctx: CanvasRenderingContext2D,
@@ -226,6 +238,18 @@ export function SpectatorCanvas() {
         ref={canvasRef}
         className="absolute inset-0 w-full h-full rounded-xl"
       />
+      {drawHistory.length > 0 && (
+        <button
+          onClick={savePNG}
+          className="absolute top-2 right-2 w-8 h-8 rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all z-10"
+          title="PNG olarak indir"
+          aria-label="Çizimi indir"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
