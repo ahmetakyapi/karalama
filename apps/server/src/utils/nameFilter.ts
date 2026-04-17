@@ -1,10 +1,15 @@
-const BAD_WORDS = [
-  'amk', 'amq', 'amcık', 'amcik', 'aptal',
-  'göt', 'got', 'sikim', 'siktir', 'sikik', 'sikko',
-  'piç', 'pic', 'orospu', 'oç', 'orospuçocuğu',
-  'mal', 'salak', 'ibne', 'yarak', 'yarrak',
-  'fuck', 'shit', 'bitch', 'ass', 'cunt', 'dick',
+// Whole-word matches (compared against normalized token or substring-safe).
+const BAD_WORDS_EXACT = [
+  'amk', 'amq', 'amcık', 'amcik', 'aptal', 'sikim', 'sikik', 'sikko',
+  'siktir', 'göt', 'piç', 'orospu', 'orospucocugu', 'orospucocugu',
+  'ibne', 'yarak', 'yarrak', 'pezevenk', 'puşt', 'pust',
+  'fuck', 'shit', 'bitch', 'cunt', 'dick', 'asshole',
   'nazi', 'hitler',
+];
+
+// Partial matches for strong slurs that are never OK even as a prefix.
+const BAD_WORDS_SUBSTR = [
+  'orospuc', 'sikim', 'amina', 'aminako',
 ];
 
 const HOMOGLYPHS: Record<string, string> = {
@@ -48,13 +53,22 @@ export function sanitizePlayerName(raw: unknown): {
   }
 
   const normalized = normalize(trimmed);
-  for (const bad of BAD_WORDS) {
-    if (normalized.includes(bad)) {
-      return { ok: false, name: '', reason: 'PROFANITY' };
-    }
+  if (isProfane(normalized)) {
+    return { ok: false, name: '', reason: 'PROFANITY' };
   }
 
   return { ok: true, name: trimmed };
+}
+
+function isProfane(normalized: string): boolean {
+  // exact match or surrounded by word-break equivalent (normalized strips punctuation)
+  for (const bad of BAD_WORDS_EXACT) {
+    if (normalized === bad) return true;
+  }
+  for (const bad of BAD_WORDS_SUBSTR) {
+    if (normalized.includes(bad)) return true;
+  }
+  return false;
 }
 
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
@@ -68,4 +82,40 @@ export function sanitizeAvatarColor(raw: unknown): string {
   if (typeof raw !== 'string') return '#6366f1';
   if (!HEX_COLOR_RE.test(raw)) return '#6366f1';
   return ALLOWED_COLORS.has(raw.toLowerCase()) ? raw.toLowerCase() : '#6366f1';
+}
+
+/**
+ * Sanitize a chat / guess message. Strips control chars, collapses
+ * repeated whitespace, masks profanity by word (not full block) so
+ * guesses that partially overlap still work. Returns empty string if
+ * the message is pure junk.
+ */
+export function sanitizeChatMessage(raw: unknown): string {
+  if (typeof raw !== 'string') return '';
+  const cleaned = raw
+    .normalize('NFC')
+    // strip zero-width + control chars
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001F\u007F\u200B-\u200D\uFEFF]/g, '')
+    // collapse whitespace
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 100);
+
+  if (!cleaned) return '';
+
+  // Mask profanity tokens word-by-word
+  const masked = cleaned
+    .split(' ')
+    .map((word) => {
+      const norm = normalize(word);
+      if (!norm) return word;
+      if (isProfane(norm)) {
+        return '*'.repeat(Math.max(word.length, 3));
+      }
+      return word;
+    })
+    .join(' ');
+
+  return masked;
 }

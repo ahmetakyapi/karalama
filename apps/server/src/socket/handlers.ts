@@ -6,7 +6,8 @@ import type {
 import { categories, CHAT_RATE_LIMIT_MS, DRAW_RATE_LIMIT_MS, MAX_BOTS } from '@karalama/shared';
 import { GameManager } from '../game/GameManager';
 import { nanoid } from 'nanoid';
-import { sanitizePlayerName, sanitizeAvatarColor } from '../utils/nameFilter';
+import { sanitizePlayerName, sanitizeAvatarColor, sanitizeChatMessage } from '../utils/nameFilter';
+import { RateLimiter } from '../utils/rateLimit';
 
 const NAME_ERROR_MESSAGES: Record<string, string> = {
   INVALID: 'Geçersiz isim',
@@ -16,9 +17,9 @@ const NAME_ERROR_MESSAGES: Record<string, string> = {
   PROFANITY: 'Bu isim kullanılamaz',
 };
 
-// Per-socket rate limit tracking
-const lastChatTime = new Map<string, number>();
-const lastDrawTime = new Map<string, number>();
+// Per-socket rate limiters with automatic idle-slot GC.
+const chatLimiter = new RateLimiter({ intervalMs: CHAT_RATE_LIMIT_MS });
+const drawLimiter = new RateLimiter({ intervalMs: DRAW_RATE_LIMIT_MS });
 
 type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 type GameServer = Server<ClientToServerEvents, ServerToClientEvents>;
@@ -237,11 +238,7 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
       if (!room) return;
       if (room.currentDrawerId !== socket.id) return;
 
-      // Rate limit draw strokes
-      const now = Date.now();
-      const lastDraw = lastDrawTime.get(socket.id) || 0;
-      if (now - lastDraw < DRAW_RATE_LIMIT_MS) return;
-      lastDrawTime.set(socket.id, now);
+      if (!drawLimiter.tryConsume(socket.id)) return;
 
       room.addStroke(data);
       socket.to(room.code).emit('draw:stroke', data);
@@ -297,14 +294,10 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
       const room = manager.getSocketRoom(socket.id);
       if (!room) return;
 
-      const trimmed = text.trim().slice(0, 100);
+      const trimmed = sanitizeChatMessage(text);
       if (!trimmed) return;
 
-      // Rate limit chat messages
-      const now = Date.now();
-      const lastChat = lastChatTime.get(socket.id) || 0;
-      if (now - lastChat < CHAT_RATE_LIMIT_MS) return;
-      lastChatTime.set(socket.id, now);
+      if (!chatLimiter.tryConsume(socket.id)) return;
 
       // If game is active, check for guess
       if (room.phase === 'DRAWING') {
@@ -365,8 +358,8 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
         }
       }
       manager.removeSocket(socket.id);
-      lastChatTime.delete(socket.id);
-      lastDrawTime.delete(socket.id);
+      chatLimiter.forget(socket.id);
+      drawLimiter.forget(socket.id);
     });
   });
 }
