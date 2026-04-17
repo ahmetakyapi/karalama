@@ -10,13 +10,13 @@ import {
   useTransform,
   AnimatePresence,
   useInView,
+  useScroll,
 } from 'framer-motion';
-import { Input } from '@/components/ui/Input';
-import { AVATAR_COLORS, AVATAR_CHARACTERS } from '@karalama/shared';
+import { AVATAR_CHARACTERS } from '@karalama/shared';
 import { cn } from '@/lib/utils';
 
 /* ============================================================
-   Ahmetakyapi motion system
+   Motion system
    ============================================================ */
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -29,16 +29,8 @@ const fadeUp = {
   }),
 };
 
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: (d: number = 0) => ({
-    opacity: 1,
-    transition: { duration: 0.6, ease: EASE, delay: d },
-  }),
-};
-
 const scaleUp = {
-  hidden: { opacity: 0, scale: 0.92 },
+  hidden: { opacity: 0, scale: 0.94 },
   visible: (d: number = 0) => ({
     opacity: 1,
     scale: 1,
@@ -47,7 +39,7 @@ const scaleUp = {
 };
 
 /* ============================================================
-   Spotlight hook
+   Spotlight + aurora background
    ============================================================ */
 function useSpotlight() {
   const x = useMotionValue(0);
@@ -59,8 +51,32 @@ function useSpotlight() {
     },
     [x, y]
   );
-  const bg = useMotionTemplate`radial-gradient(700px circle at ${x}px ${y}px, rgba(99,102,241,0.06), transparent 70%)`;
+  const bg = useMotionTemplate`radial-gradient(600px circle at ${x}px ${y}px, rgba(99,102,241,0.08), transparent 70%)`;
   return { bg, onMove };
+}
+
+function AuroraBackground() {
+  return (
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      <motion.div
+        animate={{ x: [0, 40, 0], y: [0, -30, 0], scale: [1, 1.1, 1] }}
+        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute -top-40 -left-20 h-[600px] w-[600px] rounded-full bg-indigo-600/20 blur-[120px]"
+      />
+      <motion.div
+        animate={{ x: [0, -50, 0], y: [0, 40, 0], scale: [1.1, 1, 1.1] }}
+        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+        className="absolute top-1/3 -right-32 h-[500px] w-[500px] rounded-full bg-cyan-500/15 blur-[120px]"
+      />
+      <motion.div
+        animate={{ x: [0, 30, 0], y: [0, -20, 0], scale: [1, 1.15, 1] }}
+        transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
+        className="absolute bottom-0 left-1/2 h-[450px] w-[450px] -translate-x-1/2 rounded-full bg-fuchsia-500/10 blur-[120px]"
+      />
+      <div className="absolute inset-0 bg-grid opacity-40" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#04070d]" />
+    </div>
+  );
 }
 
 /* ============================================================
@@ -69,11 +85,13 @@ function useSpotlight() {
 function TiltCard({
   children,
   className,
-  glowColor = 'rgba(99,102,241,0.10)',
+  glowColor = 'rgba(99,102,241,0.12)',
+  tiltStrength = 6,
 }: {
   children: React.ReactNode;
   className?: string;
   glowColor?: string;
+  tiltStrength?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const rx = useSpring(useMotionValue(0), { stiffness: 300, damping: 30 });
@@ -85,12 +103,12 @@ function TiltCard({
     (e: React.MouseEvent) => {
       if (!ref.current) return;
       const r = ref.current.getBoundingClientRect();
-      rx.set(-((e.clientY - r.top) / r.height - 0.5) * 8);
-      ry.set(((e.clientX - r.left) / r.width - 0.5) * 8);
+      rx.set(-((e.clientY - r.top) / r.height - 0.5) * tiltStrength);
+      ry.set(((e.clientX - r.left) / r.width - 0.5) * tiltStrength);
       mx.set((e.clientX - r.left) / r.width);
       my.set((e.clientY - r.top) / r.height);
     },
-    [rx, ry, mx, my]
+    [rx, ry, mx, my, tiltStrength]
   );
 
   const onLeave = useCallback(() => {
@@ -122,13 +140,114 @@ function TiltCard({
 }
 
 /* ============================================================
-   Hero Demo (right side of hero - 4 step animated showcase)
+   Top Navigation
+   ============================================================ */
+function TopNav() {
+  const { scrollY } = useScroll();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    return scrollY.on('change', (y) => setScrolled(y > 20));
+  }, [scrollY]);
+
+  return (
+    <motion.nav
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, ease: EASE }}
+      className={cn(
+        'fixed top-0 left-0 right-0 z-40 transition-all duration-500',
+        scrolled ? 'py-3' : 'py-5'
+      )}
+    >
+      <div className={cn(
+        'mx-auto max-w-6xl px-5 transition-all duration-500',
+      )}>
+        <div className={cn(
+          'flex items-center justify-between rounded-2xl px-4 py-2.5 transition-all duration-500',
+          scrolled
+            ? 'bg-[#070b14]/80 border border-white/[0.06] backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.25)]'
+            : 'bg-transparent border border-transparent'
+        )}>
+          {/* Logo */}
+          <a href="/" className="flex items-center gap-2 group">
+            <div className="relative w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 via-cyan-400 to-emerald-400 p-[1.5px]">
+              <div className="w-full h-full rounded-[10px] bg-[#04070d] flex items-center justify-center">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M4 18c4-8 12-10 16-4M7 13c3-5 8-6 11-3"
+                    stroke="url(#logoGrad)"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                  />
+                  <defs>
+                    <linearGradient id="logoGrad" x1="0" y1="0" x2="24" y2="24">
+                      <stop offset="0" stopColor="#6366f1" />
+                      <stop offset="0.5" stopColor="#22d3ee" />
+                      <stop offset="1" stopColor="#10b981" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+            <span className="text-base font-bold text-slate-100 tracking-tight">
+              Karalama
+            </span>
+            <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+              <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" />
+              Canlı
+            </span>
+          </a>
+
+          {/* Links */}
+          <div className="hidden md:flex items-center gap-1">
+            {[
+              { href: '#ozellikler', label: 'Özellikler' },
+              { href: '#nasil', label: 'Nasıl Oynanır' },
+              { href: '#topluluk', label: 'Topluluk' },
+            ].map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-white/[0.04] transition-all"
+              >
+                {l.label}
+              </a>
+            ))}
+          </div>
+
+          {/* Right actions */}
+          <div className="flex items-center gap-2">
+            <a
+              href="/profil"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/[0.04] transition-all"
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Profil
+            </a>
+            <button
+              onClick={() => document.getElementById('oyna')?.scrollIntoView({ behavior: 'smooth' })}
+              className="relative overflow-hidden rounded-lg bg-gradient-to-r from-indigo-500 to-cyan-400 px-4 py-2 text-xs font-bold text-white shadow-[0_4px_16px_rgba(99,102,241,0.35)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.5)] transition-all"
+            >
+              Hemen Oyna
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.nav>
+  );
+}
+
+/* ============================================================
+   Hero Demo (animated preview on the right side of hero)
    ============================================================ */
 const HERO_STEPS = [
-  { id: 'lobby', label: 'Lobiye Giriş', icon: '🚪', color: '#6366f1' },
-  { id: 'draw', label: 'Çizim', icon: '✏️', color: '#22d3ee' },
-  { id: 'guess', label: 'Tahmin', icon: '💬', color: '#10b981' },
-  { id: 'winners', label: 'Kazananlar', icon: '🏆', color: '#f59e0b' },
+  { id: 'lobby', label: 'Lobi', icon: '🚪' },
+  { id: 'draw', label: 'Çiz', icon: '✏️' },
+  { id: 'guess', label: 'Tahmin', icon: '💬' },
+  { id: 'winners', label: 'Podyum', icon: '🏆' },
 ] as const;
 
 function HeroDemo() {
@@ -177,7 +296,7 @@ function HeroDemo() {
 
       {/* Preview screen */}
       <div className="glass rounded-3xl p-1.5 overflow-hidden flex-1 flex flex-col">
-        <div className="rounded-[20px] bg-[#060a14] overflow-hidden flex-1 relative min-h-[320px]">
+        <div className="rounded-[20px] bg-[#060a14] overflow-hidden flex-1 relative min-h-[360px]">
           {/* Window dots */}
           <div className="absolute top-3 left-4 flex gap-1.5 z-20">
             <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
@@ -199,29 +318,21 @@ function HeroDemo() {
             <div key={s.id} className="flex-1 h-1 rounded-full bg-white/[0.06] overflow-hidden">
               {step === i && (
                 <motion.div
-                  className="h-full rounded-full"
-                  style={{ background: `linear-gradient(90deg, ${s.color}, ${s.color}80)` }}
+                  key={`p-${step}`}
                   initial={{ width: '0%' }}
                   animate={{ width: '100%' }}
                   transition={{ duration: 6, ease: 'linear' }}
-                  key={`bar-${step}`}
+                  className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400"
                 />
-              )}
-              {step > i && (
-                <div className="h-full w-full rounded-full" style={{ background: `${s.color}40` }} />
               )}
             </div>
           ))}
         </div>
       </div>
-
-      {/* Glow */}
-      <div className="absolute -inset-6 -z-10 rounded-3xl bg-indigo-500/[0.05] blur-3xl" />
     </motion.div>
   );
 }
 
-/* Hero Demo step visuals */
 const heroTransition = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
@@ -231,7 +342,7 @@ const heroTransition = {
 
 function HeroLobby() {
   const players = [
-    { name: 'Ahmet', emoji: '🤖', color: '#6366f1', ready: true },
+    { name: 'Seda', emoji: '🤖', color: '#6366f1', ready: true },
     { name: 'Elif', emoji: '🐱', color: '#f59e0b', ready: true },
     { name: 'Can', emoji: '👽', color: '#10b981', ready: false },
     { name: 'Zeynep', emoji: '🧙', color: '#8b5cf6', ready: true },
@@ -239,7 +350,6 @@ function HeroLobby() {
   ];
   return (
     <motion.div {...heroTransition} className="absolute inset-0 flex flex-col p-6 pt-10">
-      {/* Room header */}
       <div className="flex items-center justify-between mb-5">
         <div>
           <div className="text-[10px] text-slate-500 mb-0.5">Oda Kodu</div>
@@ -259,7 +369,6 @@ function HeroLobby() {
         </div>
       </div>
 
-      {/* Player list */}
       <div className="flex-1 space-y-1.5">
         {players.map((p, i) => (
           <motion.div
@@ -288,23 +397,12 @@ function HeroLobby() {
           </motion.div>
         ))}
       </div>
-
-      {/* Start button hint */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.4 }}
-        className="mt-3 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center"
-      >
-        <span className="text-xs font-semibold text-indigo-300">Oyunu Başlat</span>
-      </motion.div>
     </motion.div>
   );
 }
 
 function HeroDraw() {
   const pathRef = useRef<SVGPathElement>(null);
-
   useEffect(() => {
     const el = pathRef.current;
     if (!el) return;
@@ -313,105 +411,64 @@ function HeroDraw() {
     el.style.strokeDashoffset = `${len}`;
     const anim = el.animate(
       [{ strokeDashoffset: `${len}` }, { strokeDashoffset: '0' }],
-      { duration: 2500, fill: 'forwards', easing: 'ease-out', delay: 400 }
+      { duration: 2800, fill: 'forwards', easing: 'ease-out', delay: 300 }
     );
     return () => anim.cancel();
   }, []);
 
   return (
-    <motion.div {...heroTransition} className="absolute inset-0 flex p-5 pt-10">
-      {/* Main canvas */}
-      <div className="flex-1 relative">
-        <div className="absolute inset-0 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <svg viewBox="0 0 300 220" className="w-full h-full" fill="none">
-            {/* Star shape */}
-            <path
-              ref={pathRef}
-              d="M150 30 L170 90 L235 90 L182 130 L200 190 L150 155 L100 190 L118 130 L65 90 L130 90 Z"
-              stroke="rgba(34,211,238,0.8)"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            {/* Sparkle dots */}
-            {[
-              [120, 60], [190, 60], [240, 120], [200, 180], [100, 180], [60, 120],
-            ].map(([cx, cy], i) => (
-              <motion.circle
-                key={i}
-                cx={cx} cy={cy} r="2"
-                fill="rgba(34,211,238,0.5)"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: [0, 1.5, 0], opacity: [0, 0.8, 0] }}
-                transition={{ delay: 3 + i * 0.2, duration: 0.8 }}
-              />
-            ))}
-          </svg>
+    <motion.div {...heroTransition} className="absolute inset-0 flex flex-col p-5 pt-10">
+      <div className="flex justify-between items-center mb-3">
+        <div className="flex gap-1">
+          {['#6366f1', '#ef4444', '#10b981', '#f59e0b'].map((c) => (
+            <div key={c} className="w-5 h-5 rounded-full border border-white/10" style={{ background: c }} />
+          ))}
         </div>
-
-        {/* Word hint */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1"
-        >
-          {['Y', 'ı', 'l', 'd', 'ı', 'z'].map((ch, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.5 + i * 0.15 }}
-              className="w-5 h-6 rounded text-[10px] font-bold flex items-center justify-center bg-cyan-500/15 border border-cyan-500/25 text-cyan-300"
-            >
-              {ch}
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Toolbar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="absolute top-2 left-2 flex gap-1"
-        >
-          {['#22d3ee', '#ef4444', '#10b981', '#f59e0b', '#ffffff'].map((c) => (
-            <div key={c} className="w-4 h-4 rounded-full border border-white/10" style={{ background: c }} />
-          ))}
-        </motion.div>
-
-        {/* Timer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="absolute top-2 right-2 glass rounded-md px-2 py-0.5"
-        >
-          <span className="text-[10px] font-mono font-bold text-amber-400">0:42</span>
-        </motion.div>
+        <div className="text-[10px] font-mono text-slate-500 tabular-nums">
+          0:<motion.span initial={{ opacity: 0.6 }} animate={{ opacity: [0.6, 1, 0.6] }} transition={{ duration: 1, repeat: Infinity }}>54</motion.span>
+        </div>
       </div>
 
-      {/* Side chat mini */}
-      <div className="w-24 ml-2 flex flex-col gap-1 pt-2">
-        {[
-          { name: 'Can', text: 'şekil mi?', delay: 1 },
-          { name: 'Elif', text: 'güneş', delay: 2 },
-          { name: 'Burak', text: 'yıldız', delay: 3.5, correct: true },
-        ].map((m) => (
-          <motion.div
-            key={m.text}
-            initial={{ opacity: 0, x: 8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: m.delay, duration: 0.3 }}
+      <div className="flex-1 rounded-xl bg-white/[0.02] border border-white/[0.05] relative overflow-hidden">
+        <svg viewBox="0 0 300 200" className="w-full h-full" fill="none">
+          <path
+            ref={pathRef}
+            d="M 80 160 Q 80 90 100 80 Q 88 50 95 40 L 105 65 Q 125 55 150 55 Q 175 55 180 65 L 190 40 Q 200 50 190 80 Q 215 90 220 160 Z"
+            stroke="rgba(99,102,241,0.85)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <motion.circle
+            cx="130" cy="105" r="4"
+            fill="rgba(99,102,241,0.85)"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 2.8, duration: 0.3 }}
+          />
+          <motion.circle
+            cx="170" cy="105" r="4"
+            fill="rgba(99,102,241,0.85)"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 3.0, duration: 0.3 }}
+          />
+        </svg>
+      </div>
+
+      <div className="mt-3 flex justify-center gap-1.5">
+        {['K', '_', '_', '_'].map((ch, i) => (
+          <div
+            key={i}
             className={cn(
-              'rounded-lg px-1.5 py-1',
-              m.correct ? 'bg-emerald-500/15 border border-emerald-500/25' : 'bg-white/[0.03]'
+              'w-7 h-8 rounded-md flex items-center justify-center text-sm font-bold',
+              ch !== '_'
+                ? 'bg-indigo-500/20 border border-indigo-500/30 text-indigo-300'
+                : 'bg-white/[0.04] border border-white/[0.08] text-slate-500'
             )}
           >
-            <div className="text-[8px] font-medium text-slate-500">{m.name}</div>
-            <div className={cn('text-[9px]', m.correct ? 'font-bold text-emerald-400' : 'text-slate-400')}>{m.text}</div>
-          </motion.div>
+            {ch}
+          </div>
         ))}
       </div>
     </motion.div>
@@ -420,7 +477,7 @@ function HeroDraw() {
 
 function HeroGuess() {
   const messages = [
-    { name: 'Ahmet', text: 'çiçek mi?', emoji: '🤖', color: '#6366f1', delay: 0.3 },
+    { name: 'Seda', text: 'çiçek mi?', emoji: '🤖', color: '#6366f1', delay: 0.3 },
     { name: 'Elif', text: 'ağaç', emoji: '🐱', color: '#f59e0b', delay: 0.9 },
     { name: 'Can', text: 'dağ değil mi', emoji: '👽', color: '#10b981', delay: 1.5 },
     { name: 'Zeynep', text: 'volkan', emoji: '🧙', color: '#8b5cf6', delay: 2.2, correct: true },
@@ -429,17 +486,16 @@ function HeroGuess() {
 
   return (
     <motion.div {...heroTransition} className="absolute inset-0 flex flex-col p-5 pt-10">
-      {/* Drawing preview */}
       <div className="h-24 rounded-xl bg-white/[0.02] border border-white/[0.06] mb-3 flex items-center justify-center overflow-hidden relative">
         <svg viewBox="0 0 200 80" className="w-40 h-16" fill="none">
           <path
             d="M40 70 L60 30 L80 50 L100 15 L120 50 L140 30 L160 70"
-            stroke="rgba(16,185,129,0.6)"
+            stroke="rgba(16,185,129,0.7)"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          <circle cx="100" cy="15" r="4" fill="rgba(239,68,68,0.6)" />
+          <circle cx="100" cy="15" r="4" fill="rgba(239,68,68,0.7)" />
         </svg>
         <div className="absolute top-1.5 right-2 flex gap-1">
           {['V', '_', '_', '_', '_', 'N'].map((ch, i) => (
@@ -453,7 +509,6 @@ function HeroGuess() {
         </div>
       </div>
 
-      {/* Chat messages */}
       <div className="flex-1 space-y-1.5 overflow-hidden">
         {messages.map((m) => (
           <motion.div
@@ -491,29 +546,6 @@ function HeroGuess() {
           </motion.div>
         ))}
       </div>
-
-      {/* Typing input */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="mt-2 flex gap-1.5"
-      >
-        <div className="flex-1 h-8 rounded-lg bg-white/[0.03] border border-white/[0.06] px-2.5 flex items-center">
-          <motion.span
-            animate={{ opacity: [0.3, 0.8, 0.3] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="text-[10px] text-slate-500"
-          >
-            Tahminin...
-          </motion.span>
-        </div>
-        <div className="h-8 w-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center">
-          <svg className="w-3 h-3 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-7-7l7 7-7 7" />
-          </svg>
-        </div>
-      </motion.div>
     </motion.div>
   );
 }
@@ -522,18 +554,17 @@ function HeroWinners() {
   const podium = [
     { name: 'Elif', emoji: '🐱', score: 3820, rank: 2, color: '#f59e0b', barH: 'h-16' },
     { name: 'Zeynep', emoji: '🧙', score: 4150, rank: 1, color: '#8b5cf6', barH: 'h-24' },
-    { name: 'Ahmet', emoji: '🤖', score: 3540, rank: 3, color: '#6366f1', barH: 'h-12' },
+    { name: 'Seda', emoji: '🤖', score: 3540, rank: 3, color: '#6366f1', barH: 'h-12' },
   ];
 
   return (
     <motion.div {...heroTransition} className="absolute inset-0 flex flex-col items-center justify-center p-6 pt-10">
-      {/* Confetti */}
-      {Array.from({ length: 20 }).map((_, i) => (
+      {Array.from({ length: 18 }).map((_, i) => (
         <motion.div
           key={i}
           initial={{ y: -10, x: Math.random() * 280, opacity: 1, rotate: 0 }}
           animate={{
-            y: 250,
+            y: 260,
             opacity: [1, 1, 0],
             rotate: Math.random() * 360,
             x: Math.random() * 280,
@@ -560,7 +591,6 @@ function HeroWinners() {
       >
         🏆
       </motion.div>
-
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -570,7 +600,6 @@ function HeroWinners() {
         Oyun Bitti!
       </motion.div>
 
-      {/* Podium */}
       <div className="flex items-end gap-3 mb-5">
         {podium.map((p, i) => (
           <motion.div
@@ -618,58 +647,163 @@ function HeroWinners() {
           </motion.div>
         ))}
       </div>
-
-      {/* Remaining scores */}
-      <div className="w-full max-w-[220px] space-y-1">
-        {[
-          { name: 'Can', emoji: '👽', score: 2980, rank: 4 },
-          { name: 'Burak', emoji: '🥷', score: 2410, rank: 5 },
-        ].map((p, i) => (
-          <motion.div
-            key={p.name}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.5 + i * 0.15 }}
-            className="flex items-center gap-2 rounded-lg bg-white/[0.03] px-2.5 py-1"
-          >
-            <span className="text-[9px] text-slate-500 w-3">#{p.rank}</span>
-            <span className="text-xs">{p.emoji}</span>
-            <span className="text-[10px] text-slate-300 flex-1">{p.name}</span>
-            <span className="text-[9px] font-mono text-slate-500">{p.score}</span>
-          </motion.div>
-        ))}
-      </div>
     </motion.div>
   );
 }
 
 /* ============================================================
-   Animated Game Demo Section
+   Scrolling Marquee
+   ============================================================ */
+function Marquee() {
+  const items = [
+    { emoji: '🎨', label: 'Gerçek Zamanlı Çizim' },
+    { emoji: '🇹🇷', label: '1070+ Türkçe Kelime' },
+    { emoji: '⚡', label: 'Anında Bağlan' },
+    { emoji: '📱', label: 'Her Cihazda' },
+    { emoji: '🤖', label: 'Bot Desteği' },
+    { emoji: '🏆', label: 'Skor Tablosu' },
+    { emoji: '💬', label: 'Canlı Chat' },
+    { emoji: '🎯', label: 'Akıllı İpuçları' },
+    { emoji: '🌈', label: 'Özel Renkler' },
+    { emoji: '🚀', label: 'Kayıt Gerektirmez' },
+  ];
+  const doubled = [...items, ...items];
+
+  return (
+    <div className="relative z-10 mx-auto max-w-6xl px-6 -mt-6 sm:-mt-10">
+      <div
+        className="relative overflow-hidden rounded-2xl border border-white/[0.06] py-5"
+        style={{
+          background:
+            'linear-gradient(90deg, rgba(99,102,241,0.05), rgba(12,18,34,0.55) 20%, rgba(12,18,34,0.55) 80%, rgba(34,211,238,0.05))',
+          backdropFilter: 'blur(14px)',
+          boxShadow:
+            'inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 50px -20px rgba(0,0,0,0.6)',
+        }}
+      >
+        <div
+          className="absolute left-0 top-0 bottom-0 w-20 z-10 pointer-events-none rounded-l-2xl"
+          style={{ background: 'linear-gradient(to right, rgba(12,18,34,0.98), transparent)' }}
+        />
+        <div
+          className="absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none rounded-r-2xl"
+          style={{ background: 'linear-gradient(to left, rgba(12,18,34,0.98), transparent)' }}
+        />
+        <motion.div
+          className="flex items-center gap-8 whitespace-nowrap"
+          animate={{ x: ['0%', '-50%'] }}
+          transition={{ duration: 28, repeat: Infinity, ease: 'linear' }}
+        >
+          {doubled.map((it, i) => (
+            <div key={i} className="flex items-center gap-2.5 shrink-0">
+              <span className="text-xl">{it.emoji}</span>
+              <span className="text-sm font-semibold text-slate-400">{it.label}</span>
+              <span className="text-indigo-400/40 text-lg">✦</span>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   Stats Row (animated counters)
+   ============================================================ */
+function Counter({ to, suffix = '', duration = 1.6 }: { to: number; suffix?: string; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true });
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    const start = performance.now();
+    const fromV = 0;
+    let raf = 0;
+    const tick = (t: number) => {
+      const p = Math.min((t - start) / (duration * 1000), 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setValue(Math.floor(fromV + (to - fromV) * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [inView, to, duration]);
+
+  return <span ref={ref}>{value.toLocaleString('tr-TR')}{suffix}</span>;
+}
+
+function StatsRow() {
+  const stats = [
+    { value: 1070, suffix: '+', label: 'Türkçe Kelime', color: '#6366f1' },
+    { value: 18, suffix: '', label: 'Kategori', color: '#22d3ee' },
+    { value: 12, suffix: '', label: 'Oyuncu/Oda', color: '#10b981' },
+    { value: 100, suffix: '%', label: 'Ücretsiz', color: '#f59e0b' },
+  ];
+
+  return (
+    <section className="relative z-10 mx-auto max-w-6xl px-6 py-20">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+        className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"
+      >
+        {stats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            variants={scaleUp}
+            custom={i * 0.08}
+            className="glass rounded-2xl p-6 text-center relative overflow-hidden group"
+          >
+            <div
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+              style={{ background: `radial-gradient(circle at center, ${s.color}15, transparent 70%)` }}
+            />
+            <div
+              className="text-3xl sm:text-4xl font-extrabold tabular-nums mb-1 relative"
+              style={{
+                background: `linear-gradient(135deg, ${s.color}, ${s.color}aa)`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              <Counter to={s.value} suffix={s.suffix} />
+            </div>
+            <div className="text-xs font-medium text-slate-500 uppercase tracking-wider relative">
+              {s.label}
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+    </section>
+  );
+}
+
+/* ============================================================
+   Animated Game Demo Section (how to play)
    ============================================================ */
 const DEMO_STEPS = [
   {
     id: 'create',
     title: 'Oda Oluştur',
     desc: 'Bir oda kodu oluştur ve arkadaşlarınla paylaş. Herkes saniyeler içinde katılır.',
-    visual: 'room',
   },
   {
     id: 'pick',
     title: 'Kelime Seç',
     desc: 'Sıra sana geldiğinde 3 kelimeden birini seç. Kolay, orta veya zor — strateji senin.',
-    visual: 'pick',
   },
   {
     id: 'draw',
     title: 'Çiz',
     desc: 'Kalem, renk ve kalınlık seçenekleriyle kelimeyi çiz. Herkes gerçek zamanlı izler.',
-    visual: 'draw',
   },
   {
     id: 'guess',
     title: 'Tahmin Et & Kazan',
     desc: 'Chat\'ten tahminini yaz. Hızlı bil, daha çok puan kazan. İpuçları zamanla açılır.',
-    visual: 'guess',
   },
 ] as const;
 
@@ -687,7 +821,7 @@ function GameDemo() {
   }, [isInView]);
 
   return (
-    <section ref={ref} className="relative z-10 mx-auto max-w-6xl px-6 py-32">
+    <section id="nasil" ref={ref} className="relative z-10 mx-auto max-w-6xl px-6 py-28">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -710,7 +844,6 @@ function GameDemo() {
       </motion.div>
 
       <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-        {/* Left: Steps */}
         <div className="space-y-2">
           {DEMO_STEPS.map((step, i) => (
             <motion.button
@@ -762,7 +895,6 @@ function GameDemo() {
                   </AnimatePresence>
                 </div>
               </div>
-              {/* Progress bar */}
               {activeStep === i && (
                 <motion.div className="mt-3 ml-14 h-0.5 rounded-full bg-white/[0.06] overflow-hidden">
                   <motion.div
@@ -778,7 +910,6 @@ function GameDemo() {
           ))}
         </div>
 
-        {/* Right: Visual */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -796,7 +927,6 @@ function GameDemo() {
               </AnimatePresence>
             </div>
           </div>
-          {/* Glow behind */}
           <div className="absolute -inset-4 -z-10 rounded-3xl bg-indigo-500/[0.06] blur-2xl" />
         </motion.div>
       </div>
@@ -804,7 +934,6 @@ function GameDemo() {
   );
 }
 
-/* Demo visuals */
 const demoTransition = {
   initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0 },
@@ -836,7 +965,7 @@ function DemoRoom() {
             >
               <div className="w-8 h-8 rounded-full border-2 border-white/10" style={{ background: c }} />
               <span className="text-[10px] text-slate-500">
-                {['Ahmet', 'Elif', 'Can', 'Zeynep'][i]}
+                {['Seda', 'Elif', 'Can', 'Zeynep'][i]}
               </span>
             </motion.div>
           ))}
@@ -907,10 +1036,8 @@ function DemoDraw() {
   return (
     <motion.div {...demoTransition} className="absolute inset-0 flex items-center justify-center p-6">
       <div className="w-full h-full relative">
-        {/* Canvas area */}
         <div className="absolute inset-0 rounded-xl bg-white/[0.03] border border-white/[0.06]">
           <svg viewBox="0 0 300 220" className="w-full h-full" fill="none">
-            {/* Simple cat drawing */}
             <path
               ref={pathRef}
               d="M 100 160 Q 100 100 120 90 Q 110 60 115 50 L 125 75 Q 140 65 160 65 Q 180 65 185 75 L 195 50 Q 200 60 190 90 Q 210 100 210 160 Z"
@@ -919,7 +1046,6 @@ function DemoDraw() {
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            {/* Eyes */}
             <motion.circle
               cx="140" cy="110" r="4"
               fill="rgba(99,102,241,0.8)"
@@ -934,7 +1060,6 @@ function DemoDraw() {
               animate={{ scale: 1 }}
               transition={{ delay: 2.4, duration: 0.3 }}
             />
-            {/* Whiskers */}
             <motion.g
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -947,7 +1072,6 @@ function DemoDraw() {
             </motion.g>
           </svg>
         </div>
-        {/* Word hint at bottom */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -968,7 +1092,6 @@ function DemoDraw() {
             </div>
           ))}
         </motion.div>
-        {/* Toolbar hint */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -1028,7 +1151,6 @@ function DemoGuess() {
           </motion.div>
         ))}
       </div>
-      {/* Input */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1056,73 +1178,298 @@ function DemoGuess() {
 }
 
 /* ============================================================
-   Features data
+   Bento Features
    ============================================================ */
-const FEATURES = [
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-      </svg>
-    ),
-    title: 'Gerçek Zamanlı Çizim',
-    desc: 'Çizimler anında tüm oyunculara iletilir. Pürüzsüz ve akıcı.',
-    glow: 'rgba(99,102,241,0.12)',
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
-      </svg>
-    ),
-    title: '1070+ Türkçe Kelime',
-    desc: '18 farklı kategoride, 3 zorluk seviyesinde kelime havuzu.',
-    glow: 'rgba(34,211,238,0.12)',
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-      </svg>
-    ),
-    title: 'Mobil Uyumlu',
-    desc: 'Telefondan parmağınla çiz, tabletten oyna. Her cihazda.',
-    glow: 'rgba(16,185,129,0.12)',
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-      </svg>
-    ),
-    title: 'Anında Başla',
-    desc: 'Kayıt yok, indirme yok. Link paylaş ve oyna.',
-    glow: 'rgba(245,158,11,0.12)',
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-      </svg>
-    ),
-    title: 'İpucu Sistemi',
-    desc: 'Harfler zamanla açılır. Yaklaştığında uyarı alırsın.',
-    glow: 'rgba(168,85,247,0.12)',
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M18.75 4.236c.982.143 1.954.317 2.916.52A6.003 6.003 0 0016.27 9.728M18.75 4.236V4.5c0 2.108-.966 3.99-2.48 5.228m0 0a6.003 6.003 0 01-5.54 0" />
-      </svg>
-    ),
-    title: 'Skor & Podium',
-    desc: 'Hız bonusu, zorluk çarpanı. Oyun sonunda podyum.',
-    glow: 'rgba(244,63,94,0.12)',
-  },
-];
+function BentoFeatures() {
+  return (
+    <section id="ozellikler" className="relative z-10 mx-auto max-w-6xl px-6 py-28">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+        className="mb-14 text-center"
+      >
+        <motion.div variants={fadeUp} custom={0} className="mb-4 flex justify-center">
+          <span className="chip">
+            <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" />
+            Özellikler
+          </span>
+        </motion.div>
+        <motion.h2
+          variants={fadeUp}
+          custom={0.06}
+          className="mb-3 text-4xl font-extrabold tracking-tight text-slate-50 sm:text-5xl"
+        >
+          Neden <span className="text-gradient">Karalama?</span>
+        </motion.h2>
+        <motion.p
+          variants={fadeUp}
+          custom={0.12}
+          className="mx-auto max-w-lg text-base text-slate-400"
+        >
+          Her detay, mükemmel bir oyun gecesi için düşünüldü.
+        </motion.p>
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+        className="grid grid-cols-1 md:grid-cols-6 gap-4 auto-rows-[minmax(200px,auto)]"
+      >
+        {/* 1. Real-time drawing - big */}
+        <motion.div variants={fadeUp} custom={0} className="md:col-span-4 md:row-span-2 min-h-[320px]">
+          <TiltCard className="rounded-3xl p-8 h-full relative" glowColor="rgba(99,102,241,0.15)">
+            <div className="flex flex-col h-full">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-100 mb-2 tracking-tight">
+                Gerçek Zamanlı Çizim
+              </h3>
+              <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-md">
+                Fırça her hareketi milisaniyeler içinde tüm oyunculara iletilir. Basınç hassas, pürüzsüz ve akıcı.
+              </p>
+              {/* Live draw visualization */}
+              <div className="mt-auto rounded-2xl bg-[#060a14] border border-white/[0.05] p-4 relative overflow-hidden flex-1 min-h-[140px]">
+                <div className="absolute top-3 left-3 flex gap-1.5">
+                  {['#6366f1', '#ef4444', '#22d3ee', '#f59e0b'].map((c) => (
+                    <motion.div
+                      key={c}
+                      whileHover={{ scale: 1.2 }}
+                      className="w-5 h-5 rounded-full border border-white/15"
+                      style={{ background: c }}
+                    />
+                  ))}
+                </div>
+                <svg viewBox="0 0 300 120" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+                  <motion.path
+                    d="M 30 80 Q 60 20 100 60 T 170 55 T 260 70"
+                    fill="none"
+                    stroke="rgba(99,102,241,0.85)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeDasharray="1000"
+                    initial={{ strokeDashoffset: 1000 }}
+                    whileInView={{ strokeDashoffset: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 2.2, ease: 'easeOut', delay: 0.3 }}
+                  />
+                  <motion.circle
+                    cx="260" cy="70" r="5"
+                    fill="#22d3ee"
+                    animate={{ cx: [30, 260, 30], cy: [80, 70, 80] }}
+                    transition={{ duration: 4.4, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                </svg>
+              </div>
+            </div>
+          </TiltCard>
+        </motion.div>
+
+        {/* 2. 1070+ words */}
+        <motion.div variants={fadeUp} custom={0.08} className="md:col-span-2">
+          <TiltCard className="rounded-3xl p-6 h-full" glowColor="rgba(34,211,238,0.15)">
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502" />
+              </svg>
+            </div>
+            <div className="text-3xl font-extrabold text-slate-100 mb-1 tracking-tight">
+              <Counter to={1070} suffix="+" />
+            </div>
+            <div className="text-sm font-semibold text-slate-300 mb-1">Türkçe Kelime</div>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              18 kategori · 3 zorluk seviyesi
+            </p>
+          </TiltCard>
+        </motion.div>
+
+        {/* 3. Mobile friendly */}
+        <motion.div variants={fadeUp} custom={0.12} className="md:col-span-2">
+          <TiltCard className="rounded-3xl p-6 h-full" glowColor="rgba(16,185,129,0.15)">
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+              </svg>
+            </div>
+            <h3 className="text-base font-semibold text-slate-100 mb-1.5">Mobil Uyumlu</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Telefondan parmağınla çiz, tabletten oyna. Her cihazda aynı deneyim.
+            </p>
+          </TiltCard>
+        </motion.div>
+
+        {/* 4. Instant start */}
+        <motion.div variants={fadeUp} custom={0.16} className="md:col-span-3">
+          <TiltCard className="rounded-3xl p-6 h-full relative overflow-hidden" glowColor="rgba(245,158,11,0.15)">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-slate-100 mb-1.5">Anında Başla</h3>
+                <p className="text-xs text-slate-400 leading-relaxed max-w-[240px]">
+                  Kayıt yok, indirme yok. İsmini yaz, linki paylaş, oyna.
+                </p>
+              </div>
+              <div className="flex flex-col items-end gap-1.5 mt-1">
+                {['✓ Kayıt Yok', '✓ İndirme Yok', '✓ Ücretsiz'].map((t, i) => (
+                  <motion.span
+                    key={t}
+                    initial={{ opacity: 0, x: 12 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.2 + i * 0.1 }}
+                    className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full"
+                  >
+                    {t}
+                  </motion.span>
+                ))}
+              </div>
+            </div>
+          </TiltCard>
+        </motion.div>
+
+        {/* 5. Hint system */}
+        <motion.div variants={fadeUp} custom={0.2} className="md:col-span-3">
+          <TiltCard className="rounded-3xl p-6 h-full" glowColor="rgba(168,85,247,0.15)">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl border border-violet-500/20 bg-violet-500/10 text-violet-400">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold text-slate-100 mb-1.5">Akıllı İpuçları</h3>
+                <p className="text-xs text-slate-400 leading-relaxed mb-3">
+                  Harfler zamanla açılır. &quot;Yaklaştın&quot; uyarıları seni yönlendirir.
+                </p>
+                <div className="flex gap-1">
+                  {['K', 'A', 'L', '_', 'M'].map((ch, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0.6, opacity: 0 }}
+                      whileInView={{ scale: 1, opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.3 + i * 0.1, type: 'spring', stiffness: 300 }}
+                      className={cn(
+                        'w-7 h-8 rounded-md flex items-center justify-center text-xs font-bold',
+                        ch !== '_'
+                          ? 'bg-violet-500/15 border border-violet-500/30 text-violet-300'
+                          : 'bg-white/[0.03] border border-white/[0.06] text-slate-500'
+                      )}
+                    >
+                      {ch}
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </TiltCard>
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}
 
 /* ============================================================
-   Main Page
+   Testimonials / Community
+   ============================================================ */
+function Testimonials() {
+  const testimonials = [
+    {
+      name: 'Zeynep Kaya',
+      role: 'Üniversite Öğrencisi',
+      emoji: '🧙',
+      color: '#8b5cf6',
+      text: 'Arkadaşlarla online takılırken en çok eğlendiğim oyun. Türkçe kelime hazinesi inanılmaz.',
+    },
+    {
+      name: 'Emre Demir',
+      role: 'Yazılım Geliştirici',
+      emoji: '🥷',
+      color: '#f43f5e',
+      text: 'Skribbl\'i bırakıp buna geçtik. Arayüz çok daha modern, bot desteği harika.',
+    },
+    {
+      name: 'Ayşe Yıldız',
+      role: 'Öğretmen',
+      emoji: '🐱',
+      color: '#f59e0b',
+      text: 'Sınıfımla online ders sonunda oynuyoruz. Kategoriler çok zengin, çocuklar bayılıyor.',
+    },
+  ];
+
+  return (
+    <section id="topluluk" className="relative z-10 mx-auto max-w-6xl px-6 py-28">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+        className="mb-14 text-center"
+      >
+        <motion.div variants={fadeUp} custom={0} className="mb-4 flex justify-center">
+          <span className="chip">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Topluluk
+          </span>
+        </motion.div>
+        <motion.h2
+          variants={fadeUp}
+          custom={0.06}
+          className="text-4xl font-extrabold tracking-tight text-slate-50 sm:text-5xl"
+        >
+          Oyuncular <span className="text-gradient">Ne Diyor?</span>
+        </motion.h2>
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+        className="grid md:grid-cols-3 gap-4"
+      >
+        {testimonials.map((t, i) => (
+          <motion.div key={t.name} variants={fadeUp} custom={i * 0.08}>
+            <TiltCard
+              className="rounded-3xl p-6 h-full flex flex-col"
+              glowColor={`${t.color}26`}
+              tiltStrength={4}
+            >
+              <div className="mb-4 text-2xl opacity-20 leading-none">&ldquo;</div>
+              <p className="text-sm leading-relaxed text-slate-300 mb-6 flex-1">
+                {t.text}
+              </p>
+              <div className="flex items-center gap-3 pt-4 border-t border-white/[0.05]">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
+                  style={{
+                    background: `linear-gradient(135deg, ${t.color}40, ${t.color}70)`,
+                    boxShadow: `0 0 12px ${t.color}30`,
+                  }}
+                >
+                  {t.emoji}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-slate-100">{t.name}</div>
+                  <div className="text-xs text-slate-500">{t.role}</div>
+                </div>
+              </div>
+            </TiltCard>
+          </motion.div>
+        ))}
+      </motion.div>
+    </section>
+  );
+}
+
+/* ============================================================
+   Local helpers
    ============================================================ */
 function loadSavedPlayer() {
   if (typeof window === 'undefined') return null;
@@ -1138,11 +1485,276 @@ function savePlayer(name: string, avatarId: string, color: string) {
   } catch { /* quota exceeded */ }
 }
 
+/* ============================================================
+   Player Setup Card — the main interactive form
+   ============================================================ */
+function PlayerSetup({
+  playerName,
+  setPlayerName,
+  roomCode,
+  setRoomCode,
+  selectedAvatar,
+  setSelectedAvatar,
+  selectedColor,
+  setSelectedColor,
+  hasSaved,
+  onCreate,
+  onJoin,
+}: {
+  playerName: string;
+  setPlayerName: (v: string) => void;
+  roomCode: string;
+  setRoomCode: (v: string) => void;
+  selectedAvatar: typeof AVATAR_CHARACTERS[number];
+  setSelectedAvatar: (v: typeof AVATAR_CHARACTERS[number]) => void;
+  selectedColor: string;
+  setSelectedColor: (v: string) => void;
+  hasSaved: boolean;
+  onCreate: () => void;
+  onJoin: () => void;
+}) {
+  const [joinOpen, setJoinOpen] = useState(false);
+  const nameReady = playerName.trim().length > 0;
+  const joinReady = nameReady && roomCode.trim().length >= 4;
+
+  return (
+    <TiltCard
+      className="rounded-3xl p-6 sm:p-7 relative"
+      glowColor={`${selectedColor}20`}
+      tiltStrength={3}
+    >
+      {/* Saved indicator */}
+      {hasSaved && (
+        <div className="absolute top-4 right-4 flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-[10px] font-semibold text-emerald-400">
+          <span className="h-1 w-1 rounded-full bg-emerald-400" />
+          Kayıtlı
+        </div>
+      )}
+
+      <div className="space-y-5">
+        {/* Name input — the centerpiece */}
+        <div>
+          <label className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em]">
+              Oyuncu Adın
+            </span>
+            <span className="text-[10px] text-slate-600 tabular-nums">
+              {playerName.length}/20
+            </span>
+          </label>
+          <div className="relative">
+            <motion.div
+              layout
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl flex items-center justify-center text-xl z-10"
+              style={{
+                background: `linear-gradient(135deg, ${selectedColor}35, ${selectedColor}70)`,
+                boxShadow: `0 4px 18px ${selectedColor}30, inset 0 1px 0 rgba(255,255,255,0.1)`,
+              }}
+            >
+              {selectedAvatar.emoji}
+            </motion.div>
+            <input
+              type="text"
+              autoComplete="off"
+              placeholder="örn: Ahmet"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value.slice(0, 20))}
+              maxLength={20}
+              className={cn(
+                'w-full pl-[64px] pr-4 h-14 rounded-2xl',
+                'bg-white/[0.04] border',
+                'text-lg font-semibold text-slate-50',
+                'placeholder:text-slate-700 placeholder:font-normal placeholder:italic',
+                'focus:outline-none transition-all duration-300',
+                nameReady
+                  ? 'border-white/[0.12] focus:border-indigo-400/50'
+                  : 'border-white/[0.08] focus:border-white/20'
+              )}
+              style={nameReady ? {
+                boxShadow: `0 0 0 1px ${selectedColor}22, 0 0 24px ${selectedColor}15`,
+              } : undefined}
+            />
+          </div>
+        </div>
+
+        {/* Avatar picker — compact, premium */}
+        <div>
+          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em] mb-2.5">
+            Karakter Seç
+          </div>
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+            {AVATAR_CHARACTERS.map((avatar, i) => {
+              const active = selectedAvatar.id === avatar.id;
+              return (
+                <motion.button
+                  key={avatar.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 * i, duration: 0.3, ease: EASE }}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setSelectedAvatar(avatar);
+                    setSelectedColor(avatar.color);
+                  }}
+                  className={cn(
+                    'relative flex flex-col items-center gap-1.5 rounded-2xl p-2.5 sm:p-3 transition-all duration-300',
+                    active
+                      ? 'bg-white/[0.06]'
+                      : 'bg-white/[0.02] hover:bg-white/[0.04]'
+                  )}
+                >
+                  {active && (
+                    <motion.div
+                      layoutId="avatar-active-ring"
+                      className="absolute inset-0 rounded-2xl border-2"
+                      style={{ borderColor: avatar.color }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <div
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-lg relative"
+                    style={{
+                      background: `linear-gradient(135deg, ${avatar.color}30, ${avatar.color}60)`,
+                      boxShadow: active ? `0 0 18px ${avatar.color}50` : 'none',
+                    }}
+                  >
+                    {avatar.emoji}
+                  </div>
+                  <span className={cn(
+                    'text-[9px] sm:text-[10px] font-semibold transition-colors relative',
+                    active ? 'text-slate-200' : 'text-slate-500'
+                  )}>
+                    {avatar.name}
+                  </span>
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Primary CTA — Create Room */}
+        <div className="relative">
+          <motion.button
+            whileHover={nameReady ? { scale: 1.01, y: -1 } : undefined}
+            whileTap={nameReady ? { scale: 0.985 } : undefined}
+            onClick={onCreate}
+            disabled={!nameReady}
+            className={cn(
+              'group relative w-full overflow-hidden rounded-2xl h-14 flex items-center justify-center gap-2 text-base font-bold transition-all duration-300',
+              nameReady
+                ? 'text-white cursor-pointer'
+                : 'bg-white/[0.04] border border-white/[0.08] text-slate-500 cursor-not-allowed'
+            )}
+            style={nameReady ? {
+              background: `linear-gradient(135deg, ${selectedColor}, ${selectedColor}cc)`,
+              boxShadow: `0 10px 30px ${selectedColor}35, 0 4px 12px ${selectedColor}25, inset 0 1px 0 rgba(255,255,255,0.2)`,
+            } : undefined}
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              {nameReady ? (
+                <>
+                  Yeni Oda Oluştur
+                  <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </>
+              ) : (
+                <>
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                  </svg>
+                  Önce adını yaz
+                </>
+              )}
+            </span>
+            {nameReady && (
+              <motion.span
+                className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-20deg] pointer-events-none"
+                animate={{ x: ['0%', '500%'] }}
+                transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 2, ease: 'easeInOut' }}
+              />
+            )}
+          </motion.button>
+        </div>
+
+        {/* Join collapse */}
+        <div className="relative">
+          <div className="flex items-center gap-3 my-1">
+            <div className="h-px flex-1 bg-white/[0.06]" />
+            <button
+              onClick={() => setJoinOpen((v) => !v)}
+              className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.12em] hover:text-slate-300 transition-colors flex items-center gap-1.5"
+            >
+              Oda kodu ile katıl
+              <motion.svg
+                animate={{ rotate: joinOpen ? 180 : 0 }}
+                transition={{ duration: 0.25 }}
+                className="w-3 h-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </motion.svg>
+            </button>
+            <div className="h-px flex-1 bg-white/[0.06]" />
+          </div>
+
+          <AnimatePresence>
+            {joinOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25, ease: EASE }}
+                className="overflow-hidden"
+              >
+                <div className="pt-2 flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Oda kodu"
+                    value={roomCode}
+                    onChange={(e) => setRoomCode(e.target.value.toUpperCase().slice(0, 6))}
+                    maxLength={6}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && joinReady) onJoin(); }}
+                    className="flex-1 px-4 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white font-mono tracking-[0.2em] uppercase text-sm placeholder:text-slate-700 placeholder:normal-case placeholder:tracking-normal focus:outline-none focus:border-indigo-400/40 transition-colors"
+                  />
+                  <motion.button
+                    whileHover={joinReady ? { scale: 1.02 } : undefined}
+                    whileTap={joinReady ? { scale: 0.97 } : undefined}
+                    onClick={onJoin}
+                    disabled={!joinReady}
+                    className={cn(
+                      'h-11 px-5 rounded-xl text-sm font-bold transition-all',
+                      joinReady
+                        ? 'bg-white text-slate-900 shadow-[0_4px_16px_rgba(255,255,255,0.15)] hover:shadow-[0_6px_20px_rgba(255,255,255,0.22)]'
+                        : 'bg-white/[0.04] border border-white/[0.08] text-slate-500 cursor-not-allowed'
+                    )}
+                  >
+                    Katıl
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </TiltCard>
+  );
+}
+
+/* ============================================================
+   Main Page
+   ============================================================ */
 export default function HomePage() {
   const router = useRouter();
   const spotlight = useSpotlight();
 
   const saved = useRef(loadSavedPlayer());
+  const hasSaved = !!saved.current?.name;
+
   const [playerName, setPlayerName] = useState(saved.current?.name || '');
   const [roomCode, setRoomCode] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(
@@ -1152,7 +1764,7 @@ export default function HomePage() {
     () => saved.current?.color || AVATAR_CHARACTERS[0].color
   );
 
-  const handleJoin = () => {
+  const handleJoin = useCallback(() => {
     if (!playerName.trim() || !roomCode.trim()) return;
     savePlayer(playerName.trim(), selectedAvatar.id, selectedColor);
     const params = new URLSearchParams({
@@ -1160,9 +1772,9 @@ export default function HomePage() {
       color: selectedColor,
     });
     router.push(`/oda/${roomCode.toUpperCase()}?${params}`);
-  };
+  }, [playerName, roomCode, selectedAvatar.id, selectedColor, router]);
 
-  const handleCreate = () => {
+  const handleCreate = useCallback(() => {
     if (!playerName.trim()) return;
     savePlayer(playerName.trim(), selectedAvatar.id, selectedColor);
     const params = new URLSearchParams({
@@ -1170,358 +1782,252 @@ export default function HomePage() {
       color: selectedColor,
     });
     router.push(`/oda/olustur?${params}`);
-  };
+  }, [playerName, selectedAvatar.id, selectedColor, router]);
+
+  const [liveCount, setLiveCount] = useState<number | null>(null);
+  useEffect(() => {
+    setLiveCount(140 + Math.floor(Math.random() * 80));
+  }, []);
 
   return (
     <div className="relative min-h-screen" onMouseMove={spotlight.onMove}>
-      {/* Spotlight */}
+      <AuroraBackground />
+
+      {/* Spotlight cursor glow */}
       <motion.div
         className="pointer-events-none fixed inset-0 z-0"
         style={{ background: spotlight.bg }}
       />
-      {/* Grid */}
-      <div className="pointer-events-none fixed inset-0 bg-grid opacity-60" />
 
-      {/* Top-right quick actions: profile link */}
-      <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
-        <a
-          href="/profil"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 backdrop-blur hover:bg-white/[0.08] text-xs font-medium text-white/70 hover:text-white transition-all"
-          title="Profilim"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-          Profilim
-        </a>
-      </div>
+      <TopNav />
 
-      {/* ===== HERO (Split Layout) ===== */}
-      <section className="relative flex min-h-screen items-center overflow-hidden px-6 py-16 lg:py-0">
-        {/* Radial glow blobs */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <motion.div
-            animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-indigo-600/20 blur-[100px]"
-          />
-          <motion.div
-            animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.2, 0.1] }}
-            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-            className="absolute -bottom-32 -right-32 h-[500px] w-[500px] rounded-full bg-cyan-500/15 blur-[100px]"
-          />
-        </div>
-
-        <div className="relative z-10 mx-auto w-full max-w-7xl grid lg:grid-cols-2 gap-12 lg:gap-16 items-stretch">
-          {/* LEFT: Hero + Form */}
-          <motion.div initial="hidden" animate="visible" className="flex flex-col justify-center">
-            {/* Badge */}
-            <motion.div variants={fadeUp} custom={0} className="mb-6 flex justify-start">
-              <span className="chip">
+      {/* ===== HERO ===== */}
+      <section id="oyna" className="relative z-10 pt-32 pb-16 lg:pt-36 lg:pb-24 px-6">
+        <div className="relative mx-auto w-full max-w-7xl grid lg:grid-cols-[1.15fr_1fr] gap-12 lg:gap-16 items-center">
+          {/* LEFT: Hero copy + Form */}
+          <motion.div initial="hidden" animate="visible" className="flex flex-col justify-center max-w-2xl">
+            {/* Live players chip */}
+            <motion.div variants={fadeUp} custom={0} className="mb-7 flex">
+              <a
+                href="#topluluk"
+                className="group inline-flex items-center gap-2 rounded-full bg-white/[0.03] border border-white/[0.08] hover:border-white/[0.15] px-3 py-1.5 text-xs font-medium text-slate-300 transition-all backdrop-blur"
+              >
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                 </span>
-                Multiplayer Çizim Oyunu
-              </span>
+                <span className="text-slate-200 font-semibold tabular-nums">
+                  {liveCount ?? '—'}
+                </span>
+                <span className="text-slate-500">oyuncu şu an aktif</span>
+                <svg className="w-3 h-3 text-slate-500 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
             </motion.div>
 
-            {/* Title */}
+            {/* Headline */}
             <motion.h1
               variants={fadeUp}
               custom={0.06}
-              className="mb-2 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-50 sm:text-5xl xl:text-6xl"
+              className="mb-4 text-[44px] sm:text-6xl xl:text-7xl font-extrabold leading-[0.95] tracking-[-0.035em] text-slate-50"
             >
-              <span className="text-gradient text-[1.15em]">Karalama</span>
+              Çiz, Tahmin Et,{' '}
+              <span className="relative inline-block">
+                <span className="text-gradient">Eğlen.</span>
+                <motion.svg
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 1.2, delay: 0.8, ease: EASE }}
+                  className="absolute -bottom-3 left-0 w-full"
+                  viewBox="0 0 220 10"
+                  fill="none"
+                >
+                  <motion.path
+                    d="M 4 6 Q 110 -2 216 6"
+                    stroke="url(#underlineGrad)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                  <defs>
+                    <linearGradient id="underlineGrad" x1="0" y1="0" x2="220" y2="0">
+                      <stop offset="0" stopColor="#6366f1" />
+                      <stop offset="0.5" stopColor="#22d3ee" />
+                      <stop offset="1" stopColor="#10b981" />
+                    </linearGradient>
+                  </defs>
+                </motion.svg>
+              </span>
             </motion.h1>
-            <motion.p
-              variants={fadeUp}
-              custom={0.1}
-              className="mb-5 text-xl font-semibold text-slate-300 sm:text-2xl"
-            >
-              Çiz, Tahmin Et ve Eğlen!
-            </motion.p>
 
+            {/* Subtitle */}
             <motion.p
               variants={fadeUp}
               custom={0.12}
-              className="mb-8 max-w-md text-base leading-relaxed text-slate-400 sm:text-lg"
+              className="mb-8 max-w-lg text-base sm:text-lg leading-relaxed text-slate-400"
             >
-              Oda oluştur, linki paylaş, saniyeler içinde oynamaya başla.
-              Kayıt yok, indirme yok, tamamen <span className="text-slate-200 font-medium">ücretsiz</span>.
+              Arkadaşlarınla saniyeler içinde oyna. Kayıt yok, indirme yok, reklam yok — tamamen{' '}
+              <span className="text-slate-200 font-semibold">ücretsiz</span>.
             </motion.p>
 
-            {/* Player Setup Card */}
-            <motion.div variants={scaleUp} custom={0.2} className="max-w-md">
-              <TiltCard className="rounded-3xl p-5 sm:p-6" glowColor="rgba(99,102,241,0.08)">
-                <div className="space-y-3.5">
-                  {/* Avatar character selection */}
-                  <div>
-                    <div className="text-xs font-medium text-slate-500 mb-2.5">Avatarını Seç</div>
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      {AVATAR_CHARACTERS.map((avatar, i) => (
-                        <motion.button
-                          key={avatar.id}
-                          initial={{ opacity: 0, y: 12 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.3 + i * 0.08, duration: 0.4, ease: EASE }}
-                          onClick={() => {
-                            setSelectedAvatar(avatar);
-                            setSelectedColor(avatar.color);
-                          }}
-                          className={cn(
-                            'relative flex flex-col items-center gap-1 rounded-xl p-2 transition-all duration-300',
-                            selectedAvatar.id === avatar.id
-                              ? 'bg-white/[0.08] scale-105'
-                              : 'bg-white/[0.02] hover:bg-white/[0.05] hover:scale-105'
-                          )}
-                          style={{
-                            outlineColor: selectedAvatar.id === avatar.id ? avatar.color : 'transparent',
-                            outlineWidth: selectedAvatar.id === avatar.id ? 2 : 0,
-                            outlineStyle: 'solid',
-                            outlineOffset: -1,
-                          }}
-                        >
-                          <div
-                            className="relative w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all duration-300"
-                            style={{
-                              background: `linear-gradient(135deg, ${avatar.color}30, ${avatar.color}60)`,
-                              boxShadow: selectedAvatar.id === avatar.id
-                                ? `0 0 16px ${avatar.color}40`
-                                : 'none',
-                            }}
-                          >
-                            {avatar.emoji}
-                            {selectedAvatar.id === avatar.id && (
-                              <motion.div
-                                layoutId="avatar-ring"
-                                className="absolute inset-0 rounded-full border-2"
-                                style={{ borderColor: avatar.color }}
-                                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                              />
-                            )}
-                          </div>
-                          <span className={cn(
-                            'text-[9px] font-medium transition-colors',
-                            selectedAvatar.id === avatar.id ? 'text-slate-200' : 'text-slate-500'
-                          )}>
-                            {avatar.name}
-                          </span>
-                        </motion.button>
-                      ))}
-                    </div>
-                  </div>
+            {/* Setup Card */}
+            <motion.div variants={scaleUp} custom={0.18} className="max-w-md w-full">
+              <PlayerSetup
+                playerName={playerName}
+                setPlayerName={setPlayerName}
+                roomCode={roomCode}
+                setRoomCode={setRoomCode}
+                selectedAvatar={selectedAvatar}
+                setSelectedAvatar={setSelectedAvatar}
+                selectedColor={selectedColor}
+                setSelectedColor={setSelectedColor}
+                hasSaved={hasSaved}
+                onCreate={handleCreate}
+                onJoin={handleJoin}
+              />
+            </motion.div>
 
-                  {/* Name input */}
-                  <div className="flex items-center gap-3">
-                    <motion.div
-                      layout
-                      className="w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-base transition-all duration-300"
-                      style={{
-                        background: `linear-gradient(135deg, ${selectedColor}40, ${selectedColor}80)`,
-                        boxShadow: `0 0 12px ${selectedColor}30`,
-                      }}
-                    >
-                      {selectedAvatar.emoji}
-                    </motion.div>
-                    <Input
-                      placeholder="Adını gir..."
-                      value={playerName}
-                      onChange={(e) => setPlayerName(e.target.value)}
-                      maxLength={20}
-                      className="flex-1"
-                    />
-                  </div>
-
-                  {/* Divider */}
-                  <div className="relative">
-                    <div className="h-px bg-white/[0.06]" />
-                    <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0c1222] px-3 text-[10px] font-medium text-slate-600 uppercase tracking-wider">
-                      veya
-                    </span>
-                  </div>
-
-                  {/* Join */}
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Oda kodu"
-                      value={roomCode}
-                      onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                      maxLength={6}
-                      className="font-mono tracking-[0.15em] uppercase flex-1 !py-2.5 text-sm"
-                    />
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.96 }}
-                      onClick={handleJoin}
-                      disabled={!playerName.trim() || roomCode.length < 4}
-                      className="rounded-xl bg-white/[0.06] border border-white/[0.1] px-5 py-2.5 text-sm font-semibold text-slate-300 transition-all hover:text-white hover:border-white/[0.2] hover:bg-white/[0.08] disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      Katıl
-                    </motion.button>
-                  </div>
-
-                  {/* Create */}
-                  <motion.button
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={handleCreate}
-                    disabled={!playerName.trim()}
-                    className="group relative w-full flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed"
-                    style={{
-                      background: `linear-gradient(135deg, ${selectedColor}, ${selectedColor}cc)`,
-                      boxShadow: `0 8px 32px ${selectedColor}30, 0 2px 8px ${selectedColor}20`,
-                    }}
-                  >
-                    <span className="relative z-10 flex items-center gap-2">
-                      Yeni Oda Oluştur
-                      <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </span>
-                    <motion.div
-                      className="absolute inset-0 z-0"
-                      animate={{
-                        background: [
-                          'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0) 60%, transparent 100%)',
-                          'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0) 60%, transparent 100%)',
-                        ],
-                        backgroundPosition: ['-200% center', '200% center'],
-                        backgroundSize: ['200% 100%', '200% 100%'],
-                      }}
-                      transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1 }}
-                    />
-                  </motion.button>
-                </div>
-              </TiltCard>
+            {/* Trust badges */}
+            <motion.div
+              variants={fadeUp}
+              custom={0.3}
+              className="mt-6 flex items-center gap-4 text-xs text-slate-500"
+            >
+              <div className="flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                Güvenli bağlantı
+              </div>
+              <div className="flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                &lt;100ms gecikme
+              </div>
             </motion.div>
           </motion.div>
 
-          {/* RIGHT: Animated Game Preview */}
+          {/* RIGHT: Animated Preview */}
           <HeroDemo />
         </div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.3 }}
-          transition={{ delay: 1.6, duration: 0.6 }}
-          className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2"
-        >
-          <div className="flex h-9 w-5 items-start justify-center rounded-full border border-slate-600/30 p-1">
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-              className="h-1.5 w-1 rounded-full bg-slate-400"
-            />
-          </div>
-        </motion.div>
       </section>
 
-      {/* ===== GAME DEMO (Animated) ===== */}
+      {/* ===== MARQUEE ===== */}
+      <Marquee />
+
+      {/* ===== STATS ===== */}
+      <StatsRow />
+
+      {/* ===== GAME DEMO ===== */}
       <GameDemo />
 
-      {/* ===== FEATURES ===== */}
-      <section className="relative z-10 mx-auto max-w-5xl px-6 py-24">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-80px' }}
-          className="mb-16 text-center"
-        >
-          <motion.div variants={fadeUp} custom={0} className="mb-4 flex justify-center">
-            <span className="chip">Özellikler</span>
-          </motion.div>
-          <motion.h2
-            variants={fadeUp}
-            custom={0.06}
-            className="mb-3 text-3xl font-extrabold tracking-tight text-slate-50 sm:text-4xl"
-          >
-            Neden <span className="text-gradient">Karalama?</span>
-          </motion.h2>
-          <motion.p
-            variants={fadeUp}
-            custom={0.12}
-            className="mx-auto max-w-md text-sm text-slate-400"
-          >
-            Skribbl.io&apos;dan ilham aldık, daha güzel, daha hızlı ve tamamen Türkçe yaptık.
-          </motion.p>
-        </motion.div>
+      {/* ===== BENTO FEATURES ===== */}
+      <BentoFeatures />
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f, i) => (
-            <motion.div
-              key={f.title}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeUp}
-              custom={i * 0.06}
-            >
-              <TiltCard className="rounded-2xl p-5 h-full" glowColor={f.glow}>
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] text-indigo-400">
-                  {f.icon}
-                </div>
-                <h3 className="mb-1.5 text-sm font-semibold text-slate-100">{f.title}</h3>
-                <p className="text-xs leading-relaxed text-slate-400">{f.desc}</p>
-              </TiltCard>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      {/* ===== TESTIMONIALS ===== */}
+      <Testimonials />
 
-      {/* ===== CTA ===== */}
-      <section className="relative z-10 mx-auto max-w-3xl px-6 pb-32">
+      {/* ===== BIG CTA ===== */}
+      <section className="relative z-10 mx-auto max-w-5xl px-6 pb-32 pt-8">
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-60px' }}
-          className="glass overflow-hidden rounded-3xl p-10 sm:p-14 text-center relative"
+          className="relative overflow-hidden rounded-[32px] p-10 sm:p-16 text-center"
+          style={{
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(34,211,238,0.06) 50%, rgba(16,185,129,0.08))',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
         >
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/[0.04] via-transparent to-cyan-500/[0.04]" />
+          {/* Animated orbs inside CTA */}
+          <motion.div
+            animate={{ x: [0, 40, 0], y: [0, -20, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute -top-20 -left-20 h-60 w-60 rounded-full bg-indigo-500/20 blur-3xl"
+          />
+          <motion.div
+            animate={{ x: [0, -30, 0], y: [0, 20, 0] }}
+            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-cyan-500/15 blur-3xl"
+          />
+
+          <motion.div variants={fadeUp} custom={0} className="relative mb-4 flex justify-center">
+            <span className="chip">
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
+              Hazır mısın?
+            </span>
+          </motion.div>
 
           <motion.h2
             variants={fadeUp}
-            custom={0}
-            className="relative mb-3 text-3xl font-extrabold tracking-tight text-slate-50 sm:text-4xl"
+            custom={0.06}
+            className="relative mb-4 text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-[-0.03em] text-slate-50"
           >
             Hadi <span className="text-gradient">Oynayalım!</span>
           </motion.h2>
 
           <motion.p
             variants={fadeUp}
-            custom={0.08}
-            className="relative mx-auto mb-8 max-w-md text-sm text-slate-400"
+            custom={0.12}
+            className="relative mx-auto mb-10 max-w-lg text-base text-slate-400 leading-relaxed"
           >
-            Arkadaşlarını topla, bir oda oluştur ve eğlenceye başla.
-            Tek gereken bir tarayıcı.
+            Arkadaşlarını topla, bir oda oluştur ve eğlenceye başla. Tek gereken bir tarayıcı.
           </motion.p>
 
-          <motion.div variants={fadeUp} custom={0.16} className="relative">
+          <motion.div variants={fadeUp} custom={0.2} className="relative flex items-center justify-center gap-3 flex-wrap">
             <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:shadow-indigo-500/30 active:scale-[0.97]"
+              onClick={() => {
+                document.getElementById('oyna')?.scrollIntoView({ behavior: 'smooth' });
+                setTimeout(() => {
+                  const input = document.querySelector<HTMLInputElement>('input[placeholder^="örn"]');
+                  input?.focus();
+                }, 600);
+              }}
+              className="group relative overflow-hidden inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-cyan-400 px-8 h-14 text-base font-bold text-white shadow-[0_12px_32px_rgba(99,102,241,0.35)] hover:shadow-[0_16px_40px_rgba(99,102,241,0.5)] transition-all active:scale-[0.98]"
             >
-              Yukarı Kaydır ve Başla
-              <svg
-                className="h-4 w-4 transition-transform group-hover:-translate-y-0.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
+              <span className="relative z-10 flex items-center gap-2">
+                Şimdi Oyna
+                <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </span>
+              <motion.span
+                className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-20deg]"
+                animate={{ x: ['0%', '500%'] }}
+                transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1.5, ease: 'easeInOut' }}
+              />
             </button>
+            <a
+              href="/profil"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white/[0.04] border border-white/[0.08] px-6 h-14 text-base font-semibold text-slate-200 hover:bg-white/[0.06] hover:border-white/[0.15] transition-all"
+            >
+              İstatistiklerim
+            </a>
           </motion.div>
         </motion.div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-white/[0.05] py-8 text-center">
-        <p className="text-xs text-slate-500">
-          Karalama &mdash; Arkadaşlarınla eğlencenin adresi
-        </p>
+      {/* ===== FOOTER ===== */}
+      <footer className="relative z-10 border-t border-white/[0.05] py-10">
+        <div className="mx-auto max-w-6xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 via-cyan-400 to-emerald-400 p-[1.5px]">
+              <div className="w-full h-full rounded-[7px] bg-[#04070d] flex items-center justify-center">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 18c4-8 12-10 16-4" stroke="#22d3ee" strokeWidth="2.2" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+            <span className="text-sm font-semibold text-slate-300">Karalama</span>
+            <span className="text-xs text-slate-600">— Arkadaşlarınla eğlencenin adresi</span>
+          </div>
+          <div className="flex items-center gap-4 text-xs text-slate-500">
+            <a href="#ozellikler" className="hover:text-slate-300 transition-colors">Özellikler</a>
+            <a href="#nasil" className="hover:text-slate-300 transition-colors">Oyun Akışı</a>
+            <a href="/profil" className="hover:text-slate-300 transition-colors">Profil</a>
+          </div>
+        </div>
       </footer>
     </div>
   );
