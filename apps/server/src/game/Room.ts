@@ -175,10 +175,32 @@ export class Room {
         this.currentTurnIndex = 0;
       }
 
-      // If drawer left, skip turn
+      // If drawer left, reveal the word then advance
       if (wasDrawer) {
         this.clearTimer();
-        this.advanceGame();
+        this.botController.clearAllTimers();
+
+        if (this.phase === 'DRAWING' || this.phase === 'PICKING') {
+          this.phase = 'ROUND_RESULT';
+          const scores: Record<string, number> = {};
+          const roundScoresObj: Record<string, number> = {};
+          for (const p of this.players.values()) {
+            scores[p.id] = p.score;
+          }
+          for (const [id, s] of this.roundScores.entries()) {
+            roundScoresObj[id] = s;
+          }
+          this.io.to(this.code).emit('game:roundEnd', {
+            word: this.currentWord ?? '',
+            scores,
+            roundScores: roundScoresObj,
+          });
+          setTimeout(() => {
+            this.advanceGame();
+          }, ROUND_RESULT_TIME * 1000);
+        } else {
+          this.advanceGame();
+        }
       }
     }
 
@@ -618,13 +640,6 @@ export class Room {
     const unrevealed: number[] = [];
     const chars = this.currentWord.split('');
     const currentRevealed: number[] = [];
-
-    for (let i = 0; i < chars.length; i++) {
-      if (chars[i] === ' ') continue;
-      if (this.hint.replace(/ /g, '')[i] !== '_') {
-        // Already revealed — find its actual position
-      }
-    }
 
     // Parse current hint to find unrevealed
     const hintChars = this.hint.split(' ').filter((c) => c !== '');

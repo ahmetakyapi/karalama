@@ -79,14 +79,6 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
         return;
       }
 
-      if (room.phase !== 'WAITING') {
-        socket.emit('room:error', {
-          code: 'GAME_IN_PROGRESS',
-          message: 'Oyun devam ediyor, yeni oyuncular katılamaz',
-        });
-        return;
-      }
-
       const player = room.addPlayer(socket, cleanName, cleanColor);
       manager.setSocketRoom(socket.id, room.code);
 
