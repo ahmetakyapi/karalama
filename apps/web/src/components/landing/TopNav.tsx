@@ -157,7 +157,7 @@ export function TopNav() {
             className="fixed inset-0 z-[65] flex flex-col justify-between bg-[#060912] px-6 pb-10 pt-28 md:hidden"
             initial={{ clipPath: 'circle(0% at calc(100% - 44px) 44px)' }}
             animate={{ clipPath: 'circle(150% at calc(100% - 44px) 44px)' }}
-            exit={{ clipPath: 'circle(0% at calc(100% - 44px) 44px)' }}
+            exit={{ clipPath: 'circle(0% at calc(100% - 44px) 44px)', transition: { duration: 0.6, ease: CURTAIN, delay: 0.1 } }}
             transition={{ duration: 0.8, ease: CURTAIN }}
           >
             <ul className="space-y-2">
@@ -168,7 +168,7 @@ export function TopNav() {
                     onClick={() => setOpen(false)}
                     initial={{ y: '110%' }}
                     animate={{ y: '0%' }}
-                    exit={{ y: '110%' }}
+                    exit={{ y: '110%', transition: { duration: 0.3, ease: CURTAIN } }}
                     transition={{ duration: 0.7, ease: EXPO, delay: 0.15 + i * 0.06 }}
                     className="flex items-baseline gap-4 py-1 font-display text-5xl font-extrabold tracking-[-0.04em] text-slate-50"
                   >
@@ -181,7 +181,7 @@ export function TopNav() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
+              exit={{ opacity: 0, transition: { duration: 0.2 } }}
               transition={{ duration: 0.6, ease: EXPO, delay: 0.45 }}
               className="space-y-6"
             >

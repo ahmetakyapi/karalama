@@ -72,9 +72,9 @@ export default function BentoFeatures() {
                     transition={{ duration: 2.2, ease: 'easeOut', delay: 0.3 }}
                   />
                   <motion.circle
-                    cx="260" cy="70" r="5"
+                    cx="30" cy="80" r="5"
                     fill="#22d3ee"
-                    animate={{ cx: [30, 260, 30], cy: [80, 70, 80] }}
+                    animate={{ x: [0, 230, 0], y: [0, -10, 0] }}
                     transition={{ duration: 4.4, repeat: Infinity, ease: 'easeInOut' }}
                   />
                 </svg>

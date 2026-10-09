@@ -371,7 +371,7 @@ export function GameOverScreen() {
           initial={{ opacity: 0, y: -30, scale: 0.8 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.7, ease: easeCurve as unknown as EaseCurve }}
-          className="text-5xl sm:text-6xl font-extrabold text-center mb-2 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 bg-clip-text text-transparent drop-shadow-lg"
+          className="font-display text-6xl sm:text-7xl font-extrabold tracking-[-0.05em] text-center mb-2 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 bg-clip-text text-transparent drop-shadow-lg"
         >
           Oyun Bitti!
         </motion.h1>

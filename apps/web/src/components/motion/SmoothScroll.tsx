@@ -43,6 +43,12 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       cancelAnimationFrame(raf);
       lenis.destroy();
       lenisRef.current = null;
+      // Lenis may re-tag <html> from a pending internal timeout after destroy
+      setTimeout(() => {
+        if (lenisRef.current) return;
+        const html = document.documentElement;
+        html.className = html.className.replace(/\blenis(-\w+)?\b/g, '').replace(/\s+/g, ' ').trim();
+      }, 600);
     };
   }, [enabled]);
 
