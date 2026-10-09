@@ -12,11 +12,23 @@ import {
   categories,
 } from '@karalama/shared';
 import { cn } from '@/lib/utils';
-import { easeCurve } from '@/styles/animations';
+import { InkLoader } from '@/components/ui/InkLoader';
+import { MaskText } from '@/components/motion/primitives';
+import { useTransitionRouter } from '@/components/motion/PageTransition';
+import { EXPO } from '@/components/motion/hooks';
+
+const item = {
+  hidden: { opacity: 0, y: 28 },
+  visible: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.9, ease: EXPO, delay: 0.25 + i * 0.07 } }),
+};
+
+function fill(v: number, min: number, max: number) {
+  return { '--fill': `${((v - min) / (max - min)) * 100}%` } as React.CSSProperties;
+}
 
 export default function CreateRoomPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-accent-indigo border-t-transparent rounded-full animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><InkLoader /></div>}>
       <CreateRoomContent />
     </Suspense>
   );
@@ -24,6 +36,7 @@ export default function CreateRoomPage() {
 
 function CreateRoomContent() {
   const router = useRouter();
+  const { navigate } = useTransitionRouter();
   const params = useSearchParams();
   const { socket } = useSocket();
   const store = useGameStore();
@@ -41,9 +54,9 @@ function CreateRoomContent() {
 
   useEffect(() => {
     if (store.roomCode) {
-      router.push(`/oda/${store.roomCode}`);
+      navigate(`/oda/${store.roomCode}`);
     }
-  }, [store.roomCode, router]);
+  }, [store.roomCode, navigate]);
 
   useEffect(() => {
     if (store.roomError) {
@@ -86,21 +99,34 @@ function CreateRoomContent() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center px-4">
-      <div className="absolute inset-0 pointer-events-none">
+    <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-24">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] w-[400px] h-[400px] bg-accent-indigo/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] bg-accent-emerald/10 rounded-full blur-[120px]" />
+        <div className="absolute inset-0 bg-grid opacity-30" />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: easeCurve }}
-        className="relative z-10 w-full max-w-lg"
+      <a
+        href="/"
+        className="group absolute left-5 top-6 z-10 inline-flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-slate-100 sm:left-8"
       >
-        <h1 className="text-3xl font-bold gradient-text text-center mb-8">
-          Oda Oluştur
-        </h1>
+        <span className="transition-transform duration-500 ease-expo group-hover:-translate-x-1">←</span>
+        Ana sayfa
+      </a>
+
+      <motion.div initial="hidden" animate="visible" className="relative z-10 w-full max-w-lg">
+        <motion.div variants={item} custom={-2} className="mb-4 flex items-center justify-center gap-3 font-mono text-[11px] uppercase tracking-[0.28em] text-slate-500">
+          <span className="text-[var(--marker)]">(01)</span>
+          <span className="h-px w-8 bg-slate-600" />
+          <span>{playerName} için yeni oda</span>
+        </motion.div>
+        <MaskText
+          as="h1"
+          play
+          delay={0.1}
+          parts={['Odanı', { text: 'kur.', className: 'text-gradient' }]}
+          className="mb-10 text-center font-display text-6xl sm:text-7xl font-extrabold tracking-[-0.05em] text-slate-50"
+        />
 
         {store.roomError && (
           <motion.div
@@ -113,12 +139,13 @@ function CreateRoomContent() {
           </motion.div>
         )}
 
-        <GlassCard className="p-6 space-y-6">
+        <motion.div variants={item} custom={0}>
+        <GlassCard className="p-6 sm:p-8 space-y-7">
           {/* Rounds */}
           <div>
-            <label className="flex justify-between text-sm text-white/50 mb-2">
+            <label className="flex items-end justify-between text-xs font-semibold uppercase tracking-[0.14em] text-white/50 mb-3">
               <span>Tur Sayısı</span>
-              <span className="text-white">{rounds}</span>
+              <span className="font-display text-xl font-bold text-white tabular-nums">{rounds}</span>
             </label>
             <input
               type="range"
@@ -126,15 +153,16 @@ function CreateRoomContent() {
               max={10}
               value={rounds}
               onChange={(e) => setRounds(Number(e.target.value))}
-              className="w-full accent-accent-indigo"
+              className="range"
+              style={fill(rounds, 1, 10)}
             />
           </div>
 
           {/* Draw Time */}
           <div>
-            <label className="flex justify-between text-sm text-white/50 mb-2">
+            <label className="flex items-end justify-between text-xs font-semibold uppercase tracking-[0.14em] text-white/50 mb-3">
               <span>Çizim Süresi</span>
-              <span className="text-white">{drawTime}s</span>
+              <span className="font-display text-xl font-bold text-white tabular-nums">{drawTime}s</span>
             </label>
             <input
               type="range"
@@ -143,15 +171,16 @@ function CreateRoomContent() {
               step={10}
               value={drawTime}
               onChange={(e) => setDrawTime(Number(e.target.value))}
-              className="w-full accent-accent-indigo"
+              className="range"
+              style={fill(drawTime, 30, 120)}
             />
           </div>
 
           {/* Max Players */}
           <div>
-            <label className="flex justify-between text-sm text-white/50 mb-2">
+            <label className="flex items-end justify-between text-xs font-semibold uppercase tracking-[0.14em] text-white/50 mb-3">
               <span>Maks Oyuncu</span>
-              <span className="text-white">{maxPlayers}</span>
+              <span className="font-display text-xl font-bold text-white tabular-nums">{maxPlayers}</span>
             </label>
             <input
               type="range"
@@ -159,7 +188,8 @@ function CreateRoomContent() {
               max={12}
               value={maxPlayers}
               onChange={(e) => setMaxPlayers(Number(e.target.value))}
-              className="w-full accent-accent-indigo"
+              className="range"
+              style={fill(maxPlayers, 2, 12)}
             />
           </div>
 
@@ -170,18 +200,22 @@ function CreateRoomContent() {
             </label>
             <div className="flex flex-wrap gap-2">
               {Object.entries(categories).map(([key, cat]) => (
-                <button
+                <motion.button
                   key={key}
+                  type="button"
+                  whileTap={{ scale: 0.92 }}
+                  whileHover={{ y: -2 }}
+                  aria-pressed={selectedCategories.includes(key)}
                   onClick={() => toggleCategory(key)}
                   className={cn(
-                    'px-3 py-1.5 rounded-lg text-sm transition-all duration-200',
+                    'px-3 py-1.5 rounded-full text-sm transition-colors duration-300',
                     selectedCategories.includes(key)
-                      ? 'bg-accent-indigo/20 border border-accent-indigo/50 text-accent-indigo'
-                      : 'bg-white/[0.03] border border-white/[0.08] text-white/50 hover:text-white/70'
+                      ? 'bg-[var(--marker)] border border-transparent text-[#04070d] font-semibold'
+                      : 'bg-white/[0.03] border border-white/[0.08] text-white/50 hover:text-white/80 hover:border-white/20'
                   )}
                 >
                   {cat.emoji} {cat.name}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
@@ -217,9 +251,10 @@ function CreateRoomContent() {
             disabled={selectedCategories.length === 0 && !customWordsText.trim()}
             className="w-full"
           >
-            Oda Oluştur
+            Oda Oluştur →
           </Button>
         </GlassCard>
+        </motion.div>
       </motion.div>
     </div>
   );

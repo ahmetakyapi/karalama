@@ -2,38 +2,29 @@
 
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { fadeUp, TiltCard, Counter } from './common';
+import { TiltCard, Counter } from './common';
+import { SectionHeading } from '@/components/motion/primitives';
+import { EXPO } from '@/components/motion/hooks';
+
+const reveal = {
+  hidden: { opacity: 0, y: 80, clipPath: 'inset(20% 6% 0% 6% round 28px)' },
+  visible: (d: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    clipPath: 'inset(0% 0% 0% 0% round 24px)',
+    transition: { duration: 1.1, ease: EXPO, delay: d },
+  }),
+};
 
 export default function BentoFeatures() {
   return (
-    <section id="ozellikler" className="relative z-10 mx-auto max-w-6xl px-6 py-28">
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-80px' }}
-        className="mb-14 text-center"
-      >
-        <motion.div variants={fadeUp} custom={0} className="mb-4 flex justify-center">
-          <span className="chip">
-            <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" />
-            Özellikler
-          </span>
-        </motion.div>
-        <motion.h2
-          variants={fadeUp}
-          custom={0.06}
-          className="mb-3 text-4xl font-extrabold tracking-tight text-slate-50 sm:text-5xl"
-        >
-          Neden <span className="text-gradient">Karalama?</span>
-        </motion.h2>
-        <motion.p
-          variants={fadeUp}
-          custom={0.12}
-          className="mx-auto max-w-lg text-base text-slate-400"
-        >
-          Her detay, mükemmel bir oyun gecesi için düşünüldü.
-        </motion.p>
-      </motion.div>
+    <section id="ozellikler" className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6 py-24 sm:py-36">
+      <SectionHeading
+        index="02"
+        eyebrow="Özellikler"
+        title={['Neden', { text: 'Karalama?', className: 'text-gradient' }]}
+        desc="Her detay, mükemmel bir oyun gecesi için düşünüldü. Hızlı, Türkçe, ücretsiz."
+      />
 
       <motion.div
         initial="hidden"
@@ -42,7 +33,7 @@ export default function BentoFeatures() {
         className="grid grid-cols-1 md:grid-cols-6 gap-4 auto-rows-[minmax(200px,auto)]"
       >
         {/* 1. Real-time drawing - big */}
-        <motion.div variants={fadeUp} custom={0} className="md:col-span-4 md:row-span-2 min-h-[320px]">
+        <motion.div variants={reveal} custom={0} className="md:col-span-4 md:row-span-2 min-h-[320px]">
           <TiltCard className="rounded-3xl p-8 h-full relative" glowColor="rgba(99,102,241,0.15)">
             <div className="flex flex-col h-full">
               <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
@@ -50,7 +41,7 @@ export default function BentoFeatures() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-slate-100 mb-2 tracking-tight">
+              <h3 className="font-display text-3xl sm:text-4xl font-bold text-slate-50 mb-2 tracking-[-0.035em]">
                 Gerçek Zamanlı Çizim
               </h3>
               <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-md">
@@ -93,14 +84,14 @@ export default function BentoFeatures() {
         </motion.div>
 
         {/* 2. 1070+ words */}
-        <motion.div variants={fadeUp} custom={0.08} className="md:col-span-2">
+        <motion.div variants={reveal} custom={0.08} className="md:col-span-2">
           <TiltCard className="rounded-3xl p-6 h-full" glowColor="rgba(34,211,238,0.15)">
             <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400">
               <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502" />
               </svg>
             </div>
-            <div className="text-3xl font-extrabold text-slate-100 mb-1 tracking-tight">
+            <div className="font-display text-5xl font-extrabold text-slate-50 mb-1 tracking-[-0.05em]">
               <Counter to={1070} suffix="+" />
             </div>
             <div className="text-sm font-semibold text-slate-300 mb-1">Türkçe Kelime</div>
@@ -111,14 +102,14 @@ export default function BentoFeatures() {
         </motion.div>
 
         {/* 3. Mobile friendly */}
-        <motion.div variants={fadeUp} custom={0.12} className="md:col-span-2">
+        <motion.div variants={reveal} custom={0.12} className="md:col-span-2">
           <TiltCard className="rounded-3xl p-6 h-full" glowColor="rgba(16,185,129,0.15)">
             <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
               <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
               </svg>
             </div>
-            <h3 className="text-base font-semibold text-slate-100 mb-1.5">Mobil Uyumlu</h3>
+            <h3 className="font-display text-xl font-bold tracking-[-0.02em] text-slate-50 mb-1.5">Mobil Uyumlu</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               Telefondan parmağınla çiz, tabletten oyna. Her cihazda aynı deneyim.
             </p>
@@ -126,7 +117,7 @@ export default function BentoFeatures() {
         </motion.div>
 
         {/* 4. Instant start */}
-        <motion.div variants={fadeUp} custom={0.16} className="md:col-span-3">
+        <motion.div variants={reveal} custom={0.16} className="md:col-span-3">
           <TiltCard className="rounded-3xl p-6 h-full relative overflow-hidden" glowColor="rgba(245,158,11,0.15)">
             <div className="flex items-start justify-between">
               <div>
@@ -135,7 +126,7 @@ export default function BentoFeatures() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-100 mb-1.5">Anında Başla</h3>
+                <h3 className="font-display text-xl font-bold tracking-[-0.02em] text-slate-50 mb-1.5">Anında Başla</h3>
                 <p className="text-xs text-slate-400 leading-relaxed max-w-[240px]">
                   Kayıt yok, indirme yok. İsmini yaz, linki paylaş, oyna.
                 </p>
@@ -159,7 +150,7 @@ export default function BentoFeatures() {
         </motion.div>
 
         {/* 5. Hint system */}
-        <motion.div variants={fadeUp} custom={0.2} className="md:col-span-3">
+        <motion.div variants={reveal} custom={0.2} className="md:col-span-3">
           <TiltCard className="rounded-3xl p-6 h-full" glowColor="rgba(168,85,247,0.15)">
             <div className="flex items-start gap-4">
               <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl border border-violet-500/20 bg-violet-500/10 text-violet-400">
@@ -168,7 +159,7 @@ export default function BentoFeatures() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-slate-100 mb-1.5">Akıllı İpuçları</h3>
+                <h3 className="font-display text-xl font-bold tracking-[-0.02em] text-slate-50 mb-1.5">Akıllı İpuçları</h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
                   Harfler zamanla açılır. &quot;Yaklaştın&quot; uyarıları seni yönlendirir.
                 </p>

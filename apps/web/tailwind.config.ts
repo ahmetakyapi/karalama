@@ -7,6 +7,8 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['var(--font-display)', 'var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        hand: ['var(--font-hand)', 'cursive'],
       },
       colors: {
         bg: {
@@ -23,6 +25,12 @@ const config: Config = {
           indigo: '#6366f1',
           cyan: '#22d3ee',
           emerald: '#10b981',
+          lime: '#c8f560',
+        },
+        ink: {
+          DEFAULT: '#04070d',
+          900: '#070a12',
+          800: '#0b0f1a',
         },
       },
       backdropBlur: {
@@ -30,6 +38,8 @@ const config: Config = {
       },
       transitionTimingFunction: {
         custom: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        expo: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        curtain: 'cubic-bezier(0.76, 0, 0.24, 1)',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s cubic-bezier(0.22,1,0.36,1)',

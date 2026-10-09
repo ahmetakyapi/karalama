@@ -8,10 +8,11 @@ import { LobbyView } from '@/components/lobby/LobbyView';
 import { GameView } from '@/components/game/GameView';
 import { GameOverScreen } from '@/components/game/GameOverScreen';
 import { getSocket } from '@/lib/socket';
+import { InkLoader } from '@/components/ui/InkLoader';
 
 export default function RoomPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-accent-indigo border-t-transparent rounded-full animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><InkLoader /></div>}>
       <RoomContent />
     </Suspense>
   );
@@ -67,13 +68,13 @@ function RoomContent() {
   if (roomError) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-4 animate-rise px-6">
           <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto">
             <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
           </div>
-          <p className="text-white/70 text-lg font-medium">{roomError}</p>
+          <p className="font-display text-2xl font-bold tracking-[-0.02em] text-slate-100">{roomError}</p>
           <a
             href="/"
             className="inline-block px-6 py-2.5 rounded-xl bg-accent-indigo text-white font-medium text-sm hover:bg-accent-indigo/80 transition-colors"
@@ -89,9 +90,11 @@ function RoomContent() {
   if (!isConnected && !wasConnected) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-accent-indigo border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white/50">Bağlanıyor...</p>
+        <div className="text-center animate-rise">
+          <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.3em] text-slate-500">
+            Oda <span className="text-[var(--marker)]">{roomCode.toUpperCase()}</span>
+          </p>
+          <InkLoader label="Bağlanıyor" />
         </div>
       </div>
     );

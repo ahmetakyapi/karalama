@@ -51,7 +51,7 @@ export default function ProfilPage() {
   for (const a of ACHIEVEMENTS) groupedAchievements[a.tier].push(a);
 
   return (
-    <div className="min-h-screen px-4 py-6 max-w-4xl mx-auto">
+    <div className="min-h-screen px-4 py-6 max-w-4xl mx-auto animate-rise">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <Link
@@ -63,7 +63,7 @@ export default function ProfilPage() {
           </svg>
           Ana Sayfa
         </Link>
-        <h1 className="text-xl font-bold text-gradient">Profilim</h1>
+        <h1 className="font-display text-2xl font-extrabold tracking-[-0.04em] text-gradient">Profilim</h1>
         <div className="w-20" />
       </div>
 
