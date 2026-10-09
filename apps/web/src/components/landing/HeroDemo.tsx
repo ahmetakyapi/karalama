@@ -12,7 +12,7 @@ const HERO_STEPS = [
   { id: 'winners', label: 'Podyum', icon: '🏆' },
 ] as const;
 
-export default function HeroDemo({ play = true }: { play?: boolean }) {
+export default function HeroDemo() {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
@@ -21,15 +21,9 @@ export default function HeroDemo({ play = true }: { play?: boolean }) {
   }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 70, rotate: 4, scale: 0.92 }}
-      animate={
-        play
-          ? { opacity: 1, y: 0, rotate: 0, scale: 1 }
-          : undefined
-      }
-      transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1], delay: 0.45 }}
-      className="relative flex flex-col mt-8 lg:mt-0"
+    <div
+      className="intro-pop relative flex flex-col mt-8 lg:mt-0"
+      style={{ ['--d' as string]: '0.45s' }}
       aria-label="Oyun önizlemesi"
     >
       {/* Rotating sticker */}
@@ -112,7 +106,7 @@ export default function HeroDemo({ play = true }: { play?: boolean }) {
           ))}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { useIntroDone } from '@/lib/intro';
 import { EXPO, CURTAIN } from '@/components/motion/hooks';
 import { Magnetic, RollText } from '@/components/motion/primitives';
 import { useSmoothScroll } from '@/components/motion/SmoothScroll';
@@ -44,7 +43,6 @@ export function Logo({ size = 32 }: { size?: number }) {
 }
 
 export function TopNav() {
-  const ready = useIntroDone();
   const { scrollY } = useScroll();
   const { scrollTo } = useSmoothScroll();
   const [scrolled, setScrolled] = useState(false);
@@ -77,12 +75,12 @@ export function TopNav() {
     <>
       <motion.nav
         aria-label="Ana gezinme"
-        initial={{ y: -100, opacity: 0 }}
-        animate={ready ? { y: hidden ? -110 : 0, opacity: 1 } : undefined}
-        transition={{ duration: 0.8, ease: EXPO, delay: ready && !scrolled ? 0.5 : 0 }}
+        initial={false}
+        animate={{ y: hidden ? -110 : 0 }}
+        transition={{ duration: 0.8, ease: EXPO }}
         className={cn('fixed left-0 right-0 top-0 z-[70] transition-[padding] duration-500', scrolled ? 'py-3' : 'py-5')}
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="intro-drop mx-auto max-w-7xl px-4 sm:px-6" style={{ ['--d' as string]: '0.5s' }}>
           <div
             className={cn(
               'flex items-center justify-between rounded-2xl px-3 py-2 sm:px-4 transition-all duration-500',

@@ -6,7 +6,7 @@ import { MotionConfig, motion, useScroll, useSpring } from 'framer-motion';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { SmoothScroll } from './SmoothScroll';
 import { TransitionProvider } from './PageTransition';
-import { Preloader } from './Preloader';
+import { IntroClock } from './IntroClock';
 import { Cursor } from './Cursor';
 import { isGameRoute } from './hooks';
 
@@ -39,7 +39,7 @@ export function MotionProvider({ children }: { children: ReactNode }) {
           {children}
           <ScrollProgress />
           <Cursor />
-          <Preloader />
+          <IntroClock />
           <Grain />
         </TransitionProvider>
       </SmoothScroll>

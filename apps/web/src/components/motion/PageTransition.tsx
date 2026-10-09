@@ -13,6 +13,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CURTAIN, EXPO, useLowMotion } from './hooks';
 import { useSmoothScroll } from './SmoothScroll';
+import { InkLoader } from '@/components/ui/InkLoader';
 
 type Phase = 'idle' | 'cover' | 'covered' | 'reveal';
 
@@ -188,9 +189,9 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
             initial={false}
             animate={{ opacity: phase === 'covered' ? 1 : 0 }}
             transition={{ duration: 0.3, delay: phase === 'covered' ? 0.5 : 0 }}
-            className="ink-dots mt-6 font-mono text-[11px] uppercase tracking-[0.3em] text-slate-500"
+            className="mt-4"
           >
-            yükleniyor<span>.</span><span>.</span><span>.</span>
+            {phase === 'covered' && <InkLoader label="yükleniyor" gradientId="dd-grad-transition" />}
           </motion.div>
         </div>
       </div>

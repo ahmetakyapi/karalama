@@ -30,5 +30,10 @@ export function useIntroDone() {
   );
 }
 
-/** Inline <head> script: decides before first paint whether the intro plays. */
-export const INTRO_BOOT_SCRIPT = `(function(){try{var d=document.documentElement;var rm=false;try{var st=JSON.parse(localStorage.getItem('karalama_settings')||'{}');rm=!!st.reduceMotion}catch(e){}if(sessionStorage.getItem('karalama_intro')||rm||location.pathname!=='/'||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){d.classList.add('intro-seen')}else{d.classList.add('is-loading')}}catch(e){document.documentElement.classList.add('intro-seen')}})();`;
+/**
+ * Inline <head> script: decides before first paint whether the intro plays,
+ * then follows the CSS preloader's own `animationend` (not a JS timer) to
+ * unlock scrolling — so it stays in sync even when the page loads slowly and
+ * never depends on hydration. A timeout is the last-resort failsafe.
+ */
+export const INTRO_BOOT_SCRIPT = `(function(){var d=document.documentElement;try{var rm=false;try{var st=JSON.parse(localStorage.getItem('karalama_settings')||'{}');rm=!!st.reduceMotion}catch(e){}if(sessionStorage.getItem('karalama_intro')||rm||location.pathname!=='/'||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){d.classList.add('intro-seen');window.__introDone=true;return}try{sessionStorage.setItem('karalama_intro','1')}catch(e){}d.classList.add('intro-play','is-loading');var done=function(){if(window.__introDone)return;window.__introDone=true;d.classList.remove('is-loading');window.dispatchEvent(new Event('karalama:intro'));setTimeout(function(){d.classList.remove('intro-play');d.classList.add('intro-seen')},4000)};document.addEventListener('animationend',function(e){if(e.animationName==='pre-content-out')done()},true);setTimeout(done,6000)}catch(e){d.classList.add('intro-seen');window.__introDone=true}})();`;

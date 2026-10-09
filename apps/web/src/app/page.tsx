@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect, type ReactNode } from 'react';
+import { useState, useRef, useCallback, useEffect, type CSSProperties, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { AVATAR_CHARACTERS } from '@karalama/shared';
@@ -17,11 +17,8 @@ import { MarqueeBand } from '@/components/landing/MarqueeBand';
 import { Manifesto } from '@/components/landing/Manifesto';
 import { FinalCTA } from '@/components/landing/FinalCTA';
 import { SiteFooter } from '@/components/landing/SiteFooter';
+import HeroDemo from '@/components/landing/HeroDemo';
 
-const HeroDemo = dynamic(() => import('@/components/landing/HeroDemo'), {
-  ssr: false,
-  loading: () => <div className="mt-8 lg:mt-0 min-h-[440px]" />,
-});
 const GameDemo = dynamic(() => import('@/components/landing/GameDemo'), {
   loading: () => <SectionPlaceholder minHeight={600} />,
 });
@@ -62,30 +59,16 @@ function AuroraBackground() {
 /* ============================================================
    Hero headline pieces
    ============================================================ */
-function Line({
-  children,
-  play,
-  delay,
-  className,
-}: {
-  children: ReactNode;
-  play: boolean;
-  delay: number;
-  className?: string;
-}) {
+function Line({ children, delay }: { children: ReactNode; delay: number }) {
   return (
-    <span className="block overflow-hidden pb-[0.07em] -mb-[0.07em]">
-      <motion.span
-        className={cn('block origin-bottom-left will-change-transform', className)}
-        initial={{ y: '115%', rotate: 5 }}
-        animate={play ? { y: '0%', rotate: 0 } : undefined}
-        transition={{ duration: 1.25, ease: EXPO, delay }}
-      >
-        {children}
-      </motion.span>
+    <span className="line-mask">
+      <span style={{ ['--d' as string]: `${delay}s` }}>{children}</span>
     </span>
   );
 }
+
+/** CSS entrance (paints before hydration); `--d` is its delay. */
+const enter = (delay: number) => ({ ['--d' as string]: `${delay}s` }) as CSSProperties;
 
 function Doodle({ play }: { play: boolean }) {
   return (
@@ -195,11 +178,6 @@ export default function HomePage() {
   const demoY = useTransform(heroProgress, [0, 1], [0, 90]);
   const heroFade = useTransform(heroProgress, [0, 0.85], [1, 0.15]);
 
-  const fadeIn = (delay: number) => ({
-    initial: { opacity: 0, y: 24 },
-    animate: ready ? { opacity: 1, y: 0 } : undefined,
-    transition: { duration: 1, ease: EXPO, delay },
-  });
 
   return (
     <div className="relative min-h-screen">
@@ -219,7 +197,7 @@ export default function HomePage() {
           <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
             {/* LEFT: copy + form */}
             <motion.div style={{ y: copyY, opacity: heroFade }} className="flex max-w-2xl flex-col justify-center">
-              <motion.div {...fadeIn(0.05)} className="mb-7 flex">
+              <div className="intro-fade mb-7 flex" style={enter(0.05)}>
                 <a
                   href="#topluluk"
                   className="group inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-300 backdrop-blur transition-all hover:border-white/[0.15]"
@@ -236,16 +214,16 @@ export default function HomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </a>
-              </motion.div>
+              </div>
 
               <h1 className="mb-7 font-display text-[56px] font-extrabold leading-[0.88] tracking-[-0.055em] text-slate-50 sm:text-[84px] xl:text-[104px]">
-                <Line play={ready} delay={0.1}>Çiz,</Line>
-                <Line play={ready} delay={0.2}>
+                <Line delay={0.1}>Çiz,</Line>
+                <Line delay={0.2}>
                   Tahmin{' '}
                   <span className="inline-block -rotate-6 font-hand font-bold tracking-normal text-[var(--marker)]">et,</span>
                 </Line>
                 <span className="relative block w-fit">
-                  <Line play={ready} delay={0.3}>
+                  <Line delay={0.3}>
                     <span className="text-gradient pr-2">Eğlen.</span>
                   </Line>
                   <Doodle play={ready} />
@@ -276,17 +254,12 @@ export default function HomePage() {
                 </span>
               </h1>
 
-              <motion.p {...fadeIn(0.5)} className="mb-9 max-w-lg text-base leading-relaxed text-slate-400 sm:text-lg">
+              <p style={enter(0.5)} className="intro-fade mb-9 max-w-lg text-base leading-relaxed text-slate-400 sm:text-lg">
                 Arkadaşlarınla saniyeler içinde oyna. Kayıt yok, indirme yok, reklam yok — tamamen{' '}
                 <span className="font-semibold text-slate-200">ücretsiz</span>.
-              </motion.p>
+              </p>
 
-              <motion.div
-                initial={{ opacity: 0, y: 50, scale: 0.96 }}
-                animate={ready ? { opacity: 1, y: 0, scale: 1 } : undefined}
-                transition={{ duration: 1.2, ease: EXPO, delay: 0.6 }}
-                className="relative w-full max-w-md"
-              >
+              <div className="intro-fade relative w-full max-w-md" style={enter(0.6)}>
                 <PlayerSetup
                   playerName={playerName}
                   setPlayerName={setPlayerName}
@@ -326,9 +299,9 @@ export default function HomePage() {
                     gerisi kolay!
                   </p>
                 </motion.div>
-              </motion.div>
+              </div>
 
-              <motion.div {...fadeIn(0.85)} className="mt-6 flex items-center gap-4 text-xs text-slate-500">
+              <div style={enter(0.85)} className="intro-fade mt-6 flex items-center gap-4 text-xs text-slate-500">
                 <div className="flex items-center gap-1.5">
                   <svg aria-hidden="true" className="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -341,22 +314,22 @@ export default function HomePage() {
                   </svg>
                   &lt;100ms gecikme
                 </div>
-              </motion.div>
+              </div>
             </motion.div>
 
             {/* RIGHT: animated preview */}
             <motion.div style={{ y: demoY }}>
-              <HeroDemo play={ready} />
+              <HeroDemo />
             </motion.div>
           </div>
 
           {/* Scroll cue */}
           <div className="absolute bottom-6 left-0 right-0 hidden justify-center lg:flex">
-          <motion.button
+          <button
             type="button"
             onClick={() => scrollTo('#nasil')}
-            {...fadeIn(1.2)}
-            className="flex flex-col items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500 transition-colors hover:text-slate-300"
+            style={enter(1.2)}
+            className="intro-fade flex flex-col items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500 transition-colors hover:text-slate-300"
           >
             Kaydır
             <span className="relative block h-10 w-px overflow-hidden bg-white/10">
@@ -366,7 +339,7 @@ export default function HomePage() {
                 transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
               />
             </span>
-          </motion.button>
+          </button>
           </div>
         </section>
 

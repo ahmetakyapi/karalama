@@ -13,14 +13,9 @@ import {
 } from '@karalama/shared';
 import { cn } from '@/lib/utils';
 import { InkLoader } from '@/components/ui/InkLoader';
-import { MaskText } from '@/components/motion/primitives';
 import { useTransitionRouter } from '@/components/motion/PageTransition';
-import { EXPO } from '@/components/motion/hooks';
 
-const item = {
-  hidden: { opacity: 0, y: 28 },
-  visible: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.9, ease: EXPO, delay: 0.25 + i * 0.07 } }),
-};
+const enter = (d: number) => ({ ['--d' as string]: `${d}s` }) as React.CSSProperties;
 
 function fill(v: number, min: number, max: number) {
   return { '--fill': `${((v - min) / (max - min)) * 100}%` } as React.CSSProperties;
@@ -114,19 +109,16 @@ function CreateRoomContent() {
         Ana sayfa
       </a>
 
-      <motion.div initial="hidden" animate="visible" className="relative z-10 w-full max-w-lg">
-        <motion.div variants={item} custom={-2} className="mb-4 flex items-center justify-center gap-3 font-mono text-[11px] uppercase tracking-[0.28em] text-slate-500">
+      <div className="relative z-10 w-full max-w-lg">
+        <div style={enter(0.05)} className="intro-fade mb-4 flex items-center justify-center gap-3 font-mono text-[11px] uppercase tracking-[0.28em] text-slate-500">
           <span className="text-[var(--marker)]">(01)</span>
           <span className="h-px w-8 bg-slate-600" />
           <span>{playerName} için yeni oda</span>
-        </motion.div>
-        <MaskText
-          as="h1"
-          play
-          delay={0.1}
-          parts={['Odanı', { text: 'kur.', className: 'text-gradient' }]}
-          className="mb-10 text-center font-display text-6xl sm:text-7xl font-extrabold tracking-[-0.05em] text-slate-50"
-        />
+        </div>
+        <h1 className="mb-10 flex justify-center gap-[0.25em] text-center font-display text-6xl sm:text-7xl font-extrabold tracking-[-0.05em] text-slate-50">
+          <span className="line-mask"><span style={enter(0.1)}>Odanı</span></span>
+          <span className="line-mask"><span style={enter(0.18)} className="text-gradient">kur.</span></span>
+        </h1>
 
         {store.roomError && (
           <motion.div
@@ -139,7 +131,7 @@ function CreateRoomContent() {
           </motion.div>
         )}
 
-        <motion.div variants={item} custom={0}>
+        <div className="intro-fade" style={enter(0.3)}>
         <GlassCard className="p-6 sm:p-8 space-y-7">
           {/* Rounds */}
           <div>
@@ -254,8 +246,8 @@ function CreateRoomContent() {
             Oda Oluştur →
           </Button>
         </GlassCard>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 }
