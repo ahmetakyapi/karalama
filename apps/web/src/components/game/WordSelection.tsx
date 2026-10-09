@@ -36,10 +36,10 @@ export function WordSelection() {
           transition={{ duration: 0.6, ease: easeCurve }}
           className="font-hand text-4xl font-bold text-[var(--marker)]"
         >
-          Sıra sende!
+          Sıra Sende!
         </motion.p>
         <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.25em] text-white/50">
-          Bir kelime seç · <span className="tabular-nums text-white/80">{timeLeft}s</span>
+          Bir Kelime Seç · <span className="tabular-nums text-white/80">{timeLeft}s</span>
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           {wordOptions.map((opt, i) => {

@@ -75,7 +75,7 @@ export default function ProfilPage() {
         className="mb-6"
       >
         <GlassCard className="p-6 relative overflow-hidden" glowColor="rgba(99,102,241,0.15)">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-accent-indigo/10 rounded-full blur-[80px] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-64 text-accent-indigo/10 pointer-events-none glow" />
           <div className="relative">
             <div className="flex items-end justify-between gap-4 mb-4 flex-wrap">
               <div>

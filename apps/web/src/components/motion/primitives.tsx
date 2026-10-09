@@ -120,11 +120,13 @@ export function ScrollWords({
   text,
   highlight = [],
   className,
+  highlightClassName = 'text-[var(--marker)] font-hand text-[1.18em] leading-none',
 }: {
   text: string;
-  /** Words (lowercase match) that get the marker colour */
+  /** Words (lowercase match) that get the highlight treatment */
   highlight?: string[];
   className?: string;
+  highlightClassName?: string;
 }) {
   const ref = useRef<HTMLParagraphElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.85', 'end 0.45'] });
@@ -141,7 +143,7 @@ export function ScrollWords({
               <ScrubWord
                 progress={scrollYProgress}
                 range={[start, start + 1 / words.length]}
-                className={hl ? 'text-[var(--marker)] font-hand text-[1.18em] leading-none' : undefined}
+                className={hl ? highlightClassName : undefined}
               >
                 {w}
               </ScrubWord>{' '}
@@ -225,8 +227,11 @@ export function VelocityMarquee({
   const skewX = useTransform(smooth, [-2000, 0, 2000], [8, 0, -8]);
   const x = useTransform(baseX, (v) => `${wrap(-50, 0, v)}%`);
   const direction = useRef(1);
+  const ref = useRef<HTMLDivElement>(null);
+  const visible = useInView(ref, { margin: '100px 0px' });
 
   useAnimationFrame((_, delta) => {
+    if (!visible) return;
     let move = direction.current * baseVelocity * (delta / 1000);
     const f = factor.get();
     if (f < 0) direction.current = -1;
@@ -236,8 +241,8 @@ export function VelocityMarquee({
   });
 
   return (
-    <div className={cn('overflow-hidden whitespace-nowrap', className)}>
-      <motion.div className="flex w-max flex-nowrap" style={{ x, skewX }}>
+    <div ref={ref} className={cn('overflow-hidden whitespace-nowrap', className)}>
+      <motion.div className="flex w-max flex-nowrap will-change-transform" style={{ x, skewX }}>
         <div className="flex shrink-0 items-center">{children}</div>
         <div className="flex shrink-0 items-center" aria-hidden="true">
           {children}
@@ -302,15 +307,23 @@ export function SectionHeading({
       )}
     >
       <div className={cn(align === 'center' && 'flex flex-col items-center')}>
-        <div className="mb-5 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.28em] text-slate-500">
-          <span className="text-[var(--marker)]">({index})</span>
-          <motion.span
-            className="h-px w-10 origin-left bg-slate-600"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: inView ? 1 : 0 }}
-            transition={{ duration: 0.9, ease: EXPO, delay: 0.1 }}
-          />
-          <span>{eyebrow}</span>
+        <div className="mb-4 flex items-center gap-3">
+          <span className="relative inline-flex h-12 w-12 shrink-0 items-center justify-center font-hand text-3xl font-bold text-[var(--marker)]">
+            {Number(index)}
+            {/* hand-drawn circle around the number */}
+            <svg viewBox="0 0 48 48" className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
+              <motion.path
+                d="M30 7 C 16 4, 5 14, 6 26 C 7 39, 21 45, 32 41 C 43 37, 46 22, 38 12 C 34 7, 26 5, 19 8"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: inView ? 1 : 0 }}
+                transition={{ duration: 0.9, ease: EXPO, delay: 0.1 }}
+              />
+            </svg>
+          </span>
+          <span className="font-hand text-2xl text-slate-400">{eyebrow}</span>
         </div>
         <MaskText
           as="h2"

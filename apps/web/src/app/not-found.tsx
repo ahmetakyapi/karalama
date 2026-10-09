@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Sayfa bulunamadı',
+  title: 'Sayfa Bulunamadı',
   description: 'Aradığın sayfa mevcut değil.',
 };
 
@@ -45,10 +45,10 @@ export default function NotFound() {
           bu sayfa biraz fazla karalanmış…
         </p>
         <h1 className="animate-rise font-display text-3xl sm:text-4xl font-bold text-slate-50 mb-3 tracking-[-0.03em]" style={{ animationDelay: '1s' }}>
-          Sayfa bulunamadı
+          Sayfa Bulunamadı
         </h1>
         <p className="animate-rise text-sm text-slate-400 leading-relaxed mb-10" style={{ animationDelay: '1.1s' }}>
-          Link kırılmış olabilir ya da oda süresi dolmuş olabilir. Ana sayfadan yeni bir oda oluşturabilirsin.
+          Bağlantı bozuk olabilir ya da odanın süresi dolmuş olabilir. Ana sayfadan yeni bir oda kurabilirsin.
         </p>
         <Link
           href="/"

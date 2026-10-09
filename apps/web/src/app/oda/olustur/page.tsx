@@ -96,8 +96,8 @@ function CreateRoomContent() {
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-24">
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[400px] h-[400px] bg-accent-indigo/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] bg-accent-emerald/10 rounded-full blur-[120px]" />
+        <div className="absolute top-[-20%] left-[-10%] w-[400px] h-[400px] text-accent-indigo/10 glow" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] text-accent-emerald/10 glow" />
         <div className="absolute inset-0 bg-grid opacity-30" />
       </div>
 
@@ -106,7 +106,7 @@ function CreateRoomContent() {
         className="group absolute left-5 top-6 z-10 inline-flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-slate-100 sm:left-8"
       >
         <span className="transition-transform duration-500 ease-expo group-hover:-translate-x-1">←</span>
-        Ana sayfa
+        Ana Sayfa
       </a>
 
       <div className="relative z-10 w-full max-w-lg">
@@ -117,7 +117,7 @@ function CreateRoomContent() {
         </div>
         <h1 className="mb-10 flex justify-center gap-[0.25em] text-center font-display text-6xl sm:text-7xl font-extrabold tracking-[-0.05em] text-slate-50">
           <span className="line-mask"><span style={enter(0.1)}>Odanı</span></span>
-          <span className="line-mask"><span style={enter(0.18)} className="text-gradient">kur.</span></span>
+          <span className="line-mask"><span style={enter(0.18)} className="text-gradient">Kur.</span></span>
         </h1>
 
         {store.roomError && (
@@ -127,7 +127,7 @@ function CreateRoomContent() {
             role="alert"
             className="mb-4 rounded-xl bg-rose-500/10 border border-rose-500/30 px-4 py-3 text-sm text-rose-300"
           >
-            {store.roomError} — Ana sayfaya yönlendiriliyorsun...
+            {store.roomError}. Ana sayfaya yönlendiriliyorsun…
           </motion.div>
         )}
 
@@ -171,7 +171,7 @@ function CreateRoomContent() {
           {/* Max Players */}
           <div>
             <label className="flex items-end justify-between text-xs font-semibold uppercase tracking-[0.14em] text-white/50 mb-3">
-              <span>Maks Oyuncu</span>
+              <span>En Fazla Oyuncu</span>
               <span className="font-display text-xl font-bold text-white tabular-nums">{maxPlayers}</span>
             </label>
             <input
@@ -215,12 +215,12 @@ function CreateRoomContent() {
           {/* Custom Words */}
           <div>
             <label className="block text-sm text-white/50 mb-2">
-              Özel Kelimeler <span className="text-white/30">(opsiyonel)</span>
+              Özel Kelimeler <span className="text-white/30">(İsteğe Bağlı)</span>
             </label>
             <textarea
               value={customWordsText}
               onChange={(e) => setCustomWordsText(e.target.value)}
-              placeholder="Virgül veya satır ile ayırarak yaz...&#10;örnek: pizza, astronot, kaykay"
+              placeholder="Kelimeleri virgülle ya da alt alta yaz…&#10;Örnek: pizza, astronot, kaykay"
               rows={3}
               className={cn(
                 'w-full px-3 py-2 rounded-lg text-sm resize-none',

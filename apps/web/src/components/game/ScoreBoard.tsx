@@ -20,7 +20,7 @@ export function ScoreBoard() {
     <div className="glass rounded-xl overflow-hidden">
       <div className="px-3 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
         <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider">
-          Skor Tablosu
+          Puan Tablosu
         </h3>
         <span className="text-[10px] text-white/20 font-mono">
           {sorted.length} oyuncu

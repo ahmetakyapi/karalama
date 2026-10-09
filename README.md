@@ -1,6 +1,6 @@
 # Karalama - Çiz, Tahmin Et ve Eğlen!
 
-Türkçe multiplayer çizim oyunu. Oda oluştur, linki paylaş, saniyeler içinde oynamaya başla.
+Türkçe, çok oyunculu çizim oyunu. Oda kur, bağlantıyı paylaş, saniyeler içinde oynamaya başla.
 
 ## Özellikler
 
@@ -8,8 +8,8 @@ Türkçe multiplayer çizim oyunu. Oda oluştur, linki paylaş, saniyeler içind
 - Gerçek zamanlı çizim (Socket.io)
 - Mobil uyumlu
 - İpucu sistemi
-- Skor & podium animasyonları
-- Kayıt gerektirmez
+- Puan ve kürsü animasyonları
+- Üyelik gerektirmez
 
 ## Teknik Stack
 

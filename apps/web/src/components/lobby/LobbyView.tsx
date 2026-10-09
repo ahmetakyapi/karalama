@@ -72,8 +72,8 @@ export function LobbyView() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[400px] h-[400px] bg-accent-indigo/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] bg-accent-cyan/10 rounded-full blur-[120px]" />
+        <div className="absolute top-[-20%] left-[-10%] w-[400px] h-[400px] text-accent-indigo/10 glow" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] text-accent-cyan/10 glow" />
       </div>
 
       <motion.div
@@ -103,14 +103,14 @@ export function LobbyView() {
                 </motion.span>
               ))}
             </span>
-            <Button variant="ghost" size="sm" onClick={handleNativeShare} aria-label="Oda linkini paylaş">
+            <Button variant="ghost" size="sm" onClick={handleNativeShare} aria-label="Oda Bağlantısını Paylaş">
               {copied ? 'Kopyalandı!' : 'Paylaş'}
             </Button>
             <button
               type="button"
               onClick={() => setShowQR((v) => !v)}
               aria-expanded={showQR}
-              aria-label={showQR ? 'QR kodu gizle' : 'QR kodu göster'}
+              aria-label={showQR ? 'QR Kodu Gizle' : 'QR Kodu Göster'}
               className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08] hover:text-white transition-colors"
             >
               <svg className="w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -141,7 +141,7 @@ export function LobbyView() {
                 />
               </div>
               <p className="text-[11px] text-white/40">
-                Telefonla tara ve direkt katıl
+                Telefonla tara, doğrudan katıl
               </p>
             </motion.div>
           )}
@@ -150,8 +150,8 @@ export function LobbyView() {
         {/* Settings summary */}
         <div className="flex justify-center gap-3 flex-wrap">
           <Badge variant="info">{settings.totalRounds} Tur</Badge>
-          <Badge variant="info">{settings.drawTime}s Çizim</Badge>
-          <Badge variant="info">Maks {settings.maxPlayers} Oyuncu</Badge>
+          <Badge variant="info">{settings.drawTime} sn Çizim</Badge>
+          <Badge variant="info">En Fazla {settings.maxPlayers} Oyuncu</Badge>
         </div>
 
         {/* Player List */}
@@ -195,7 +195,7 @@ export function LobbyView() {
                   </button>
                 ) : null}
                 {player.isHost ? (
-                  <Badge variant="warning">Host</Badge>
+                  <Badge variant="warning">Kurucu</Badge>
                 ) : player.isBot ? (
                   <Badge variant="info">Bot</Badge>
                 ) : player.isReady ? (
@@ -244,9 +244,9 @@ export function LobbyView() {
               className="flex-1"
             >
               {playerList.length < 2
-                ? 'En az 2 oyuncu gerekli'
+                ? 'En Az 2 Oyuncu Gerekli'
                 : !allReady
-                  ? 'Herkes hazır olmalı'
+                  ? 'Herkes Hazır Olmalı'
                   : 'Oyunu Başlat'}
             </Button>
           ) : (
@@ -292,7 +292,7 @@ export function LobbyView() {
             className="flex items-center gap-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] px-3 py-2 text-xs font-medium text-white/60 hover:bg-white/[0.08] transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></svg>
-            {copied ? 'Kopyalandı!' : 'Link Kopyala'}
+            {copied ? 'Kopyalandı!' : 'Bağlantıyı Kopyala'}
           </button>
         </div>
       </motion.div>

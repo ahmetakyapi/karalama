@@ -22,10 +22,10 @@ export default function PrivacyPage() {
         işlendiğini sade bir dille açıklar.
       </p>
 
-      <H2>Ne topluyoruz</H2>
+      <H2>Neleri Topluyoruz?</H2>
       <ul className="list-disc list-inside space-y-2">
         <li>
-          <strong className="text-slate-100">Oyuncu adı ve avatar rengi:</strong>{' '}
+          <strong className="text-slate-100">Oyuncu adı ve karakter rengi:</strong>{' '}
           Sadece sen girdiğinde. Oyun bittiğinde veya odadan ayrıldığında
           sunucu tarafında silinir.
         </li>
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong className="text-slate-100">Tarayıcıda saklanan bilgiler:</strong>{' '}
-          Ad/avatar tercihlerin, başarı kilit açma verilerin ve
+          Ad ve karakter tercihlerin, açtığın başarımlar ve
           erişilebilirlik ayarların <em>sadece kendi tarayıcında</em>{' '}
           (localStorage) tutulur. Bize gönderilmez.
         </li>
@@ -47,28 +47,28 @@ export default function PrivacyPage() {
         </li>
       </ul>
 
-      <H2>Ne toplamıyoruz</H2>
+      <H2>Neleri Toplamıyoruz?</H2>
       <ul className="list-disc list-inside space-y-2">
         <li>E-posta, telefon, gerçek isim — hiçbiri.</li>
         <li>Kayıt/parola sistemi yok.</li>
-        <li>Reklam takibi, fingerprint, third-party cookie yok.</li>
+        <li>Reklam takibi, cihaz parmak izi ya da üçüncü taraf çerezi yok.</li>
         <li>Analitik yüklemiyoruz.</li>
       </ul>
 
-      <H2>Çerez kullanımı</H2>
+      <H2>Çerez Kullanımı</H2>
       <p>
         Karalama çerez kullanmaz. Tercihlerin için tarayıcının localStorage
         alanını kullanırız, bu alan sadece senin tarayıcında durur.
       </p>
 
-      <H2>Saklama süresi</H2>
+      <H2>Saklama Süresi</H2>
       <p>
         Oda verileri oyun süresince bellekte tutulur ve sen veya son
         oyuncu ayrıldığında silinir. Sohbet mesajları ve çizimler{' '}
         <strong className="text-slate-100">kalıcı olarak kaydedilmez</strong>.
       </p>
 
-      <H2>Haklar (KVKK)</H2>
+      <H2>Haklarınız (KVKK)</H2>
       <p>
         6698 sayılı KVKK kapsamında kişisel verin işlenmişse bilgi alma,
         silme ve düzeltme haklarına sahipsin. Pratikte biz kalıcı veri
@@ -90,7 +90,7 @@ export default function PrivacyPage() {
 
       <H2>İletişim</H2>
       <p>
-        Soru veya talebin için GitHub üzerinden issue açabilir ya da proje
+        Soru ya da talebin için GitHub üzerinden kayıt (issue) açabilir ya da proje
         sorumlusuyla iletişime geçebilirsin.
       </p>
     </LegalLayout>

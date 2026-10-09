@@ -2,7 +2,7 @@ import { Doodle } from '@/components/ui/Doodle';
 
 const COLUMNS = 5;
 const WORD = 'Karalama';
-const STATUS = ['Kalem açıldı', 'Kedi çiziliyor', 'Bıyıklar ekleniyor', 'Hazır, miyav'];
+const STATUS = ['Kalem yontuluyor', 'Kedi çiziliyor', 'Bıyıklar ekleniyor', 'Hazır, miyav!'];
 
 /**
  * First-visit intro, rendered on the server and animated purely with CSS so it
@@ -52,7 +52,7 @@ export function Preloader() {
                   className={i === STATUS.length - 1 ? 'pre-status pre-status-last' : 'pre-status'}
                   style={{ ['--i' as string]: i }}
                 >
-                  {s}…
+                  {s.endsWith('!') ? s : `${s}…`}
                 </span>
               ))}
             </div>

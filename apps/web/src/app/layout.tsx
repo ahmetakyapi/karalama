@@ -39,14 +39,14 @@ export const metadata: Metadata = {
     template: '%s · Karalama',
   },
   description:
-    'Arkadaşlarınla saniyeler içinde oyna. 1070+ Türkçe kelime, gerçek zamanlı çizim, bot desteği. Kayıt yok, indirme yok, ücretsiz.',
+    'Arkadaşlarınla saniyeler içinde oyna. 1070+ Türkçe kelime, gerçek zamanlı çizim, bot desteği. Üyelik yok, indirme yok, ücretsiz.',
   applicationName: 'Karalama',
   keywords: [
     'karalama',
     'çizim oyunu',
     'çiz tahmin et',
     'skribbl türkçe',
-    'multiplayer çizim',
+    'çok oyunculu çizim oyunu',
     'türkçe kelime oyunu',
     'arkadaşlarla oyun',
   ],
@@ -63,13 +63,13 @@ export const metadata: Metadata = {
     siteName: 'Karalama',
     title: 'Karalama — Çiz, Tahmin Et, Eğlen',
     description:
-      'Arkadaşlarınla saniyeler içinde oyna. 1070+ Türkçe kelime, gerçek zamanlı çizim. Kayıt yok, ücretsiz.',
+      'Arkadaşlarınla saniyeler içinde oyna. 1070+ Türkçe kelime, gerçek zamanlı çizim. Üyelik yok, ücretsiz.',
     images: [
       {
         url: '/opengraph-image',
         width: 1200,
         height: 630,
-        alt: 'Karalama — Türkçe multiplayer çizim oyunu',
+        alt: 'Karalama — Türkçe çok oyunculu çizim oyunu',
       },
     ],
   },
@@ -119,7 +119,7 @@ const jsonLd = {
   name: 'Karalama',
   url: SITE_URL,
   description:
-    'Gerçek zamanlı Türkçe multiplayer çizim ve tahmin oyunu. 1070+ kelime, 18 kategori.',
+    'Gerçek zamanlı, çok oyunculu Türkçe çizim ve tahmin oyunu. 1070+ kelime, 18 kategori.',
   applicationCategory: 'GameApplication',
   operatingSystem: 'Any (Web)',
   inLanguage: 'tr-TR',

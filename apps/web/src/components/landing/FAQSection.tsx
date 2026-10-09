@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { SectionHeading } from '@/components/motion/primitives';
@@ -8,33 +8,80 @@ import { EXPO } from '@/components/motion/hooks';
 
 const FAQS = [
   {
-    q: 'Oyun nasıl çalışıyor?',
-    a: 'Bir oda oluştur, 6 karakterlik kodu veya linki arkadaşlarına gönder. Herkes katıldığında tura başlarsın. Sırası gelen oyuncu bir kelime seçer ve çizer, diğerleri sohbet üzerinden tahmin eder. Hızlı bilen daha çok puan kazanır.',
+    q: 'Oyun Nasıl Oynanıyor?',
+    a: 'Bir oda oluştur, altı haneli kodu ya da bağlantıyı arkadaşlarına gönder. Herkes gelince turu başlat. Sırası gelen oyuncu bir kelime seçip çizer, diğerleri sohbete tahmin yazar. Ne kadar hızlı bilirsen o kadar çok puan alırsın.',
   },
   {
-    q: 'Kayıt olmam gerekir mi?',
-    a: 'Hayır. İsmini ve avatarını seçmen yeterli. İstersen tarayıcıda saklı kalır, bir sonraki gelişinde hazır olur.',
+    q: 'Üye Olmam Gerekiyor mu?',
+    a: 'Hayır. Bir isim ve karakter seçmen yeterli. Bilgilerin tarayıcında saklanır, bir dahaki gelişinde hazır olur.',
   },
   {
-    q: 'Kaç kişi oynayabilir?',
-    a: 'Bir odada 2 ile 12 oyuncu arasında oynayabilirsin. Az kişiyseniz bot ekleyerek maçı renklendirebilirsiniz.',
+    q: 'Kaç Kişi Oynayabilir?',
+    a: 'Bir odada 2 ila 12 kişi oynayabilir. Az kişiyseniz bot ekleyerek oyunu hareketlendirebilirsin.',
   },
   {
-    q: 'Özel kelime listesi ekleyebilir miyim?',
-    a: 'Evet. Oda oluşturma ekranında kendi kelimelerini virgül ya da satır ile ayırarak yapıştırabilirsin. İsterseniz tamamen kendi listenizle de oynayabilirsiniz.',
+    q: 'Kendi Kelimelerimi Ekleyebilir miyim?',
+    a: 'Elbette. Oda kurarken kelimelerini virgülle ya da alt alta yazman yeterli. İstersen yalnızca kendi listenle de oynayabilirsin.',
   },
   {
-    q: 'Mobilde çalışıyor mu?',
-    a: 'Evet. Telefon ve tablette parmakla çizim, sohbet ve tahmin tam olarak çalışır. Tarayıcıdan açman yeterli, indirme gerekmez.',
+    q: 'Telefonda Çalışıyor mu?',
+    a: 'Evet. Telefonda ve tablette parmağınla çizebilir, sohbete yazıp tahmin edebilirsin. Tarayıcıdan açman yeterli, uygulama indirmen gerekmez.',
   },
   {
-    q: 'Reklamsız ve ücretsiz mi?',
-    a: 'Evet — reklam yok, mikro-ödeme yok, hesap yok. Açık kaynak ruhlu, keyif odaklı bir proje.',
+    q: 'Gerçekten Ücretsiz mi?',
+    a: 'Evet. Reklam yok, uygulama içi satın alma yok, hesap açmak yok. Karalama, keyif için yapılmış bir proje.',
   },
 ];
 
+type Msg = { id: number; from: 'me' | 'bot'; text: string };
+
+function Typing() {
+  return (
+    <div className="flex w-fit items-center gap-1 rounded-2xl rounded-bl-md bg-white/[0.06] px-4 py-3" aria-hidden="true">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          className="h-1.5 w-1.5 rounded-full bg-slate-400"
+          animate={{ y: [0, -4, 0], opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.12 }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * FAQ as the game's own chat: tap a question, it is "sent" as your message
+ * and Karalama types the answer back.
+ */
 export default function FAQSection() {
-  const [open, setOpen] = useState<number | null>(0);
+  const [asked, setAsked] = useState<number[]>([0]);
+  const [msgs, setMsgs] = useState<Msg[]>([
+    { id: 0, from: 'bot', text: 'Selam! Aklına takılan bir şey mi var? Bir soru seç, hemen anlatayım.' },
+    { id: 1, from: 'me', text: FAQS[0].q },
+    { id: 2, from: 'bot', text: FAQS[0].a },
+  ]);
+  const [typing, setTyping] = useState(false);
+  const scroller = useRef<HTMLDivElement>(null);
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(() => {
+    const el = scroller.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+  }, [msgs, typing]);
+
+  const ask = (i: number) => {
+    if (typing) return;
+    setAsked((a) => (a.includes(i) ? a : [...a, i]));
+    setMsgs((m) => [...m, { id: Date.now(), from: 'me', text: FAQS[i].q }]);
+    setTyping(true);
+    timer.current = setTimeout(() => {
+      setTyping(false);
+      setMsgs((m) => [...m, { id: Date.now() + 1, from: 'bot', text: FAQS[i].a }]);
+    }, 700);
+  };
+
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -46,92 +93,97 @@ export default function FAQSection() {
   };
 
   return (
-    <section id="topluluk" aria-labelledby="faq-title" className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6 py-24 sm:py-36">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
-        <div className="lg:sticky lg:top-28 lg:self-start">
+    <section id="topluluk" aria-labelledby="faq-title" className="cv-auto relative z-10 mx-auto max-w-6xl px-5 sm:px-6 py-16 sm:py-24">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+
+      {/* Full Q&A for search engines and screen readers */}
+      <dl className="sr-only">
+        {FAQS.map((f) => (
+          <div key={f.q}>
+            <dt>{f.q}</dt>
+            <dd>{f.a}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+        <div>
           <SectionHeading
             id="faq-title"
             index="03"
             eyebrow="Sıkça Sorulanlar"
-            title={['Merak', '\n', { text: 'edilenler.', className: 'text-gradient' }]}
+            title={['Merak', { text: 'Edilenler', className: 'text-gradient' }]}
           />
-          <p className="-mt-8 hidden max-w-xs font-hand text-2xl leading-snug text-slate-400 lg:block">
-            Cevabını bulamadın mı? Bir oda aç, oynarken öğrenirsin. ✎
-          </p>
+          <div className="-mt-6 flex flex-wrap gap-2" aria-label="Sorular">
+            {FAQS.map((f, i) => {
+              const done = asked.includes(i);
+              return (
+                <motion.button
+                  key={f.q}
+                  type="button"
+                  onClick={() => ask(i)}
+                  whileTap={{ scale: 0.95 }}
+                  className={cn(
+                    'rounded-full border px-4 py-2 text-left text-sm font-semibold transition-colors duration-300',
+                    done
+                      ? 'border-transparent bg-white/[0.06] text-slate-400'
+                      : 'border-white/10 text-slate-200 hover:border-[var(--marker)] hover:text-white'
+                  )}
+                >
+                  {done && <span className="mr-1.5 text-[var(--marker)]">✓</span>}
+                  {f.q}
+                </motion.button>
+              );
+            })}
+          </div>
         </div>
 
-        <ul className="border-b border-white/10">
-          {FAQS.map((f, i) => {
-            const isOpen = open === i;
-            return (
-              <motion.li
-                key={f.q}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-8% 0px' }}
-                transition={{ duration: 0.9, ease: EXPO, delay: i * 0.05 }}
-                className="relative"
-              >
-                <motion.span
-                  aria-hidden="true"
-                  className="absolute inset-x-0 top-0 h-px origin-left bg-white/10"
-                  initial={{ scaleX: 0 }}
-                  whileInView={{ scaleX: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.2, ease: EXPO, delay: 0.1 + i * 0.05 }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setOpen(isOpen ? null : i)}
-                  aria-expanded={isOpen}
-                  aria-controls={`faq-panel-${i}`}
-                  className="group flex w-full items-center gap-5 py-6 text-left sm:py-7"
+        {/* Chat window, styled like the in-game chat */}
+        <div role="log" aria-live="polite" aria-label="Sorular ve cevaplar" className="flex h-[440px] flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-[#070b14]">
+          <div className="flex items-center gap-3 border-b border-white/[0.06] px-5 py-4">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--marker)] font-hand text-xl font-bold text-[#04070d]">
+              K
+            </span>
+            <div>
+              <div className="text-sm font-bold text-slate-100">Karalama</div>
+              <div className="flex items-center gap-1.5 text-[11px] text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                Çevrimiçi
+              </div>
+            </div>
+          </div>
+
+          <div ref={scroller} data-lenis-prevent className="flex-1 space-y-3 overflow-y-auto px-5 py-5">
+            <AnimatePresence initial={false}>
+              {msgs.map((m) => (
+                <motion.div
+                  key={m.id}
+                  layout
+                  initial={{ opacity: 0, y: 14, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.4, ease: EXPO }}
+                  className={cn('flex', m.from === 'me' ? 'justify-end' : 'justify-start')}
                 >
-                  <span className={cn('font-mono text-xs transition-colors duration-300', isOpen ? 'text-[var(--marker)]' : 'text-slate-600')}>
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span
+                  <p
                     className={cn(
-                      'flex-1 font-display text-xl sm:text-2xl font-semibold tracking-[-0.025em] transition-all duration-500 ease-expo',
-                      isOpen ? 'translate-x-1 text-slate-50' : 'text-slate-300 group-hover:translate-x-2 group-hover:text-slate-50'
+                      'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+                      m.from === 'me'
+                        ? 'rounded-br-md bg-[var(--marker)] font-semibold text-[#04070d]'
+                        : 'rounded-bl-md bg-white/[0.06] text-slate-200'
                     )}
                   >
-                    {f.q}
-                  </span>
-                  <motion.span
-                    aria-hidden="true"
-                    animate={{ rotate: isOpen ? 135 : 0, backgroundColor: isOpen ? 'rgba(200,245,96,1)' : 'rgba(255,255,255,0.04)' }}
-                    transition={{ duration: 0.5, ease: EXPO }}
-                    className={cn(
-                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-xl leading-none',
-                      isOpen ? 'border-transparent text-[#04070d]' : 'border-white/10 text-slate-300'
-                    )}
-                  >
-                    +
-                  </motion.span>
-                </button>
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      id={`faq-panel-${i}`}
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.55, ease: EXPO }}
-                      className="overflow-hidden"
-                    >
-                      <p className="max-w-xl pb-7 pl-10 text-base leading-relaxed text-slate-400">{f.a}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.li>
-            );
-          })}
-        </ul>
+                    {m.text}
+                  </p>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            {typing && <Typing />}
+          </div>
+
+          <div className="border-t border-white/[0.06] px-5 py-3 text-xs text-slate-500">
+            Bir soru seç, cevabı hemen gelsin…
+          </div>
+        </div>
       </div>
     </section>
   );

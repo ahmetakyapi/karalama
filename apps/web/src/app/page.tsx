@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, type CSSProperties, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
 import { AVATAR_CHARACTERS } from '@karalama/shared';
 import { cn } from '@/lib/utils';
 import { useIntroDone } from '@/lib/intro';
@@ -35,20 +35,15 @@ const FAQSection = dynamic(() => import('@/components/landing/FAQSection'), {
 function AuroraBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <motion.div
-        animate={{ x: [0, 40, 0], y: [0, -30, 0], scale: [1, 1.1, 1] }}
-        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute -top-40 -left-20 h-[600px] w-[600px] rounded-full bg-indigo-600/20 blur-[120px]"
-      />
-      <motion.div
-        animate={{ x: [0, -50, 0], y: [0, 40, 0], scale: [1.1, 1, 1.1] }}
-        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-        className="absolute top-1/3 -right-32 h-[500px] w-[500px] rounded-full bg-cyan-500/15 blur-[120px]"
-      />
-      <motion.div
-        animate={{ x: [0, 30, 0], y: [0, -20, 0], scale: [1, 1.15, 1] }}
-        transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
-        className="absolute bottom-0 left-1/2 h-[450px] w-[450px] -translate-x-1/2 rounded-full bg-fuchsia-500/10 blur-[120px]"
+      {/* Three soft blobs painted into ONE drifting layer (one composite, no blur filter) */}
+      <div
+        className="aurora absolute -inset-[10%]"
+        style={{
+          background:
+            'radial-gradient(420px circle at 18% 14%, rgba(79,70,229,0.22), transparent 70%),' +
+            'radial-gradient(360px circle at 88% 46%, rgba(6,182,212,0.16), transparent 70%),' +
+            'radial-gradient(330px circle at 50% 96%, rgba(217,70,239,0.11), transparent 70%)',
+        }}
       />
       <div className="absolute inset-0 bg-grid opacity-40" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#04070d]" />
@@ -178,6 +173,12 @@ export default function HomePage() {
   const demoY = useTransform(heroProgress, [0, 1], [0, 90]);
   const heroFade = useTransform(heroProgress, [0, 0.85], [1, 0.15]);
 
+  // Pause ambient background drift once the hero is out of view
+  useMotionValueEvent(heroProgress, 'change', (v) => {
+    document.documentElement.classList.toggle('past-hero', v > 0.95);
+  });
+  useEffect(() => () => document.documentElement.classList.remove('past-hero'), []);
+
 
   return (
     <div className="relative min-h-screen">
@@ -200,7 +201,7 @@ export default function HomePage() {
               <div className="intro-fade mb-7 flex" style={enter(0.05)}>
                 <a
                   href="#topluluk"
-                  className="group inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-300 backdrop-blur transition-all hover:border-white/[0.15]"
+                  className="group inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-300 transition-all hover:border-white/[0.15]"
                 >
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -208,7 +209,7 @@ export default function HomePage() {
                   </span>
                   <span className="font-semibold tabular-nums text-slate-200">{liveCount ?? '…'}</span>
                   <span className="text-slate-500">
-                    {liveCount === 0 ? 'ilk oyuncu sen ol' : 'oyuncu çevrimiçi'}
+                    {liveCount === 0 ? 'İlk Oyuncu Sen Ol' : 'Oyuncu Çevrimiçi'}
                   </span>
                   <svg aria-hidden="true" className="h-3 w-3 text-slate-500 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -220,7 +221,7 @@ export default function HomePage() {
                 <Line delay={0.1}>Çiz,</Line>
                 <Line delay={0.2}>
                   Tahmin{' '}
-                  <span className="inline-block -rotate-6 font-hand font-bold tracking-normal text-[var(--marker)]">et,</span>
+                  <span className="inline-block -rotate-6 font-hand font-bold tracking-normal text-[var(--marker)]">Et,</span>
                 </Line>
                 <span className="relative block w-fit">
                   <Line delay={0.3}>
@@ -255,7 +256,7 @@ export default function HomePage() {
               </h1>
 
               <p style={enter(0.5)} className="intro-fade mb-9 max-w-lg text-base leading-relaxed text-slate-400 sm:text-lg">
-                Arkadaşlarınla saniyeler içinde oyna. Kayıt yok, indirme yok, reklam yok — tamamen{' '}
+                Arkadaşlarınla saniyeler içinde oyna. Üyelik yok, indirme yok, reklam yok; tamamen{' '}
                 <span className="font-semibold text-slate-200">ücretsiz</span>.
               </p>
 
@@ -306,13 +307,13 @@ export default function HomePage() {
                   <svg aria-hidden="true" className="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
-                  Güvenli bağlantı
+                  Güvenli Bağlantı
                 </div>
                 <div className="flex items-center gap-1.5">
                   <svg aria-hidden="true" className="h-3.5 w-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  &lt;100ms gecikme
+                  Düşük Gecikme
                 </div>
               </div>
             </motion.div>
@@ -331,7 +332,7 @@ export default function HomePage() {
             style={enter(1.2)}
             className="intro-fade flex flex-col items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500 transition-colors hover:text-slate-300"
           >
-            Kaydır
+            Aşağı Kaydır
             <span className="relative block h-10 w-px overflow-hidden bg-white/10">
               <motion.span
                 className="absolute inset-x-0 top-0 h-1/2 bg-[var(--marker)]"

@@ -163,7 +163,7 @@ function HeroLobby() {
             </div>
             <span className="text-xs font-medium text-slate-300 flex-1">{p.name}</span>
             {i === 0 && (
-              <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/15 px-1.5 py-0.5 rounded-md">HOST</span>
+              <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/15 px-1.5 py-0.5 rounded-md">KURUCU</span>
             )}
             <div className={cn(
               'w-5 h-5 rounded-full flex items-center justify-center text-[10px]',

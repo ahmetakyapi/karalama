@@ -28,13 +28,13 @@ export function FinalCTA() {
       <motion.div style={{ scale }} className="relative mx-auto max-w-7xl text-center">
         <h2
           id="cta-title"
-          className="font-display text-[19vw] lg:text-[200px] font-extrabold leading-[0.82] tracking-[-0.065em] text-slate-50"
+          className="font-display text-[15vw] lg:text-[190px] font-extrabold leading-[0.82] tracking-[-0.065em] text-slate-50"
         >
           <motion.span style={{ x: x1 }} className="block">
             Hadi<span className="font-hand font-bold text-[var(--marker)] tracking-normal">,</span>
           </motion.span>
-          <motion.span style={{ x: x2 }} className="block text-gradient">
-            oynayalım!
+          <motion.span style={{ x: x2 }} className="block text-gradient pb-[0.16em] -mb-[0.12em]">
+            Oynayalım!
           </motion.span>
         </h2>
 
@@ -68,7 +68,7 @@ export function FinalCTA() {
           />
         </svg>
         <p className="pointer-events-none absolute left-[3%] top-[50%] hidden -rotate-6 font-hand text-2xl text-slate-400 md:block">
-          tek tık, söz!
+          bir tık uzağında!
         </p>
 
         <div className="mt-14 flex flex-col items-center gap-8">
@@ -76,7 +76,7 @@ export function FinalCTA() {
             <button
               onClick={play}
               data-cursor="Başla"
-              aria-label="Şimdi oyna"
+              aria-label="Şimdi Oyna"
               className="group relative flex h-40 w-40 sm:h-48 sm:w-48 items-center justify-center rounded-full"
             >
               <motion.svg style={{ rotate }} viewBox="0 0 200 200" className="absolute inset-0 h-full w-full" aria-hidden="true">
@@ -84,7 +84,7 @@ export function FinalCTA() {
                   <path id="cta-ring" d="M100,100 m-82,0 a82,82 0 1,1 164,0 a82,82 0 1,1 -164,0" />
                 </defs>
                 <text className="fill-slate-400 font-mono text-[13px] uppercase tracking-[0.34em]">
-                  <textPath href="#cta-ring">şimdi oyna • ücretsiz • kayıt yok • </textPath>
+                  <textPath href="#cta-ring">şimdi oyna • ücretsiz • üyelik yok • </textPath>
                 </text>
               </motion.svg>
               <span className="relative flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-[var(--marker)] text-[#04070d] shadow-[0_0_60px_rgba(200,245,96,0.35)] transition-transform duration-700 ease-expo group-hover:scale-110">
@@ -95,7 +95,7 @@ export function FinalCTA() {
             </button>
           </Magnetic>
           <p className="max-w-md text-base leading-relaxed text-slate-400">
-            Arkadaşlarını topla, bir oda oluştur ve eğlenceye başla. Tek gereken bir tarayıcı.
+            Arkadaşlarını topla, bir oda kur ve eğlence başlasın. Tek ihtiyacın bir tarayıcı.
           </p>
         </div>
       </motion.div>

@@ -19,28 +19,28 @@ const DEMO_STEPS: Step[] = [
   {
     id: 'create',
     title: 'Oda Oluştur',
-    desc: 'Bir oda kodu oluştur ve arkadaşlarınla paylaş. Herkes saniyeler içinde katılır.',
+    desc: 'Bir oda kur, bağlantıyı arkadaşlarına gönder. Herkes saniyeler içinde katılır.',
     accent: '#6366f1',
     Scene: DemoRoom,
   },
   {
     id: 'pick',
     title: 'Kelime Seç',
-    desc: 'Sıra sana geldiğinde 3 kelimeden birini seç. Kolay, orta veya zor — strateji senin.',
+    desc: 'Sıra sana geldiğinde üç kelimeden birini seç: kolay, orta ya da zor. Karar senin.',
     accent: '#22d3ee',
     Scene: DemoPick,
   },
   {
     id: 'draw',
     title: 'Çiz',
-    desc: 'Kalem, renk ve kalınlık seçenekleriyle kelimeyi çiz. Herkes gerçek zamanlı izler.',
+    desc: 'Kalemini, rengini ve kalınlığını seç, kelimeyi çiz. Herkes seni anlık olarak izler.',
     accent: '#10b981',
     Scene: DemoDraw,
   },
   {
     id: 'guess',
-    title: 'Tahmin Et & Kazan',
-    desc: "Chat'ten tahminini yaz. Hızlı bil, daha çok puan kazan. İpuçları zamanla açılır.",
+    title: 'Tahmin Et ve Kazan',
+    desc: 'Tahminini sohbete yaz. Ne kadar hızlı bilirsen o kadar çok puan alırsın; harfler zamanla açılır.',
     accent: '#c8f560',
     Scene: DemoGuess,
   },
@@ -56,8 +56,8 @@ function StepCard({ step, i, className }: { step: Step; i: number; className?: s
       )}
     >
       <div
-        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-30 blur-[90px] transition-opacity duration-700 group-hover:opacity-60"
-        style={{ background: step.accent }}
+        className="glow absolute -right-24 -top-24 h-72 w-72 opacity-30 transition-opacity duration-700 group-hover:opacity-60"
+        style={{ color: step.accent }}
       />
       <div className="relative flex items-start justify-between gap-4">
         <span
@@ -87,7 +87,7 @@ function ProgressDots({ progress }: { progress: MotionValue<number> }) {
   const width = useTransform(progress, [0, 1], ['0%', '100%']);
   return (
     <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-6">
-      <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-slate-500">Kaydır</span>
+      <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-slate-500">Kaydırmaya Devam</span>
       <div className="relative h-px flex-1 bg-white/10">
         <motion.div className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 via-cyan-400 to-[#c8f560]" style={{ width }} />
       </div>
@@ -124,19 +124,19 @@ function HorizontalTrack() {
 
   return (
     <div ref={sectionRef} style={{ height: `calc(100vh + ${distance}px)` }} className="relative">
-      <div className="sticky top-0 flex h-screen flex-col justify-center gap-10 overflow-hidden">
+      <div className="sticky top-0 flex h-screen flex-col justify-center gap-6 overflow-hidden pt-10">
         <motion.div ref={trackRef} style={{ x }} className="flex w-max gap-6 pl-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))] pr-[12vw]">
           <div className="flex w-[34vw] max-w-[460px] shrink-0 flex-col justify-center pr-8">
             <SectionHeading
               stacked
               index="01"
               eyebrow="Oyun Akışı"
-              title={['Nasıl', '\n', { text: 'oynanır?', className: 'text-gradient' }]}
-              desc="Dört adım, sıfır kurulum. Bir link at, kalemleri konuştur."
+              title={['Nasıl', '\n', { text: 'Oynanır?', className: 'text-gradient' }]}
+              desc="Dört adım, sıfır kurulum. Bağlantıyı gönder, gerisini kalemler halletsin."
             />
           </div>
           {DEMO_STEPS.map((s, i) => (
-            <StepCard key={s.id} step={s} i={i} className="h-[72vh] max-h-[640px] w-[min(520px,42vw)] shrink-0" />
+            <StepCard key={s.id} step={s} i={i} className="h-[76vh] max-h-[680px] w-[min(520px,42vw)] shrink-0" />
           ))}
         </motion.div>
         <ProgressDots progress={scrollYProgress} />
@@ -152,12 +152,12 @@ export default function GameDemo() {
       {desktop ? (
         <HorizontalTrack />
       ) : (
-        <div className="mx-auto max-w-6xl px-5 sm:px-6 py-24">
+        <div className="mx-auto max-w-6xl px-5 sm:px-6 pt-20 pb-10">
           <SectionHeading
             index="01"
             eyebrow="Oyun Akışı"
-            title={['Nasıl', { text: 'oynanır?', className: 'text-gradient' }]}
-            desc="Dört adım, sıfır kurulum. Bir link at, kalemleri konuştur."
+            title={['Nasıl', { text: 'Oynanır?', className: 'text-gradient' }]}
+            desc="Dört adım, sıfır kurulum. Bağlantıyı gönder, gerisini kalemler halletsin."
           />
           <div className="space-y-5">
             {DEMO_STEPS.map((s, i) => (
@@ -238,7 +238,7 @@ function DemoPick() {
   return (
     <motion.div {...demoTransition} className="absolute inset-0 flex flex-col items-center justify-center p-8">
       <div className="text-xs text-slate-500 mb-1 font-medium">Sıra Sende!</div>
-      <div className="text-sm text-slate-300 mb-5 font-semibold">Bir kelime seç</div>
+      <div className="text-sm text-slate-300 mb-5 font-semibold">Bir Kelime Seç</div>
       <div className="flex gap-3">
         {words.map((w, i) => (
           <motion.div

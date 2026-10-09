@@ -30,7 +30,7 @@ function labelFor(pathname: string) {
   if (pathname === '/') return 'Ana Sayfa';
   if (pathname === '/oda/olustur') return 'Oda Kuruluyor';
   if (pathname.startsWith('/oda/')) return 'Odaya Giriliyor';
-  if (pathname.startsWith('/profil')) return 'Profilin';
+  if (pathname.startsWith('/profil')) return 'Profil';
   if (pathname.startsWith('/gizlilik')) return 'Gizlilik';
   if (pathname.startsWith('/kosullar')) return 'Koşullar';
   return 'Karalama';

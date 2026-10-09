@@ -104,12 +104,12 @@ export function ChatPanel() {
           maxLength={100}
           placeholder={
             disableInput
-              ? 'Çizim yapıyorsun...'
+              ? 'Çizim yapıyorsun…'
               : hasGuessedCorrectly
                 ? currentStreak > 1
                   ? `Doğru bildin! (${currentStreak} seri)`
                   : 'Doğru bildin!'
-                : 'Tahminini yaz...'
+                : 'Tahminini yaz…'
           }
           className={cn(
             'w-full px-3 py-2 rounded-lg text-sm',

@@ -120,8 +120,8 @@ export function RoundTransition() {
           <div className="absolute inset-0 bg-[#04070d]/85 backdrop-blur-xl" />
 
           {/* Ambient glow effects */}
-          <div className="absolute top-1/4 left-1/3 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute bottom-1/4 right-1/3 w-48 h-48 bg-emerald-500/8 rounded-full blur-[80px] pointer-events-none" />
+          <div className="absolute top-1/4 left-1/3 w-64 h-64 text-indigo-500/10 pointer-events-none glow" />
+          <div className="absolute bottom-1/4 right-1/3 w-48 h-48 text-emerald-500/8 pointer-events-none glow" />
 
           {/* Content */}
           <div className="relative z-10 flex flex-col items-center w-full max-w-md px-6 py-8">
@@ -159,7 +159,7 @@ export function RoundTransition() {
 
                 {/* Glow pulse behind the word */}
                 <motion.div
-                  className="absolute inset-0 mx-auto -mt-4 w-40 h-12 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none"
+                  className="absolute inset-0 mx-auto -mt-4 w-40 h-12 text-indigo-500/20 pointer-events-none glow"
                   animate={{ opacity: [0.3, 0.6, 0.3] }}
                   transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                 />

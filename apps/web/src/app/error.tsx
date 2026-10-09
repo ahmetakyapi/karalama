@@ -35,10 +35,10 @@ export default function GlobalError({
           </svg>
         </div>
         <h1 className="font-display text-3xl sm:text-4xl font-bold text-slate-50 mb-3 tracking-[-0.03em]">
-          Beklenmedik bir hata oluştu
+          Beklenmedik Bir Hata Oluştu
         </h1>
         <p className="text-sm text-slate-400 leading-relaxed mb-8">
-          Sorunu kaydettik. Sayfayı tekrar deneyebilir ya da ana sayfaya dönebilirsin.
+          Sorunu kaydettik. Sayfayı yeniden deneyebilir ya da ana sayfaya dönebilirsin.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <button
@@ -46,13 +46,13 @@ export default function GlobalError({
             onClick={reset}
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-400 px-6 h-12 text-sm font-bold text-white shadow-[0_8px_24px_rgba(99,102,241,0.35)] hover:shadow-[0_12px_32px_rgba(99,102,241,0.5)] transition-all"
           >
-            Tekrar dene
+            Tekrar Dene
           </button>
           <a
             href="/"
             className="inline-flex items-center gap-2 rounded-xl bg-white/[0.04] border border-white/[0.08] px-6 h-12 text-sm font-semibold text-slate-200 hover:bg-white/[0.06] hover:border-white/[0.15] transition-all"
           >
-            Ana sayfa
+            Ana Sayfa
           </a>
         </div>
         {error.digest && (
