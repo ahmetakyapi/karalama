@@ -1,24 +1,24 @@
 import { cn } from '@/lib/utils';
+import { Doodle } from './Doodle';
 
-/** CSS-only scribble loader — safe in server components and Suspense fallbacks. */
-export function InkLoader({ label = 'Yükleniyor', className }: { label?: string; className?: string }) {
+/**
+ * Looping "pencil draws a cat" loader. CSS-only — safe in server components,
+ * Suspense fallbacks and before hydration.
+ */
+export function InkLoader({
+  label = 'Yükleniyor',
+  className,
+  gradientId = 'dd-grad-loader',
+}: {
+  label?: string;
+  className?: string;
+  gradientId?: string;
+}) {
   return (
-    <div role="status" aria-label={label} className={cn('flex flex-col items-center gap-4', className)}>
-      <svg viewBox="0 0 120 40" className="ink-loader w-28" fill="none" aria-hidden="true">
-        <path
-          d="M6 26 C 18 6, 30 34, 44 18 S 66 4, 78 22 S 100 36, 114 12"
-          stroke="url(#ink-loader-grad)"
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-        <defs>
-          <linearGradient id="ink-loader-grad" x1="0" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stopColor="#6366f1" />
-            <stop offset="0.55" stopColor="#22d3ee" />
-            <stop offset="1" stopColor="#c8f560" />
-          </linearGradient>
-        </defs>
-      </svg>
+    <div role="status" aria-label={label} className={cn('flex flex-col items-center gap-3', className)}>
+      <div className="flex h-[120px] w-[120px] items-center justify-center">
+        <Doodle loop gradientId={gradientId} style={{ transform: 'scale(0.6)' }} />
+      </div>
       <span className="ink-dots font-mono text-[11px] uppercase tracking-[0.3em] text-slate-500">
         {label}
         <span>.</span>

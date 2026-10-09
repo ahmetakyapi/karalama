@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeApplier } from '@/components/ui/ThemeApplier';
 import { ToastStack } from '@/components/ui/ToastStack';
 import { MotionProvider } from '@/components/motion/MotionProvider';
+import { Preloader } from '@/components/motion/Preloader';
 import { INTRO_BOOT_SCRIPT } from '@/lib/intro';
 
 const inter = Inter({
@@ -24,6 +25,8 @@ const hand = Caveat({
   variable: '--font-hand',
   weight: ['500', '700'],
   display: 'swap',
+  // Decorative accents only — don't let it compete with first paint
+  preload: false,
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://karalama.vercel.app';
@@ -133,6 +136,9 @@ export default function RootLayout({
     <html lang="tr" className={`dark ${inter.variable} ${display.variable} ${hand.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: INTRO_BOOT_SCRIPT }} />
+        <noscript>
+          <style>{'.preloader{display:none!important}'}</style>
+        </noscript>
         <link rel="preconnect" href={SOCKET_URL} crossOrigin="anonymous" />
         <link rel="dns-prefetch" href={SOCKET_URL} />
         <script
@@ -147,6 +153,7 @@ export default function RootLayout({
         >
           Ana içeriğe atla
         </a>
+        <Preloader />
         <ThemeApplier />
         <MotionProvider>
           {children}
