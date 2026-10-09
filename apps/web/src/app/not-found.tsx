@@ -18,7 +18,7 @@ export default function NotFound() {
       <div className="pointer-events-none fixed inset-0 bg-grid opacity-40" />
 
       <div className="relative text-center max-w-xl">
-        <div aria-hidden="true" className="relative mx-auto mb-4 w-fit">
+        <div aria-hidden="true" className="relative mx-auto mb-6 w-fit">
           <div className="animate-rise font-display text-[150px] sm:text-[220px] font-extrabold leading-none tracking-[-0.07em] text-outline">
             404
           </div>
@@ -41,9 +41,6 @@ export default function NotFound() {
             </defs>
           </svg>
         </div>
-        <p className="animate-rise mb-3 font-hand text-3xl text-[var(--marker)]" style={{ animationDelay: '0.9s' }}>
-          bu sayfa biraz fazla karalanmış…
-        </p>
         <h1 className="animate-rise font-display text-3xl sm:text-4xl font-bold text-slate-50 mb-3 tracking-[-0.03em]" style={{ animationDelay: '1s' }}>
           Sayfa Bulunamadı
         </h1>

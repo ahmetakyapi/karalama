@@ -110,8 +110,6 @@ export default function FAQSection() {
         <div>
           <SectionHeading
             id="faq-title"
-            index="03"
-            eyebrow="Sıkça Sorulanlar"
             title={['Merak', { text: 'Edilenler', className: 'text-gradient' }]}
           />
           <div className="-mt-6 flex flex-wrap gap-2" aria-label="Sorular">

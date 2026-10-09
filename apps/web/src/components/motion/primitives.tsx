@@ -275,11 +275,9 @@ export function Parallax({
 }
 
 /* ============================================================
-   SectionHeading — editorial "(02) — Label" + display title
+   SectionHeading — display title + optional description
    ============================================================ */
 export function SectionHeading({
-  index,
-  eyebrow,
   title,
   desc,
   align = 'left',
@@ -287,8 +285,6 @@ export function SectionHeading({
   id,
 }: {
   stacked?: boolean;
-  index: string;
-  eyebrow: string;
   title: MaskPart[];
   desc?: string;
   align?: 'left' | 'center';
@@ -307,24 +303,6 @@ export function SectionHeading({
       )}
     >
       <div className={cn(align === 'center' && 'flex flex-col items-center')}>
-        <div className="mb-4 flex items-center gap-3">
-          <span className="relative inline-flex h-12 w-12 shrink-0 items-center justify-center font-hand text-3xl font-bold text-[var(--marker)]">
-            {Number(index)}
-            {/* hand-drawn circle around the number */}
-            <svg viewBox="0 0 48 48" className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
-              <motion.path
-                d="M30 7 C 16 4, 5 14, 6 26 C 7 39, 21 45, 32 41 C 43 37, 46 22, 38 12 C 34 7, 26 5, 19 8"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: inView ? 1 : 0 }}
-                transition={{ duration: 0.9, ease: EXPO, delay: 0.1 }}
-              />
-            </svg>
-          </span>
-          <span className="font-hand text-2xl text-slate-400">{eyebrow}</span>
-        </div>
         <MaskText
           as="h2"
           id={id}

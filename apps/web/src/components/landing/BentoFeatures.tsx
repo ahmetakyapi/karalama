@@ -112,8 +112,6 @@ export default function BentoFeatures() {
   return (
     <section id="ozellikler" className="cv-auto relative z-10 mx-auto max-w-6xl px-5 sm:px-6 pb-12 pt-4 sm:pb-16 sm:pt-6">
       <SectionHeading
-        index="02"
-        eyebrow="Özellikler"
         title={['Neden', { text: 'Karalama?', className: 'text-gradient' }]}
         desc="Güzel bir oyun gecesi için ihtiyacın olan her şey burada: hızlı, Türkçe ve ücretsiz."
       />

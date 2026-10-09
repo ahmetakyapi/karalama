@@ -110,11 +110,6 @@ function CreateRoomContent() {
       </a>
 
       <div className="relative z-10 w-full max-w-lg">
-        <div style={enter(0.05)} className="intro-fade mb-4 flex items-center justify-center gap-3 font-mono text-[11px] uppercase tracking-[0.28em] text-slate-500">
-          <span className="text-[var(--marker)]">(01)</span>
-          <span className="h-px w-8 bg-slate-600" />
-          <span>{playerName} için yeni oda</span>
-        </div>
         <h1 className="mb-10 flex justify-center gap-[0.25em] text-center font-display text-6xl sm:text-7xl font-extrabold tracking-[-0.05em] text-slate-50">
           <span className="line-mask"><span style={enter(0.1)}>Odanı</span></span>
           <span className="line-mask"><span style={enter(0.18)} className="text-gradient">Kur.</span></span>

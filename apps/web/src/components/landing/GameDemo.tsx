@@ -129,8 +129,6 @@ function HorizontalTrack() {
           <div className="flex w-[34vw] max-w-[460px] shrink-0 flex-col justify-center pr-8">
             <SectionHeading
               stacked
-              index="01"
-              eyebrow="Oyun Akışı"
               title={['Nasıl', '\n', { text: 'Oynanır?', className: 'text-gradient' }]}
               desc="Dört adım, sıfır kurulum. Bağlantıyı gönder, gerisini kalemler halletsin."
             />
@@ -154,8 +152,6 @@ export default function GameDemo() {
       ) : (
         <div className="mx-auto max-w-6xl px-5 sm:px-6 pt-20 pb-10">
           <SectionHeading
-            index="01"
-            eyebrow="Oyun Akışı"
             title={['Nasıl', { text: 'Oynanır?', className: 'text-gradient' }]}
             desc="Dört adım, sıfır kurulum. Bağlantıyı gönder, gerisini kalemler halletsin."
           />

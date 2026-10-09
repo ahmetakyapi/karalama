@@ -234,23 +234,19 @@ kbd {
 }
 
 /* ============================================================
-   Preloader — pure CSS timeline, starts on first paint
-   0.10s pencil draws the cat · 0.10→1.70s counter
-   1.80s content leaves · 1.85s+ columns lift · 2.9s gone
+   Preloader — "Karalama defteri": pure CSS, starts on first paint
+   0.05s pencil scribbles the cat · 0.7s face + doodles
+   0.8s wordmark lettered + lime highlighter · 1.3s sheet strains
+   1.42s sheet rips in two and flies off · 2.05s gone
+   Only transform / opacity / clip-path / stroke-dashoffset animate.
    ============================================================ */
-@property --pct {
-  syntax: '<integer>';
-  initial-value: 0;
-  inherits: false;
-}
-
 .preloader {
   position: fixed;
   inset: 0;
   z-index: 200;
-  display: flex;
   pointer-events: auto;
-  animation: pre-release 0s linear 2s forwards, pre-gone 0s linear 2.9s forwards;
+  overflow: hidden;
+  animation: pre-release 0.01s linear 1.45s forwards, pre-gone 0.01s linear 2.05s forwards;
 }
 html.intro-seen .preloader {
   display: none !important;
@@ -258,81 +254,228 @@ html.intro-seen .preloader {
 @keyframes pre-release { to { pointer-events: none; } }
 @keyframes pre-gone { to { visibility: hidden; } }
 
-.pre-col {
-  height: 100%;
-  flex: 1;
-  background: #05070d;
-  transform-origin: 50% 0%;
-  margin-left: -1px;
-  animation: pre-col 0.8s var(--ease-curtain) both;
-  animation-delay: calc(1.85s + var(--i) * 55ms);
+/* Paper-coloured backing so the two halves never show a hairline seam */
+.ps-under {
+  position: absolute;
+  inset: 0;
+  background: #f3eee3;
+  animation: ps-hide 0.01s linear 1.4s forwards;
 }
-@keyframes pre-col { from { transform: scaleY(1); } to { transform: scaleY(0); } }
+@keyframes ps-hide { to { opacity: 0; } }
 
-.pre-content {
-  pointer-events: none;
+.ps-piece {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.ps-clip,
+.ps-fiber {
+  position: absolute;
+  inset: 0;
+}
+.ps-fiber {
+  background: #fffcf4;
+  opacity: 0;
+  animation: ps-show 0.1s linear 1.3s forwards;
+}
+@keyframes ps-show { to { opacity: 1; } }
+
+.ps-top {
+  transform-origin: 100% 0%;
+  animation: ps-tear-top 0.72s 1.3s both;
+}
+.ps-bottom {
+  transform-origin: 0% 100%;
+  animation: ps-tear-bottom 0.72s 1.3s both;
+}
+@keyframes ps-tear-top {
+  0% { transform: none; animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  17% { transform: translate3d(0, -7px, 0) rotate(-0.5deg); animation-timing-function: cubic-bezier(0.6, 0, 0.2, 1); }
+  100% { transform: translate3d(-4%, -112%, 0) rotate(-8deg); }
+}
+@keyframes ps-tear-bottom {
+  0% { transform: none; animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  17% { transform: translate3d(0, 7px, 0) rotate(0.4deg); animation-timing-function: cubic-bezier(0.6, 0, 0.2, 1); }
+  100% { transform: translate3d(3%, 112%, 0) rotate(6deg); }
+}
+
+/* A sheet of ruled notebook paper (same stock as the Manifesto card) */
+.ps-sheet {
   position: absolute;
   inset: 0;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 1.25rem;
-  animation: pre-content-out 0.45s var(--ease-curtain) 1.8s both;
+  align-items: center;
+  justify-content: center;
+  background-color: #f3eee3;
+  background-image:
+    linear-gradient(90deg, transparent 0, transparent 30px, rgba(225, 80, 80, 0.45) 30px, rgba(225, 80, 80, 0.45) 32px, transparent 32px),
+    repeating-linear-gradient(180deg, transparent 0, transparent 35px, rgba(70, 110, 170, 0.16) 35px, rgba(70, 110, 170, 0.16) 36px);
+  color: #1f2430;
 }
 @media (min-width: 640px) {
-  .pre-content { padding: 2rem; }
-}
-@keyframes pre-content-out {
-  from { opacity: 1; transform: none; }
-  to { opacity: 0; transform: translateY(-60px); }
-}
-
-.pre-letter {
-  display: inline-block;
-  animation: pre-letter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  animation-delay: calc(0.75s + var(--i) * 55ms);
-}
-@keyframes pre-letter {
-  from { transform: translateY(110%) rotate(10deg) scale(0.8); }
-  to { transform: none; }
+  .ps-sheet {
+    background-image:
+      linear-gradient(90deg, transparent 0, transparent 72px, rgba(225, 80, 80, 0.45) 72px, rgba(225, 80, 80, 0.45) 74px, transparent 74px),
+      repeating-linear-gradient(180deg, transparent 0, transparent 39px, rgba(70, 110, 170, 0.16) 39px, rgba(70, 110, 170, 0.16) 40px);
+  }
 }
 
-.pre-count {
-  counter-reset: pct var(--pct);
-  animation: pre-count 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.1s both;
-}
-.pre-count::before {
-  content: counter(pct);
-}
-@keyframes pre-count { from { --pct: 0; } to { --pct: 100; } }
-
-.pre-bar {
-  width: 0;
-  animation: pre-bar 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.1s both;
-}
-@keyframes pre-bar { to { width: 100%; } }
-
-.pre-status {
+/* The rip runs along the middle of the viewport, so the cat sits just above
+   it and the wordmark just below — each half flies off with its own piece. */
+.ps-stage {
   position: absolute;
-  right: 0;
+  inset: 0;
+}
+/* Cat: 200×200 artboard scaled per breakpoint */
+.ps-cat-box {
+  --s: 1;
+  position: absolute;
+  left: 50%;
+  bottom: calc(50% - 10px);
+  margin-left: calc(-100px * var(--s));
+  width: calc(200px * var(--s));
+  height: calc(200px * var(--s));
+}
+@media (min-width: 640px) {
+  .ps-cat-box { --s: 1.7; }
+}
+.ps-cat {
+  position: absolute;
+  left: 0;
   top: 0;
+  width: 200px;
+  height: 200px;
+  transform: scale(var(--s));
+  transform-origin: 0 0;
+}
+.ps-cat > svg { overflow: visible; }
+
+.ps-draw {
+  /* gap > 1 so no zero-length round-cap dot shows before the stroke starts */
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1;
+  animation: ps-draw var(--dur, 0.3s) cubic-bezier(0.45, 0, 0.55, 1) var(--at, 0s) forwards;
+}
+@keyframes ps-draw { to { stroke-dashoffset: 0; } }
+.ps-head { --at: 0.05s; --dur: 0.62s; }
+.ps-head2 { --at: 0.3s; --dur: 0.5s; }
+.ps-face { --at: 0.72s; --dur: 0.2s; }
+.ps-whiskers { --at: 0.8s; --dur: 0.22s; }
+.ps-star { --at: 0.86s; --dur: 0.26s; }
+.ps-squiggle { --at: 0.94s; --dur: 0.24s; }
+.ps-ticks { --at: 1.04s; --dur: 0.14s; }
+
+.ps-pop,
+.ps-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0);
+  animation: ps-pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) var(--at, 0s) forwards;
+}
+@keyframes ps-pop { to { transform: scale(1); } }
+.ps-eye { --at: 0.68s; animation-name: ps-eye; animation-duration: 0.62s; animation-timing-function: ease-out; }
+.ps-eye-r { --at: 0.72s; }
+@keyframes ps-eye {
+  0% { transform: scale(0); }
+  22% { transform: scale(1.3); }
+  32%, 70% { transform: scale(1); }
+  80% { transform: scale(1.15, 0.12); }
+  90%, 100% { transform: scale(1); }
+}
+.ps-cheek { --at: 0.78s; }
+.ps-cheek-r { --at: 0.82s; }
+.ps-star-fill { --at: 1.08s; }
+
+.ps-pencil,
+.ps-pencil2 {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 44px;
+  height: 44px;
+}
+.ps-pencil > svg,
+.ps-pencil2 > svg {
+  animation: dd-wiggle 0.14s ease-in-out infinite alternate;
+  transform-origin: 5% 95%;
+}
+.ps-pencil {
+  offset-anchor: 5% 95%;
+  offset-rotate: 0deg;
+  animation:
+    ps-trace 0.62s cubic-bezier(0.45, 0, 0.55, 1) 0.05s both,
+    ps-lift 0.16s ease-in 0.68s forwards;
+}
+@keyframes ps-trace {
+  from { offset-distance: 0%; }
+  to { offset-distance: 100%; }
+}
+@keyframes ps-lift {
+  to { opacity: 0; transform: translate(16px, -22px) rotate(18deg); }
+}
+
+/* Wordmark */
+.ps-word-wrap {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 28px);
+  width: max-content;
   white-space: nowrap;
+  transform: translateX(-50%);
+  isolation: isolate;
+}
+.ps-word {
+  display: block;
+  padding: 0 0.06em 0.08em;
+  font-size: clamp(60px, 16vw, 168px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: #1f2430;
+  transform: rotate(-2deg);
+  clip-path: inset(-25% 100% -25% 0);
+  animation: ps-letter 0.4s cubic-bezier(0.45, 0, 0.55, 1) 0.8s forwards;
+}
+@keyframes ps-letter { to { clip-path: inset(-25% 0% -25% 0); } }
+.ps-swash {
+  position: absolute;
+  z-index: -1;
+  left: -3%;
+  right: -2%;
+  bottom: 14%;
+  height: 38%;
+  background: #c8f560;
+  clip-path: polygon(1% 18%, 30% 6%, 62% 12%, 99% 0, 100% 78%, 70% 92%, 36% 86%, 0 100%);
+  transform: rotate(-2.5deg) scaleX(0);
+  transform-origin: 0 50%;
+  animation: ps-swash 0.24s cubic-bezier(0.3, 0.7, 0.2, 1) 1.1s forwards;
+}
+@keyframes ps-swash { to { transform: rotate(-2.5deg) scaleX(1); } }
+
+/* Second pencil: a full-width rail that slides by exactly the word's width */
+.ps-writer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: rotate(-2deg) translateX(0);
+  animation: ps-rail 0.4s cubic-bezier(0.45, 0, 0.55, 1) 0.8s forwards;
+}
+@keyframes ps-rail { to { transform: rotate(-2deg) translateX(100%); } }
+.ps-pencil2 {
+  top: auto;
+  bottom: 30%;
+  left: -2px;
   opacity: 0;
-  animation: pre-status 0.42s ease both;
-  animation-delay: calc(0.1s + var(--i) * 0.4s);
+  animation: ps-pencil2 0.6s linear 0.74s forwards;
 }
-.pre-status-last {
-  animation-name: pre-status-in;
-  animation-duration: 0.25s;
+@keyframes ps-pencil2 {
+  0% { opacity: 0; transform: translate(10px, -16px); }
+  12%, 74% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translate(18px, -26px) rotate(20deg); }
 }
-@keyframes pre-status {
-  0% { opacity: 0; transform: translateY(8px); }
-  25%, 75% { opacity: 1; transform: none; }
-  100% { opacity: 0; transform: translateY(-8px); }
-}
-@keyframes pre-status-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .preloader { display: none !important; }
 }
 
 html.is-loading,
@@ -438,12 +581,6 @@ html.is-loading body {
   from { transform: rotate(-5deg); }
   to { transform: rotate(4deg); }
 }
-.pre-doodle {
-  transform: scale(1.05);
-}
-@media (min-width: 640px) {
-  .pre-doodle { transform: scale(1.35); }
-}
 @media (prefers-reduced-motion: reduce) {
   .dd-pencil > svg { animation: none; }
 }
@@ -492,7 +629,7 @@ html.intro-play .line-mask > span,
 html.intro-play .intro-fade,
 html.intro-play .intro-drop,
 html.intro-play .intro-pop {
-  animation-delay: calc(var(--d, 0s) + 1.9s);
+  animation-delay: calc(var(--d, 0s) + 1.45s);
 }
 
 /* Lenis */
