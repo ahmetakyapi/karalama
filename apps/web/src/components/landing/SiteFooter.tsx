@@ -15,7 +15,7 @@ const COLS = [
       { href: '#topluluk', label: 'SSS' },
     ],
   },
-  { title: 'Sen', links: [{ href: '/profil', label: 'Profil & Rozetler' }] },
+  { title: 'Hesabın', links: [{ href: '/profil', label: 'Profil ve Rozetler' }] },
   {
     title: 'Yasal',
     links: [
@@ -33,7 +33,7 @@ export function SiteFooter() {
   const { scrollTo } = useSmoothScroll();
 
   return (
-    <footer className="relative z-10 overflow-hidden border-t border-white/[0.07] pt-20">
+    <footer className="cv-auto relative z-10 overflow-hidden border-t border-white/[0.07] pt-20">
       <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-6 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div>
           <p className="max-w-xs font-display text-3xl font-bold leading-tight tracking-[-0.03em] text-slate-100">
@@ -45,7 +45,7 @@ export function SiteFooter() {
             className="roll-host mt-8 inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-xs font-semibold text-slate-300 transition-colors hover:border-white/25 hover:text-white"
           >
             <span aria-hidden="true">↑</span>
-            <RollText text="Başa dön" />
+            <RollText text="Başa Dön" />
           </button>
         </div>
         {COLS.map((c) => (

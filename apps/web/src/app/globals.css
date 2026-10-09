@@ -13,6 +13,7 @@
 
 body {
   background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
     radial-gradient(circle at 18% 12%, rgba(79,70,229,0.14), transparent 30%),
     radial-gradient(circle at 82% 10%, rgba(34,211,238,0.09), transparent 24%),
     radial-gradient(circle at 50% 100%, rgba(16,185,129,0.05), transparent 28%),
@@ -46,10 +47,11 @@ body {
 /* Glass system */
 @layer components {
   .glass {
-    background: linear-gradient(180deg, rgba(8,12,22,0.72), rgba(6,10,18,0.46));
+    /* No backdrop-filter: it re-blurs everything behind every card on each
+       scroll frame. A denser fill reads the same on our dark backgrounds. */
+    background: linear-gradient(180deg, rgba(9,13,24,0.86), rgba(7,11,20,0.7));
     border: 1px solid rgba(148,163,184,0.1);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 14px 34px rgba(2,6,23,0.14);
-    backdrop-filter: blur(16px);
     border-radius: 1rem;
   }
 
@@ -73,7 +75,6 @@ body {
     padding: 0.5rem 1rem;
     font-size: 0.78rem;
     font-weight: 600;
-    backdrop-filter: blur(18px);
     color: rgba(148,163,184,0.8);
   }
 
@@ -218,7 +219,7 @@ kbd {
 }
 
 /* ============================================================
-   Motion system — preloader, smooth scroll, grain, cursor
+   Motion system — preloader, smooth scroll, cursor
    ============================================================ */
 
 :root {
@@ -509,30 +510,8 @@ html.lenis body {
   overflow: hidden;
 }
 
-/* Film grain */
-.grain {
-  position: fixed;
-  inset: -50%;
-  width: 200%;
-  height: 200%;
-  pointer-events: none;
-  z-index: 90;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grain 1.2s steps(6) infinite;
-}
-@keyframes grain {
-  0%, 100% { transform: translate(0, 0); }
-  20% { transform: translate(-4%, 3%); }
-  40% { transform: translate(3%, -5%); }
-  60% { transform: translate(-2%, 6%); }
-  80% { transform: translate(5%, -2%); }
-}
-html.high-contrast .grain,
-html.reduce-motion .grain {
-  display: none;
-}
-
+/* Film grain is baked into the body background (see `body`) — a fixed,
+   animated full-screen overlay forced a full recomposite on every frame. */
 /* Custom cursor only on fine pointers */
 .cursor-layer {
   display: none;
@@ -665,4 +644,45 @@ html.reduce-motion .grain {
   .intro-pop {
     animation: none !important;
   }
+}
+
+/* ============================================================
+   Performance: soft glows without filter: blur()
+   A radial gradient is already soft — no per-frame blur pass.
+   Colour comes from `text-*` utilities via currentColor.
+   ============================================================ */
+.glow {
+  pointer-events: none;
+  background: radial-gradient(closest-side, currentColor, color-mix(in srgb, currentColor 45%, transparent) 55%, transparent);
+  scale: 1.45;
+}
+
+/* Landing ambient blobs: one compositor layer, CSS-only drift */
+.aurora {
+  will-change: transform;
+  animation: aurora 20s ease-in-out infinite;
+}
+html.past-hero .aurora {
+  animation-play-state: paused;
+}
+@keyframes aurora {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(var(--ax, 40px), var(--ay, -30px), 0) scale(var(--as, 1.1)); }
+}
+
+/* Off-screen work is wasted work */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+/* ============================================================
+   Typography: no lonely last words
+   Headings balance their lines; body copy avoids one-word last lines.
+   ============================================================ */
+h1, h2, h3, h4, button, label, summary, figcaption {
+  text-wrap: balance;
+}
+p, li, dd, dt, blockquote {
+  text-wrap: pretty;
 }

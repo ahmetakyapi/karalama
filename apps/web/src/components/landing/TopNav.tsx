@@ -125,7 +125,7 @@ export function TopNav() {
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
                 aria-controls="mobile-menu"
-                aria-label={open ? 'Menüyü kapat' : 'Menüyü aç'}
+                aria-label={open ? 'Menüyü Kapat' : 'Menüyü Aç'}
                 className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] md:hidden"
               >
                 <motion.span
@@ -189,7 +189,7 @@ export function TopNav() {
               >
                 Hemen Oyna →
               </button>
-              <p className="font-hand text-2xl text-slate-400">Kalemini kap, gel. ✎</p>
+              <p className="font-hand text-2xl text-slate-400">Kalemini al, gel. ✎</p>
             </motion.div>
           </motion.div>
         )}

@@ -84,7 +84,7 @@ export function GameView() {
             <div className="flex items-center gap-2 min-w-0">
               <Avatar name={drawer.name} color={drawer.avatarColor} size="sm" />
               <span className="text-sm text-white/60 truncate">
-                {isDrawer ? 'Sen çiziyorsun!' : `${drawer.name} çiziyor`}
+                {isDrawer ? 'Sen Çiziyorsun!' : `${drawer.name} Çiziyor`}
               </span>
             </div>
           )}

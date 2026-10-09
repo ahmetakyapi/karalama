@@ -1,192 +1,127 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { TiltCard, Counter } from './common';
 import { SectionHeading } from '@/components/motion/primitives';
-import { EXPO } from '@/components/motion/hooks';
 
-const reveal = {
-  hidden: { opacity: 0, y: 80, clipPath: 'inset(20% 6% 0% 6% round 28px)' },
-  visible: (d: number = 0) => ({
-    opacity: 1,
-    y: 0,
-    clipPath: 'inset(0% 0% 0% 0% round 24px)',
-    transition: { duration: 1.1, ease: EXPO, delay: d },
-  }),
+type Note = {
+  title: string;
+  text: string;
+  paper: string;
+  tilt: number;
+  /** Hand-drawn icon strokes (viewBox 0 0 48 48) */
+  icon: string[];
 };
+
+const NOTES: Note[] = [
+  {
+    title: 'Gerçek Zamanlı Çizim',
+    text: 'Çizdiğin her çizgi, milisaniyeler içinde herkesin ekranında belirir.',
+    paper: '#fde68a',
+    tilt: -3,
+    icon: ['M8 38 L30 16 L36 22 L14 44 L6 46 Z', 'M28 18 L34 24', 'M30 8 C 36 4, 44 10, 40 16'],
+  },
+  {
+    title: '1.070+ Türkçe Kelime',
+    text: '18 kategori, üç zorluk seviyesi. İstersen kendi kelimelerini de ekleyebilirsin.',
+    paper: '#bae6fd',
+    tilt: 2,
+    icon: ['M6 40 L16 10 L26 40', 'M10 30 L22 30', 'M32 24 C 44 20, 44 40, 32 38 C 26 37, 28 28, 40 30 L40 40'],
+  },
+  {
+    title: 'Her Cihazda Çalışır',
+    text: 'Telefonda parmağınla, bilgisayarda fareyle çiz. Uygulama indirmen gerekmez.',
+    paper: '#d9f99d',
+    tilt: -1.5,
+    icon: ['M14 6 L34 6 C 37 6, 38 8, 38 10 L38 40 C 38 43, 36 44, 34 44 L14 44 C 11 44, 10 42, 10 40 L10 10 C 10 7, 12 6, 14 6 Z', 'M20 38 L28 38'],
+  },
+  {
+    title: 'Kayıt Gerekmez',
+    text: 'Adını yaz, bağlantıyı paylaş, oyna. Hepsi bu kadar.',
+    paper: '#fbcfe8',
+    tilt: 3,
+    icon: ['M10 24 L20 34 L40 12'],
+  },
+  {
+    title: 'Akıllı İpuçları',
+    text: 'Süre ilerledikçe harfler açılır; yaklaştığında sana haber veririz.',
+    paper: '#ddd6fe',
+    tilt: -2.5,
+    icon: ['M24 6 C 14 6, 10 14, 12 22 C 13 27, 18 29, 18 34 L30 34 C 30 29, 35 27, 36 22 C 38 14, 34 6, 24 6 Z', 'M19 40 L29 40', 'M21 45 L27 45'],
+  },
+  {
+    title: 'Bot Desteği',
+    text: 'Az kişiyseniz bot ekleyin; oyun hiç durmasın.',
+    paper: '#fed7aa',
+    tilt: 1.5,
+    icon: ['M10 16 L38 16 L38 40 L10 40 Z', 'M24 16 L24 8', 'M18 26 L18 28', 'M30 26 L30 28', 'M18 34 L30 34'],
+  },
+];
+
+function StickyNote({ note, i }: { note: Note; i: number }) {
+  return (
+    <motion.li
+      initial={{ opacity: 0, y: -80, rotate: note.tilt * 4 }}
+      whileInView={{ opacity: 1, y: 0, rotate: note.tilt }}
+      viewport={{ once: true, margin: '-8% 0px' }}
+      transition={{ type: 'spring', stiffness: 140, damping: 16, delay: (i % 3) * 0.08 }}
+      whileHover={{ rotate: 0, y: -8, scale: 1.03 }}
+      className="group relative list-none"
+    >
+      {/* tape */}
+      <span
+        aria-hidden="true"
+        className="absolute -top-3 left-1/2 z-10 h-6 w-24 -translate-x-1/2 bg-white/50 shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
+        style={{ clipPath: 'polygon(4% 0, 96% 8%, 100% 90%, 0 100%)', rotate: `${-note.tilt * 2}deg` }}
+      />
+      <article
+        className="relative h-full min-h-[230px] rounded-[3px] p-6 text-[#1f2430] shadow-[0_18px_30px_-12px_rgba(0,0,0,0.7)] transition-shadow duration-500 group-hover:shadow-[0_30px_50px_-16px_rgba(0,0,0,0.75)]"
+        style={{
+          background: `linear-gradient(180deg, ${note.paper}, color-mix(in srgb, ${note.paper} 88%, #000))`,
+        }}
+      >
+        <svg viewBox="0 0 48 48" className="mb-5 h-11 w-11" fill="none" aria-hidden="true">
+          {note.icon.map((d, k) => (
+            <motion.path
+              key={k}
+              d={d}
+              stroke="#1f2430"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ pathLength: 0 }}
+              whileInView={{ pathLength: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, ease: 'easeInOut', delay: 0.35 + k * 0.2 }}
+            />
+          ))}
+        </svg>
+        <h3 className="mb-2 font-display text-2xl font-bold leading-tight tracking-[-0.03em]">{note.title}</h3>
+        <p className="font-hand text-xl leading-snug text-[#3b4050]">{note.text}</p>
+        {/* curled corner */}
+        <span
+          aria-hidden="true"
+          className="absolute bottom-0 right-0 h-8 w-8"
+          style={{ background: 'linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.12) 50%, rgba(255,255,255,0.35) 100%)' }}
+        />
+      </article>
+    </motion.li>
+  );
+}
 
 export default function BentoFeatures() {
   return (
-    <section id="ozellikler" className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6 py-24 sm:py-36">
+    <section id="ozellikler" className="cv-auto relative z-10 mx-auto max-w-6xl px-5 sm:px-6 pb-12 pt-4 sm:pb-16 sm:pt-6">
       <SectionHeading
         index="02"
         eyebrow="Özellikler"
         title={['Neden', { text: 'Karalama?', className: 'text-gradient' }]}
-        desc="Her detay, mükemmel bir oyun gecesi için düşünüldü. Hızlı, Türkçe, ücretsiz."
+        desc="Güzel bir oyun gecesi için ihtiyacın olan her şey burada: hızlı, Türkçe ve ücretsiz."
       />
-
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-80px' }}
-        className="grid grid-cols-1 md:grid-cols-6 gap-4 auto-rows-[minmax(200px,auto)]"
-      >
-        {/* 1. Real-time drawing - big */}
-        <motion.div variants={reveal} custom={0} className="md:col-span-4 md:row-span-2 min-h-[320px]">
-          <TiltCard className="rounded-3xl p-8 h-full relative" glowColor="rgba(99,102,241,0.15)">
-            <div className="flex flex-col h-full">
-              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
-                <svg aria-hidden="true" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-                </svg>
-              </div>
-              <h3 className="font-display text-3xl sm:text-4xl font-bold text-slate-50 mb-2 tracking-[-0.035em]">
-                Gerçek Zamanlı Çizim
-              </h3>
-              <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-md">
-                Fırça her hareketi milisaniyeler içinde tüm oyunculara iletilir. Basınç hassas, pürüzsüz ve akıcı.
-              </p>
-              <div className="mt-auto rounded-2xl bg-[#060a14] border border-white/[0.05] p-4 relative overflow-hidden flex-1 min-h-[140px]">
-                <div className="absolute top-3 left-3 flex gap-1.5">
-                  {['#6366f1', '#ef4444', '#22d3ee', '#f59e0b'].map((c) => (
-                    <motion.div
-                      key={c}
-                      whileHover={{ scale: 1.2 }}
-                      className="w-5 h-5 rounded-full border border-white/15"
-                      style={{ background: c }}
-                    />
-                  ))}
-                </div>
-                <svg aria-hidden="true" viewBox="0 0 300 120" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
-                  <motion.path
-                    d="M 30 80 Q 60 20 100 60 T 170 55 T 260 70"
-                    fill="none"
-                    stroke="rgba(99,102,241,0.85)"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeDasharray="1000"
-                    initial={{ strokeDashoffset: 1000 }}
-                    whileInView={{ strokeDashoffset: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 2.2, ease: 'easeOut', delay: 0.3 }}
-                  />
-                  <motion.circle
-                    cx="30" cy="80" r="5"
-                    fill="#22d3ee"
-                    animate={{ x: [0, 230, 0], y: [0, -10, 0] }}
-                    transition={{ duration: 4.4, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                </svg>
-              </div>
-            </div>
-          </TiltCard>
-        </motion.div>
-
-        {/* 2. 1070+ words */}
-        <motion.div variants={reveal} custom={0.08} className="md:col-span-2">
-          <TiltCard className="rounded-3xl p-6 h-full" glowColor="rgba(34,211,238,0.15)">
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400">
-              <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502" />
-              </svg>
-            </div>
-            <div className="font-display text-5xl font-extrabold text-slate-50 mb-1 tracking-[-0.05em]">
-              <Counter to={1070} suffix="+" />
-            </div>
-            <div className="text-sm font-semibold text-slate-300 mb-1">Türkçe Kelime</div>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              18 kategori · 3 zorluk seviyesi
-            </p>
-          </TiltCard>
-        </motion.div>
-
-        {/* 3. Mobile friendly */}
-        <motion.div variants={reveal} custom={0.12} className="md:col-span-2">
-          <TiltCard className="rounded-3xl p-6 h-full" glowColor="rgba(16,185,129,0.15)">
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
-              <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-              </svg>
-            </div>
-            <h3 className="font-display text-xl font-bold tracking-[-0.02em] text-slate-50 mb-1.5">Mobil Uyumlu</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Telefondan parmağınla çiz, tabletten oyna. Her cihazda aynı deneyim.
-            </p>
-          </TiltCard>
-        </motion.div>
-
-        {/* 4. Instant start */}
-        <motion.div variants={reveal} custom={0.16} className="md:col-span-3">
-          <TiltCard className="rounded-3xl p-6 h-full relative overflow-hidden" glowColor="rgba(245,158,11,0.15)">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400">
-                  <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                  </svg>
-                </div>
-                <h3 className="font-display text-xl font-bold tracking-[-0.02em] text-slate-50 mb-1.5">Anında Başla</h3>
-                <p className="text-xs text-slate-400 leading-relaxed max-w-[240px]">
-                  Kayıt yok, indirme yok. İsmini yaz, linki paylaş, oyna.
-                </p>
-              </div>
-              <div className="flex flex-col items-end gap-1.5 mt-1">
-                {['✓ Kayıt Yok', '✓ İndirme Yok', '✓ Ücretsiz'].map((t, i) => (
-                  <motion.span
-                    key={t}
-                    initial={{ opacity: 0, x: 12 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2 + i * 0.1 }}
-                    className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full"
-                  >
-                    {t}
-                  </motion.span>
-                ))}
-              </div>
-            </div>
-          </TiltCard>
-        </motion.div>
-
-        {/* 5. Hint system */}
-        <motion.div variants={reveal} custom={0.2} className="md:col-span-3">
-          <TiltCard className="rounded-3xl p-6 h-full" glowColor="rgba(168,85,247,0.15)">
-            <div className="flex items-start gap-4">
-              <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl border border-violet-500/20 bg-violet-500/10 text-violet-400">
-                <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-display text-xl font-bold tracking-[-0.02em] text-slate-50 mb-1.5">Akıllı İpuçları</h3>
-                <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  Harfler zamanla açılır. &quot;Yaklaştın&quot; uyarıları seni yönlendirir.
-                </p>
-                <div className="flex gap-1">
-                  {['K', 'A', 'L', '_', 'M'].map((ch, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ scale: 0.6, opacity: 0 }}
-                      whileInView={{ scale: 1, opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.3 + i * 0.1, type: 'spring', stiffness: 300 }}
-                      className={cn(
-                        'w-7 h-8 rounded-md flex items-center justify-center text-xs font-bold',
-                        ch !== '_'
-                          ? 'bg-violet-500/15 border border-violet-500/30 text-violet-300'
-                          : 'bg-white/[0.03] border border-white/[0.06] text-slate-500'
-                      )}
-                    >
-                      {ch}
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </TiltCard>
-        </motion.div>
-      </motion.div>
+      <ul className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+        {NOTES.map((n, i) => (
+          <StickyNote key={n.title} note={n} i={i} />
+        ))}
+      </ul>
     </section>
   );
 }

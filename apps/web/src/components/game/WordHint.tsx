@@ -12,7 +12,7 @@ export function WordHint() {
     return (
       <div className="text-center">
         <p className="text-white/40 text-sm">
-          {isDrawer ? 'Bir kelime seç...' : 'Çizici kelime seçiyor...'}
+          {isDrawer ? 'Bir kelime seç…' : 'Çizen oyuncu kelime seçiyor…'}
         </p>
       </div>
     );

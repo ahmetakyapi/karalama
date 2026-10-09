@@ -216,7 +216,7 @@ export function CanvasToolbar() {
           onClick={() => setShowColors(!showColors)}
           className="w-8 h-8 rounded-lg border-2 border-white/20 transition-all hover:border-white/40 relative overflow-hidden"
           style={{ backgroundColor: color }}
-          title="Renk seç"
+          title="Renk Seç"
           aria-label="Renk paleti"
         >
           <span className="sr-only">{color}</span>

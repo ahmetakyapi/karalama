@@ -24,12 +24,6 @@ function ScrollProgress() {
   );
 }
 
-function Grain() {
-  const pathname = usePathname();
-  if (isGameRoute(pathname)) return null;
-  return <div className="grain" aria-hidden="true" />;
-}
-
 export function MotionProvider({ children }: { children: ReactNode }) {
   const reduceMotion = useSettingsStore((s) => s.reduceMotion);
   return (
@@ -40,7 +34,6 @@ export function MotionProvider({ children }: { children: ReactNode }) {
           <ScrollProgress />
           <Cursor />
           <IntroClock />
-          <Grain />
         </TransitionProvider>
       </SmoothScroll>
     </MotionConfig>

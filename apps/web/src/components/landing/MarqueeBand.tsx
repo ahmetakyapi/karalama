@@ -4,14 +4,14 @@ import { VelocityMarquee } from '@/components/motion/primitives';
 
 const BIG = ['Çiz', 'Tahmin Et', 'Kazan', 'Gül', 'Tekrarla'];
 const SMALL = [
-  { emoji: '🎨', label: 'Gerçek zamanlı çizim' },
-  { emoji: '🇹🇷', label: '1070+ Türkçe kelime' },
-  { emoji: '⚡', label: 'Anında bağlan' },
-  { emoji: '📱', label: 'Her cihazda' },
-  { emoji: '🤖', label: 'Bot desteği' },
-  { emoji: '🏆', label: 'Skor tablosu' },
-  { emoji: '💬', label: 'Canlı sohbet' },
-  { emoji: '🚀', label: 'Kayıt gerektirmez' },
+  { emoji: '🎨', label: 'Gerçek Zamanlı Çizim' },
+  { emoji: '🇹🇷', label: '1.070+ Türkçe Kelime' },
+  { emoji: '⚡', label: 'Anında Bağlan' },
+  { emoji: '📱', label: 'Her Cihazda' },
+  { emoji: '🤖', label: 'Bot Desteği' },
+  { emoji: '🏆', label: 'Puan Tablosu' },
+  { emoji: '💬', label: 'Canlı Sohbet' },
+  { emoji: '🚀', label: 'Üyelik Gerekmez' },
 ];
 
 /** Two crossed "tapes" whose speed and skew follow scroll velocity. */
@@ -35,7 +35,7 @@ export function MarqueeBand() {
           ))}
         </VelocityMarquee>
       </div>
-      <div className="relative -ml-[5%] -mt-3 w-[110%] rotate-[2deg] border-y border-white/10 bg-[#070b14]/95 py-4 backdrop-blur">
+      <div className="relative -ml-[5%] -mt-3 w-[110%] rotate-[2deg] border-y border-white/10 bg-[#070b14] py-4">
         <VelocityMarquee baseVelocity={1.6}>
           {SMALL.map((it) => (
             <span key={it.label} className="flex items-center gap-3 px-6">

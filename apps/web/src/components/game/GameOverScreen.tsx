@@ -327,7 +327,7 @@ export function GameOverScreen() {
       {/* ---- Animated background gradients ---- */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
-          className="absolute top-[10%] left-[20%] w-[500px] h-[500px] bg-accent-indigo/15 rounded-full blur-[140px]"
+          className="absolute top-[10%] left-[20%] w-[500px] h-[500px] text-accent-indigo/15 glow"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.15, 0.25, 0.15],
@@ -335,7 +335,7 @@ export function GameOverScreen() {
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute bottom-[15%] right-[15%] w-[400px] h-[400px] bg-accent-emerald/12 rounded-full blur-[120px]"
+          className="absolute bottom-[15%] right-[15%] w-[400px] h-[400px] text-accent-emerald/12 glow"
           animate={{
             scale: [1, 1.15, 1],
             opacity: [0.12, 0.2, 0.12],
@@ -343,7 +343,7 @@ export function GameOverScreen() {
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
         />
         <motion.div
-          className="absolute top-[40%] right-[30%] w-[350px] h-[350px] bg-amber-500/10 rounded-full blur-[100px]"
+          className="absolute top-[40%] right-[30%] w-[350px] h-[350px] text-amber-500/10 glow"
           animate={{
             scale: [1, 1.3, 1],
             opacity: [0.1, 0.18, 0.1],
@@ -381,7 +381,7 @@ export function GameOverScreen() {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="text-white/40 text-sm mb-6"
         >
-          Skor tablosu aşağıda
+          Puan tablosu aşağıda
         </motion.p>
 
         {/* ---- Trophy + Winner ---- */}
@@ -401,7 +401,7 @@ export function GameOverScreen() {
             {/* Golden glow behind trophy */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <motion.div
-                className="w-40 h-40 bg-amber-400/20 rounded-full blur-[60px]"
+                className="w-40 h-40 text-amber-400/20 glow"
                 animate={{
                   scale: [1, 1.3, 1],
                   opacity: [0.2, 0.4, 0.2],
@@ -555,7 +555,7 @@ export function GameOverScreen() {
         >
           <GlassCard className="p-5" glowColor="rgba(99, 102, 241, 0.08)">
             <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-4">
-              Skor Tablosu
+              Puan Tablosu
             </h2>
             <div className="space-y-1.5">
               {sortedPlayers.map((player, i) => {
@@ -701,7 +701,7 @@ export function GameOverScreen() {
               </div>
               <div>
                 <p className="text-lg font-bold text-amber-400">{bestStreak}</p>
-                <p className="text-[10px] text-white/30 uppercase">En iyi seri</p>
+                <p className="text-[10px] text-white/30 uppercase">En İyi Seri</p>
               </div>
             </div>
           </GlassCard>
@@ -756,7 +756,7 @@ export function GameOverScreen() {
             transition={{ delay: 3.2 }}
             className="text-xs text-white/30 mt-3 text-center"
           >
-            Yeni oyun başlatmak için oda sahibini bekleyin
+            Yeni oyunu başlatmak için oda kurucusunu bekle
           </motion.p>
         )}
       </motion.div>

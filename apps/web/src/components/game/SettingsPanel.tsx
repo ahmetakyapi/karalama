@@ -149,7 +149,7 @@ export function SettingsPanel() {
 
                   <ToggleRow
                     label="Disleksi Dostu Yazı"
-                    hint="OpenDyslexic fontu ile daha okunabilir"
+                    hint="OpenDyslexic yazı tipiyle daha kolay okunur"
                     value={fontFamily === 'dyslexic'}
                     onChange={(v) => setFontFamily(v ? 'dyslexic' : 'default')}
                   />
@@ -232,7 +232,7 @@ export function SettingsPanel() {
                     <div className="grid grid-cols-4 gap-2 text-center">
                       <Stat label="Oyun" value={gamesPlayed} />
                       <Stat label="Bilinen" value={totalCorrectGuesses} />
-                      <Stat label="Şu an" value={currentStreak} accent />
+                      <Stat label="Şu An" value={currentStreak} accent />
                       <Stat label="En İyi" value={bestStreak} accent />
                     </div>
                   </div>
@@ -246,7 +246,7 @@ export function SettingsPanel() {
                       onClick={() => setOpen(false)}
                       className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-xs font-medium text-white/80 transition-all"
                     >
-                      Tüm profilimi ve başarımları gör
+                      Profilimi ve Başarımlarımı Gör
                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                       </svg>

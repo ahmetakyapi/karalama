@@ -21,16 +21,16 @@ export default function TermsPage() {
         Koşulları okuduğundan emin ol — basit tuttuk.
       </p>
 
-      <H2>Hizmetin amacı</H2>
+      <H2>Hizmetin Amacı</H2>
       <p>
         Karalama ücretsiz, kayıt gerektirmeyen bir çizim ve tahmin
         oyunudur. Arkadaşlarınla oda açıp eğlenirsin, işte o kadar.
       </p>
 
-      <H2>Kullanıcı davranışı</H2>
+      <H2>Kullanıcı Davranışı</H2>
       <ul className="list-disc list-inside space-y-2">
         <li>Taciz, tehdit, nefret söylemi, cinsel içerik yasaktır.</li>
-        <li>Otomatik araçlarla (bot, scraper) sunucuyu yormak yasaktır.</li>
+        <li>Otomatik araçlarla (bot, veri kazıyıcı vb.) sunucuyu yormak yasaktır.</li>
         <li>
           Başkalarının güvenliğini tehlikeye atacak kişisel bilgi paylaşımı
           yasaktır (telefon, adres, vb.).
@@ -41,7 +41,7 @@ export default function TermsPage() {
         </li>
       </ul>
 
-      <H2>İçerik sahipliği</H2>
+      <H2>İçerik Sahipliği</H2>
       <p>
         Çizdiğin çizim, yazdığın tahmin ve sohbet mesajları senin.
         Karalama bu içerikleri kaydetmez veya sahiplenmez; oyun bittiğinde
@@ -56,14 +56,14 @@ export default function TermsPage() {
         kurallarını ihlal ettiğin tespit edilirse erişimin engellenebilir.
       </p>
 
-      <H2>Sorumluluk sınırları</H2>
+      <H2>Sorumluluk Sınırları</H2>
       <p>
         Karalama &quot;olduğu gibi&quot; sunulur. Kesintisiz veya hatasız
         çalışma garantisi vermiyoruz. Hizmeti kullanman sonucu oluşan
         doğrudan veya dolaylı zararlardan sorumlu tutulamayız.
       </p>
 
-      <H2>Hizmetin sonlandırılması</H2>
+      <H2>Hizmetin Sonlandırılması</H2>
       <p>
         İhlal durumunda veya operasyonel nedenlerle hizmeti geçici olarak
         durdurma ya da erişimini engelleme hakkımızı saklı tutarız.
@@ -76,7 +76,7 @@ export default function TermsPage() {
         etmek anlamına gelir.
       </p>
 
-      <H2>Uygulanacak hukuk</H2>
+      <H2>Uygulanacak Hukuk</H2>
       <p>Bu koşullar Türkiye Cumhuriyeti kanunlarına tabidir.</p>
     </LegalLayout>
   );
