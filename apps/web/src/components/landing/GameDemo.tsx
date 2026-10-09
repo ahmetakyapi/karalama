@@ -1,156 +1,181 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { useEffect, useLayoutEffect, useRef, useState, type ComponentType } from 'react';
+import { motion, useScroll, useSpring, useTransform, type MotionValue } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { EASE, fadeUp } from './common';
+import { SectionHeading, WhenVisible } from '@/components/motion/primitives';
+import { EXPO, useMediaQuery } from '@/components/motion/hooks';
+import { EASE } from './common';
 
-const DEMO_STEPS = [
+type Step = {
+  id: string;
+  title: string;
+  desc: string;
+  accent: string;
+  Scene: ComponentType;
+};
+
+const DEMO_STEPS: Step[] = [
   {
     id: 'create',
     title: 'Oda Oluştur',
     desc: 'Bir oda kodu oluştur ve arkadaşlarınla paylaş. Herkes saniyeler içinde katılır.',
+    accent: '#6366f1',
+    Scene: DemoRoom,
   },
   {
     id: 'pick',
     title: 'Kelime Seç',
     desc: 'Sıra sana geldiğinde 3 kelimeden birini seç. Kolay, orta veya zor — strateji senin.',
+    accent: '#22d3ee',
+    Scene: DemoPick,
   },
   {
     id: 'draw',
     title: 'Çiz',
     desc: 'Kalem, renk ve kalınlık seçenekleriyle kelimeyi çiz. Herkes gerçek zamanlı izler.',
+    accent: '#10b981',
+    Scene: DemoDraw,
   },
   {
     id: 'guess',
     title: 'Tahmin Et & Kazan',
-    desc: 'Chat\'ten tahminini yaz. Hızlı bil, daha çok puan kazan. İpuçları zamanla açılır.',
+    desc: "Chat'ten tahminini yaz. Hızlı bil, daha çok puan kazan. İpuçları zamanla açılır.",
+    accent: '#c8f560',
+    Scene: DemoGuess,
   },
-] as const;
+];
 
-export default function GameDemo() {
-  const [activeStep, setActiveStep] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: false, margin: '-20%' });
+function StepCard({ step, i, className }: { step: Step; i: number; className?: string }) {
+  const { Scene } = step;
+  return (
+    <article
+      className={cn(
+        'group relative flex flex-col overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#070b14] p-5 sm:p-7',
+        className
+      )}
+    >
+      <div
+        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-30 blur-[90px] transition-opacity duration-700 group-hover:opacity-60"
+        style={{ background: step.accent }}
+      />
+      <div className="relative flex items-start justify-between gap-4">
+        <span
+          className="font-display text-[88px] sm:text-[120px] font-extrabold leading-[0.8] tracking-[-0.06em] text-outline transition-colors duration-700 group-hover:[-webkit-text-stroke-color:var(--hover)]"
+          style={{ ['--hover' as string]: step.accent }}
+        >
+          {String(i + 1).padStart(2, '0')}
+        </span>
+        <span className="mt-2 rounded-full border border-white/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400">
+          Adım {i + 1}/4
+        </span>
+      </div>
+      <h3 className="relative mt-6 font-display text-3xl sm:text-4xl font-bold tracking-[-0.035em] text-slate-50">
+        {step.title}
+      </h3>
+      <p className="relative mt-3 max-w-sm text-sm sm:text-base leading-relaxed text-slate-400">{step.desc}</p>
+      <div className="relative mt-6 flex-1 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#060a14]">
+        <WhenVisible className="relative aspect-[4/3] w-full" amount={0.5}>
+          <Scene />
+        </WhenVisible>
+      </div>
+    </article>
+  );
+}
 
-  useEffect(() => {
-    if (!isInView) return;
-    const timer = setInterval(() => {
-      setActiveStep((s) => (s + 1) % DEMO_STEPS.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [isInView]);
+function ProgressDots({ progress }: { progress: MotionValue<number> }) {
+  const width = useTransform(progress, [0, 1], ['0%', '100%']);
+  return (
+    <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-6">
+      <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-slate-500">Kaydır</span>
+      <div className="relative h-px flex-1 bg-white/10">
+        <motion.div className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 via-cyan-400 to-[#c8f560]" style={{ width }} />
+      </div>
+      <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-slate-500">04</span>
+    </div>
+  );
+}
+
+/** Desktop: vertical scroll drives a pinned horizontal track of steps. */
+function HorizontalTrack() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [distance, setDistance] = useState(0);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const track = trackRef.current;
+      if (!track) return;
+      setDistance(Math.max(0, track.scrollWidth - window.innerWidth));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (trackRef.current) ro.observe(trackRef.current);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
+
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end end'] });
+  const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 28, mass: 0.4 });
+  const x = useTransform(smooth, (v) => -v * distance);
 
   return (
-    <section id="nasil" ref={ref} className="relative z-10 mx-auto max-w-6xl px-6 py-28">
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-80px' }}
-        className="text-center mb-20"
-      >
-        <motion.div variants={fadeUp} custom={0} className="mb-4 flex justify-center">
-          <span className="chip">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            Oyun Akışı
-          </span>
-        </motion.div>
-        <motion.h2
-          variants={fadeUp}
-          custom={0.08}
-          className="text-4xl font-extrabold tracking-tight text-slate-50 sm:text-5xl"
-        >
-          Nasıl <span className="text-gradient">Oynanır?</span>
-        </motion.h2>
-      </motion.div>
-
-      <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-        <div className="space-y-2">
-          {DEMO_STEPS.map((step, i) => (
-            <motion.button
-              key={step.id}
-              onClick={() => setActiveStep(i)}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, ease: EASE, delay: i * 0.1 }}
-              className={cn(
-                'w-full text-left rounded-2xl p-5 transition-all duration-500',
-                activeStep === i
-                  ? 'glass border-indigo-500/30'
-                  : 'bg-transparent hover:bg-white/[0.02]'
-              )}
-            >
-              <div className="flex items-start gap-4">
-                <div
-                  className={cn(
-                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-bold transition-all duration-500',
-                    activeStep === i
-                      ? 'bg-indigo-500/20 text-gradient border border-indigo-500/30'
-                      : 'bg-white/[0.04] text-slate-500 border border-white/[0.06]'
-                  )}
-                >
-                  {String(i + 1).padStart(2, '0')}
-                </div>
-                <div className="min-w-0">
-                  <h3
-                    className={cn(
-                      'font-semibold transition-colors duration-300 mb-1',
-                      activeStep === i ? 'text-slate-100' : 'text-slate-400'
-                    )}
-                  >
-                    {step.title}
-                  </h3>
-                  <AnimatePresence mode="wait">
-                    {activeStep === i && (
-                      <motion.p
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3, ease: EASE }}
-                        className="text-sm leading-relaxed text-slate-400"
-                      >
-                        {step.desc}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-              {activeStep === i && (
-                <motion.div className="mt-3 ml-14 h-0.5 rounded-full bg-white/[0.06] overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400"
-                    initial={{ width: '0%' }}
-                    animate={{ width: '100%' }}
-                    transition={{ duration: 4, ease: 'linear' }}
-                    key={`progress-${activeStep}`}
-                  />
-                </motion.div>
-              )}
-            </motion.button>
-          ))}
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: EASE }}
-          className="relative"
-        >
-          <div className="glass rounded-3xl p-1 overflow-hidden">
-            <div className="rounded-[20px] bg-[#060a14] overflow-hidden aspect-[4/3] relative">
-              <AnimatePresence mode="wait">
-                {activeStep === 0 && <DemoRoom key="room" />}
-                {activeStep === 1 && <DemoPick key="pick" />}
-                {activeStep === 2 && <DemoDraw key="draw" />}
-                {activeStep === 3 && <DemoGuess key="guess" />}
-              </AnimatePresence>
-            </div>
+    <div ref={sectionRef} style={{ height: `calc(100vh + ${distance}px)` }} className="relative">
+      <div className="sticky top-0 flex h-screen flex-col justify-center gap-10 overflow-hidden">
+        <motion.div ref={trackRef} style={{ x }} className="flex w-max gap-6 pl-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))] pr-[12vw]">
+          <div className="flex w-[34vw] max-w-[460px] shrink-0 flex-col justify-center pr-8">
+            <SectionHeading
+              stacked
+              index="01"
+              eyebrow="Oyun Akışı"
+              title={['Nasıl', '\n', { text: 'oynanır?', className: 'text-gradient' }]}
+              desc="Dört adım, sıfır kurulum. Bir link at, kalemleri konuştur."
+            />
           </div>
-          <div className="absolute -inset-4 -z-10 rounded-3xl bg-indigo-500/[0.06] blur-2xl" />
+          {DEMO_STEPS.map((s, i) => (
+            <StepCard key={s.id} step={s} i={i} className="h-[72vh] max-h-[640px] w-[min(520px,42vw)] shrink-0" />
+          ))}
         </motion.div>
+        <ProgressDots progress={scrollYProgress} />
       </div>
+    </div>
+  );
+}
+
+export default function GameDemo() {
+  const desktop = useMediaQuery('(min-width: 1024px)');
+  return (
+    <section id="nasil" aria-label="Nasıl oynanır" className="relative z-10">
+      {desktop ? (
+        <HorizontalTrack />
+      ) : (
+        <div className="mx-auto max-w-6xl px-5 sm:px-6 py-24">
+          <SectionHeading
+            index="01"
+            eyebrow="Oyun Akışı"
+            title={['Nasıl', { text: 'oynanır?', className: 'text-gradient' }]}
+            desc="Dört adım, sıfır kurulum. Bir link at, kalemleri konuştur."
+          />
+          <div className="space-y-5">
+            {DEMO_STEPS.map((s, i) => (
+              <motion.div
+                key={s.id}
+                initial={{ opacity: 0, y: 60 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-10% 0px' }}
+                transition={{ duration: 1, ease: EXPO }}
+                className="sticky"
+                style={{ top: 80 + i * 14 }}
+              >
+                <StepCard step={s} i={i} />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

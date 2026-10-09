@@ -23,7 +23,7 @@ export function LegalLayout({
       <div className="relative mx-auto max-w-3xl">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-200 mb-8 transition-colors"
+          className="animate-rise group inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-200 mb-10 transition-colors"
         >
           <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -31,14 +31,20 @@ export function LegalLayout({
           Ana sayfa
         </Link>
 
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-50 mb-2">
+        <h1
+          className="animate-rise font-display text-5xl sm:text-7xl font-extrabold tracking-[-0.05em] text-slate-50 mb-3"
+          style={{ animationDelay: '0.08s' }}
+        >
           {title}
         </h1>
-        <p className="text-sm text-slate-500 mb-12">
+        <p className="animate-rise font-mono text-[11px] uppercase tracking-[0.25em] text-slate-500 mb-14" style={{ animationDelay: '0.16s' }}>
           Son güncelleme: {updated}
         </p>
 
-        <article className="prose-custom text-slate-300 leading-relaxed space-y-6">
+        <article
+          className="animate-rise prose-custom text-slate-300 leading-relaxed space-y-6"
+          style={{ animationDelay: '0.24s' }}
+        >
           {children}
         </article>
       </div>

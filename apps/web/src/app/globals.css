@@ -216,3 +216,191 @@ kbd {
   border-bottom-width: 2px;
   border-radius: 4px;
 }
+
+/* ============================================================
+   Motion system — preloader, smooth scroll, grain, cursor
+   ============================================================ */
+
+:root {
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-curtain: cubic-bezier(0.76, 0, 0.24, 1);
+  --marker: #c8f560;
+}
+
+::selection {
+  background: rgba(200, 245, 96, 0.9);
+  color: #04070d;
+}
+
+/* Preloader: hidden instantly when the intro already played this session */
+html.intro-seen .preloader {
+  display: none !important;
+}
+html.is-loading,
+html.is-loading body {
+  overflow: hidden;
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Film grain */
+.grain {
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 90;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite;
+}
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-4%, 3%); }
+  40% { transform: translate(3%, -5%); }
+  60% { transform: translate(-2%, 6%); }
+  80% { transform: translate(5%, -2%); }
+}
+html.high-contrast .grain,
+html.reduce-motion .grain {
+  display: none;
+}
+
+/* Custom cursor only on fine pointers */
+.cursor-layer {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cursor-layer {
+    display: block;
+  }
+}
+
+/* Letter-roll hover (nav links, footer links) */
+.roll {
+  display: inline-flex;
+  overflow: hidden;
+  line-height: 1.15;
+  vertical-align: bottom;
+}
+.roll > span {
+  display: inline-block;
+  white-space: pre;
+  transition: transform 0.55s var(--ease-expo);
+  transition-delay: calc(var(--i, 0) * 18ms);
+  text-shadow: 0 1.15em currentColor;
+}
+.roll-host:hover .roll > span,
+.roll-host:focus-visible .roll > span {
+  transform: translateY(-1.15em);
+}
+
+/* Outline display text */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(226, 232, 240, 0.38);
+}
+
+/* Footer wordmark letter hover */
+.wordmark-letter {
+  display: inline-block;
+  transition: transform 0.6s var(--ease-expo), color 0.4s ease;
+}
+.wordmark-letter:hover {
+  transform: translateY(-8%) rotate(-4deg);
+  color: var(--marker);
+  -webkit-text-stroke: 0;
+}
+
+/* Rotating badge text */
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.spin-slow {
+  animation: spin-slow 14s linear infinite;
+}
+
+/* CSS-only ink loader (works in server components) */
+@keyframes ink-draw {
+  0% { stroke-dashoffset: 300; }
+  55% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -300; }
+}
+.ink-loader path {
+  stroke-dasharray: 300;
+  animation: ink-draw 1.8s var(--ease-curtain) infinite;
+}
+@keyframes ink-dot {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-3px); }
+}
+.ink-dots span {
+  display: inline-block;
+  animation: ink-dot 1.2s ease-in-out infinite;
+}
+.ink-dots span:nth-child(2) { animation-delay: 0.15s; }
+.ink-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+/* Simple CSS entrance for server-rendered pages */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-rise {
+  animation: rise 0.9s var(--ease-expo) both;
+}
+@keyframes scribble-in {
+  from { stroke-dashoffset: var(--len, 600); }
+  to { stroke-dashoffset: 0; }
+}
+.scribble-in {
+  stroke-dasharray: var(--len, 600);
+  animation: scribble-in 1.6s var(--ease-expo) both;
+}
+
+/* Range inputs (create room) */
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6366f1, #22d3ee) 0 / var(--fill, 50%) 100% no-repeat, rgba(255, 255, 255, 0.07);
+  outline: none;
+  cursor: pointer;
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 5px solid #22d3ee;
+  box-shadow: 0 0 0 6px rgba(34, 211, 238, 0.12), 0 6px 16px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s var(--ease-expo), box-shadow 0.3s ease;
+}
+.range:active::-webkit-slider-thumb {
+  transform: scale(1.18);
+  box-shadow: 0 0 0 10px rgba(34, 211, 238, 0.16), 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+.range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 5px solid #22d3ee;
+}

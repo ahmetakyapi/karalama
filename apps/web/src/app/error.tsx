@@ -25,7 +25,7 @@ export default function GlobalError({
     >
       <div className="pointer-events-none fixed inset-0 bg-grid opacity-40" />
 
-      <div className="relative text-center max-w-md">
+      <div className="relative text-center max-w-md animate-rise">
         <div
           aria-hidden="true"
           className="mx-auto mb-6 w-20 h-20 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center"
@@ -34,7 +34,7 @@ export default function GlobalError({
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.310-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.25-8.25-3.285zm0 13.036h.008v.008H12v-.008z" />
           </svg>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-50 mb-3 tracking-tight">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold text-slate-50 mb-3 tracking-[-0.03em]">
           Beklenmedik bir hata oluştu
         </h1>
         <p className="text-sm text-slate-400 leading-relaxed mb-8">

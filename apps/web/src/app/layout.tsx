@@ -1,14 +1,29 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Bricolage_Grotesque, Caveat } from 'next/font/google';
 import './globals.css';
 import { ThemeApplier } from '@/components/ui/ThemeApplier';
 import { ToastStack } from '@/components/ui/ToastStack';
+import { MotionProvider } from '@/components/motion/MotionProvider';
+import { INTRO_BOOT_SCRIPT } from '@/lib/intro';
 
 const inter = Inter({
   subsets: ['latin', 'latin-ext'],
   variable: '--font-sans',
   display: 'swap',
   adjustFontFallback: true,
+});
+
+const display = Bricolage_Grotesque({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const hand = Caveat({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-hand',
+  weight: ['500', '700'],
+  display: 'swap',
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://karalama.vercel.app';
@@ -115,8 +130,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="tr" className={`dark ${inter.variable}`} suppressHydrationWarning>
+    <html lang="tr" className={`dark ${inter.variable} ${display.variable} ${hand.variable}`} suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: INTRO_BOOT_SCRIPT }} />
         <link rel="preconnect" href={SOCKET_URL} crossOrigin="anonymous" />
         <link rel="dns-prefetch" href={SOCKET_URL} />
         <script
@@ -132,8 +148,10 @@ export default function RootLayout({
           Ana içeriğe atla
         </a>
         <ThemeApplier />
-        {children}
-        <ToastStack />
+        <MotionProvider>
+          {children}
+          <ToastStack />
+        </MotionProvider>
       </body>
     </html>
   );

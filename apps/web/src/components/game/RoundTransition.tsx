@@ -153,7 +153,7 @@ export function RoundTransition() {
                 }}
                 className="mt-2"
               >
-                <h2 className="text-4xl font-bold bg-gradient-to-r from-indigo-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent leading-tight">
+                <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] bg-gradient-to-r from-indigo-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent leading-tight">
                   {lastRoundData!.word}
                 </h2>
 
@@ -183,7 +183,7 @@ export function RoundTransition() {
                 className="flex flex-col items-center gap-3 py-6"
               >
                 <span className="text-5xl">🤷</span>
-                <p className="text-lg font-semibold text-white/60">
+                <p className="font-hand text-3xl font-bold text-[var(--marker)]">
                   Kimse Bilemedi!
                 </p>
                 <p className="text-sm text-white/30">

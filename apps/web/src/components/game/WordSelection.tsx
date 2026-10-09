@@ -30,8 +30,16 @@ export function WordSelection() {
       className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-xl"
     >
       <div className="text-center p-6">
-        <p className="text-white/50 text-sm mb-2">
-          Bir kelime seç ({timeLeft}s)
+        <motion.p
+          initial={{ opacity: 0, y: 10, rotate: -6 }}
+          animate={{ opacity: 1, y: 0, rotate: -3 }}
+          transition={{ duration: 0.6, ease: easeCurve }}
+          className="font-hand text-4xl font-bold text-[var(--marker)]"
+        >
+          Sıra sende!
+        </motion.p>
+        <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.25em] text-white/50">
+          Bir kelime seç · <span className="tabular-nums text-white/80">{timeLeft}s</span>
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           {wordOptions.map((opt, i) => {
@@ -39,16 +47,18 @@ export function WordSelection() {
             return (
               <motion.div
                 key={opt.word}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1, ease: easeCurve }}
+                initial={{ opacity: 0, y: 40, rotate: (i - 1) * 6 }}
+                animate={{ opacity: 1, y: 0, rotate: (i - 1) * 2 }}
+                whileHover={{ y: -6, rotate: 0, scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 18, delay: i * 0.08 }}
               >
                 <GlassCard
                   hoverable
                   className="p-4 cursor-pointer min-w-[120px]"
                   onClick={() => handleSelect(opt.word)}
                 >
-                  <p className="text-lg font-bold text-white mb-1">
+                  <p className="font-display text-2xl font-bold tracking-[-0.03em] text-white mb-2">
                     {opt.word}
                   </p>
                   <Badge variant={diff.variant}>{diff.text}</Badge>

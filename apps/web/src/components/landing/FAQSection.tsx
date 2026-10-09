@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { EASE, fadeUp } from './common';
+import { cn } from '@/lib/utils';
+import { SectionHeading } from '@/components/motion/primitives';
+import { EXPO } from '@/components/motion/hooks';
 
 const FAQS = [
   {
@@ -44,57 +46,70 @@ export default function FAQSection() {
   };
 
   return (
-    <section id="topluluk" aria-labelledby="faq-title" className="relative z-10 mx-auto max-w-3xl px-6 py-28">
+    <section id="topluluk" aria-labelledby="faq-title" className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6 py-24 sm:py-36">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-80px' }}
-        className="mb-12 text-center"
-      >
-        <motion.div variants={fadeUp} custom={0} className="mb-4 flex justify-center">
-          <span className="chip">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            Sıkça Sorulanlar
-          </span>
-        </motion.div>
-        <motion.h2
-          id="faq-title"
-          variants={fadeUp}
-          custom={0.06}
-          className="text-4xl font-extrabold tracking-tight text-slate-50 sm:text-5xl"
-        >
-          Merak <span className="text-gradient">Edilenler</span>
-        </motion.h2>
-      </motion.div>
+      <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <SectionHeading
+            id="faq-title"
+            index="03"
+            eyebrow="Sıkça Sorulanlar"
+            title={['Merak', '\n', { text: 'edilenler.', className: 'text-gradient' }]}
+          />
+          <p className="-mt-8 hidden max-w-xs font-hand text-2xl leading-snug text-slate-400 lg:block">
+            Cevabını bulamadın mı? Bir oda aç, oynarken öğrenirsin. ✎
+          </p>
+        </div>
 
-      <motion.ul
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-80px' }}
-        className="space-y-2"
-      >
-        {FAQS.map((f, i) => {
-          const isOpen = open === i;
-          return (
-            <motion.li key={f.q} variants={fadeUp} custom={i * 0.05}>
-              <div className="glass rounded-2xl overflow-hidden">
+        <ul className="border-b border-white/10">
+          {FAQS.map((f, i) => {
+            const isOpen = open === i;
+            return (
+              <motion.li
+                key={f.q}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-8% 0px' }}
+                transition={{ duration: 0.9, ease: EXPO, delay: i * 0.05 }}
+                className="relative"
+              >
+                <motion.span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 top-0 h-px origin-left bg-white/10"
+                  initial={{ scaleX: 0 }}
+                  whileInView={{ scaleX: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1.2, ease: EXPO, delay: 0.1 + i * 0.05 }}
+                />
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : i)}
                   aria-expanded={isOpen}
                   aria-controls={`faq-panel-${i}`}
-                  className="w-full flex items-center justify-between gap-4 p-5 text-left hover:bg-white/[0.02] transition-colors"
+                  className="group flex w-full items-center gap-5 py-6 text-left sm:py-7"
                 >
-                  <span className="text-base font-semibold text-slate-100">{f.q}</span>
+                  <span className={cn('font-mono text-xs transition-colors duration-300', isOpen ? 'text-[var(--marker)]' : 'text-slate-600')}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span
+                    className={cn(
+                      'flex-1 font-display text-xl sm:text-2xl font-semibold tracking-[-0.025em] transition-all duration-500 ease-expo',
+                      isOpen ? 'translate-x-1 text-slate-50' : 'text-slate-300 group-hover:translate-x-2 group-hover:text-slate-50'
+                    )}
+                  >
+                    {f.q}
+                  </span>
                   <motion.span
                     aria-hidden="true"
-                    animate={{ rotate: isOpen ? 45 : 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="shrink-0 w-7 h-7 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-slate-300 text-lg leading-none"
+                    animate={{ rotate: isOpen ? 135 : 0, backgroundColor: isOpen ? 'rgba(200,245,96,1)' : 'rgba(255,255,255,0.04)' }}
+                    transition={{ duration: 0.5, ease: EXPO }}
+                    className={cn(
+                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-xl leading-none',
+                      isOpen ? 'border-transparent text-[#04070d]' : 'border-white/10 text-slate-300'
+                    )}
                   >
                     +
                   </motion.span>
@@ -106,20 +121,18 @@ export default function FAQSection() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25, ease: EASE }}
+                      transition={{ duration: 0.55, ease: EXPO }}
                       className="overflow-hidden"
                     >
-                      <p className="px-5 pb-5 text-sm leading-relaxed text-slate-400">
-                        {f.a}
-                      </p>
+                      <p className="max-w-xl pb-7 pl-10 text-base leading-relaxed text-slate-400">{f.a}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
-            </motion.li>
-          );
-        })}
-      </motion.ul>
+              </motion.li>
+            );
+          })}
+        </ul>
+      </div>
     </section>
   );
 }

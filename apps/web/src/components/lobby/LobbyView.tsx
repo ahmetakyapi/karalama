@@ -84,10 +84,24 @@ export function LobbyView() {
       >
         {/* Room Code */}
         <div className="text-center">
-          <p className="text-sm text-white/40 mb-1">Oda Kodu</p>
+          <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.3em] text-white/40">
+            <span className="text-[var(--marker)]">●</span> Oda Kodu
+          </p>
           <div className="flex items-center justify-center gap-3">
-            <span className="text-4xl font-bold font-mono tracking-[0.3em] gradient-text">
-              {roomCode}
+            <span className="flex overflow-hidden font-display text-5xl font-extrabold tracking-[0.12em]" aria-label={roomCode ?? undefined}>
+              {(roomCode ?? '').split('').map((ch, i) => (
+                <motion.span
+                  key={`${ch}-${i}`}
+                  aria-hidden="true"
+                  className="inline-block text-gradient"
+                  style={{ filter: `hue-rotate(${i * 12}deg)` }}
+                  initial={{ y: '110%' }}
+                  animate={{ y: '0%' }}
+                  transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.35 + i * 0.06 }}
+                >
+                  {ch}
+                </motion.span>
+              ))}
             </span>
             <Button variant="ghost" size="sm" onClick={handleNativeShare} aria-label="Oda linkini paylaş">
               {copied ? 'Kopyalandı!' : 'Paylaş'}
