@@ -8,10 +8,10 @@ import { Magnetic, RollText } from '@/components/motion/primitives';
 import { useSmoothScroll } from '@/components/motion/SmoothScroll';
 
 const LINKS = [
-  { href: '#nasil', label: 'Nasıl Oynanır', n: '01' },
-  { href: '#ozellikler', label: 'Özellikler', n: '02' },
-  { href: '#topluluk', label: 'SSS', n: '03' },
-  { href: '/profil', label: 'Profil', n: '04' },
+  { href: '#nasil', label: 'Nasıl Oynanır' },
+  { href: '#ozellikler', label: 'Özellikler' },
+  { href: '#topluluk', label: 'SSS' },
+  { href: '/profil', label: 'Profil' },
 ];
 
 export function Logo({ size = 32 }: { size?: number }) {
@@ -92,10 +92,6 @@ export function TopNav() {
             <a href="/" className="group flex items-center gap-2.5" aria-label="Karalama ana sayfa">
               <Logo />
               <span className="font-display text-lg font-bold tracking-[-0.03em] text-slate-100">Karalama</span>
-              <span className="hidden items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 sm:inline-flex">
-                <span className="h-1 w-1 animate-pulse rounded-full bg-emerald-400" />
-                Canlı
-              </span>
             </a>
 
             <div className="hidden items-center gap-1 md:flex">
@@ -114,7 +110,6 @@ export function TopNav() {
               <Magnetic strength={0.25}>
                 <button
                   onClick={play}
-                  data-cursor="Oyna"
                   className="roll-host relative overflow-hidden rounded-xl bg-[var(--marker)] px-4 py-2 text-xs font-bold text-[#04070d] shadow-[0_6px_24px_rgba(200,245,96,0.25)] transition-shadow hover:shadow-[0_8px_32px_rgba(200,245,96,0.45)]"
                 >
                   <RollText text="Hemen Oyna" />
@@ -168,9 +163,8 @@ export function TopNav() {
                     animate={{ y: '0%' }}
                     exit={{ y: '110%', transition: { duration: 0.3, ease: CURTAIN } }}
                     transition={{ duration: 0.7, ease: EXPO, delay: 0.15 + i * 0.06 }}
-                    className="flex items-baseline gap-4 py-1 font-display text-5xl font-extrabold tracking-[-0.04em] text-slate-50"
+                    className="block py-1 font-display text-5xl font-extrabold tracking-[-0.04em] text-slate-50"
                   >
-                    <span className="font-mono text-xs font-normal tracking-normal text-[var(--marker)]">{l.n}</span>
                     {l.label}
                   </motion.a>
                 </li>

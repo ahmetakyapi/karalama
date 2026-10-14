@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import { CATEGORY_COUNT, MAX_PLAYERS, WORD_COUNT_LABEL } from '@karalama/shared';
 
 export const runtime = 'edge';
 export const alt = 'Karalama — Türkçe çok oyunculu çizim oyunu';
@@ -108,7 +109,7 @@ export default async function Image() {
               WebkitBackgroundClip: 'text',
             }}
           >
-            Eğlen.
+            Eğlen
           </span>
         </div>
 
@@ -122,16 +123,16 @@ export default async function Image() {
             lineHeight: 1.3,
           }}
         >
-          Arkadaşlarınla saniyeler içinde oyna. Türkçe kelime hazinesi, gerçek zamanlı çizim — ücretsiz.
+          Arkadaşlarınla saniyeler içinde oyna. Üyelik yok, indirme yok; bağlantıyı paylaş, çizmeye başla.
         </div>
 
         {/* Stats row */}
         <div style={{ display: 'flex', gap: '32px' }}>
           {[
-            { v: '1.070+', l: 'Kelime' },
-            { v: '18', l: 'Kategori' },
-            { v: '12', l: 'Oyuncu/Oda' },
-            { v: '%100', l: 'Ücretsiz' },
+            { v: WORD_COUNT_LABEL, l: 'Türkçe Kelime' },
+            { v: String(CATEGORY_COUNT), l: 'Kategori' },
+            { v: String(MAX_PLAYERS), l: 'Oyuncu/Oda' },
+            { v: '3', l: 'Zorluk Seviyesi' },
           ].map((s) => (
             <div
               key={s.l}
@@ -145,7 +146,7 @@ export default async function Image() {
               }}
             >
               <div style={{ fontSize: '36px', fontWeight: 800, color: '#f0f2f5' }}>{s.v}</div>
-              <div style={{ fontSize: '16px', color: 'rgba(148,163,184,0.8)', marginTop: '4px' }}>
+              <div style={{ fontSize: '22px', color: 'rgba(203,213,225,0.9)', marginTop: '4px' }}>
                 {s.l}
               </div>
             </div>

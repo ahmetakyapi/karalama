@@ -66,8 +66,8 @@ function StepCard({ step, i, className }: { step: Step; i: number; className?: s
         >
           {String(i + 1).padStart(2, '0')}
         </span>
-        <span className="mt-2 rounded-full border border-white/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400">
-          Adım {i + 1}/4
+        <span className="mt-2 rounded-full border border-white/10 px-3 py-1 text-[13px] font-medium tabular-nums text-slate-300">
+          Adım {i + 1}/{DEMO_STEPS.length}
         </span>
       </div>
       <h3 className="relative mt-6 font-display text-3xl sm:text-4xl font-bold tracking-[-0.035em] text-slate-50">
@@ -84,14 +84,14 @@ function StepCard({ step, i, className }: { step: Step; i: number; className?: s
 }
 
 function ProgressDots({ progress }: { progress: MotionValue<number> }) {
-  const width = useTransform(progress, [0, 1], ['0%', '100%']);
+  // scaleX instead of width: the scroll-linked bar no longer relayouts per frame
   return (
     <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-6">
-      <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-slate-500">Kaydırmaya Devam</span>
+      <span className="text-[13px] font-medium text-slate-400">Kaydırmaya Devam</span>
       <div className="relative h-px flex-1 bg-white/10">
-        <motion.div className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 via-cyan-400 to-[#c8f560]" style={{ width }} />
+        <motion.div className="absolute inset-y-0 left-0 w-full origin-left bg-gradient-to-r from-indigo-500 via-cyan-400 to-[#c8f560]" style={{ scaleX: progress }} />
       </div>
-      <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-slate-500">04</span>
+      <span className="text-[13px] font-medium tabular-nums text-slate-400">{DEMO_STEPS.length} Adım</span>
     </div>
   );
 }
@@ -187,7 +187,7 @@ function DemoRoom() {
   return (
     <motion.div {...demoTransition} className="absolute inset-0 flex flex-col items-center justify-center p-8">
       <div className="glass rounded-2xl p-6 w-full max-w-[280px] text-center">
-        <div className="text-xs text-slate-500 mb-2 font-medium">Oda Kodu</div>
+        <div className="text-xs text-slate-400 mb-2 font-medium">Oda Kodu</div>
         <motion.div
           className="text-3xl font-bold font-mono tracking-[0.3em] text-gradient mb-5"
           initial={{ scale: 0.8, opacity: 0 }}
@@ -206,7 +206,7 @@ function DemoRoom() {
               className="flex flex-col items-center gap-1"
             >
               <div className="w-8 h-8 rounded-full border-2 border-white/10" style={{ background: c }} />
-              <span className="text-[10px] text-slate-500">
+              <span className="text-xs text-slate-400">
                 {['Seda', 'Elif', 'Can', 'Zeynep'][i]}
               </span>
             </motion.div>
@@ -233,7 +233,7 @@ function DemoPick() {
   ];
   return (
     <motion.div {...demoTransition} className="absolute inset-0 flex flex-col items-center justify-center p-8">
-      <div className="text-xs text-slate-500 mb-1 font-medium">Sıra Sende!</div>
+      <div className="text-xs text-slate-400 mb-1 font-medium">Sıra Sende!</div>
       <div className="text-sm text-slate-300 mb-5 font-semibold">Bir Kelime Seç</div>
       <div className="flex gap-3">
         {words.map((w, i) => (
@@ -249,7 +249,7 @@ function DemoPick() {
             )}
           >
             <div className="text-base font-bold text-slate-100 mb-1.5">{w.text}</div>
-            <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full border', w.color)}>
+            <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full border', w.color)}>
               {w.diff}
             </span>
           </motion.div>
@@ -371,11 +371,11 @@ function DemoGuess() {
                 : 'bg-white/[0.03]'
             )}
           >
-            <div className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white" style={{ background: m.color }}>
+            <div className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-xs font-bold text-white" style={{ background: m.color }}>
               {m.name[0]}
             </div>
             <div className="min-w-0">
-              <span className="text-[11px] font-medium text-slate-500 mr-2">{m.name}</span>
+              <span className="text-xs font-medium text-slate-400 mr-2">{m.name}</span>
               <span className={cn('text-sm', m.correct ? 'font-bold text-emerald-400' : 'text-slate-300')}>
                 {m.text}
               </span>
@@ -403,7 +403,7 @@ function DemoGuess() {
           <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 1, 1, 0] }}
-            transition={{ delay: 2, duration: 1.5, repeat: Infinity }}
+            transition={{ delay: 2, duration: 1.5, repeat: 3 }}
             className="text-xs text-slate-500"
           >
             Tahminin...

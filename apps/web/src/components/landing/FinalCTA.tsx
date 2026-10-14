@@ -75,7 +75,6 @@ export function FinalCTA() {
           <Magnetic strength={0.4}>
             <button
               onClick={play}
-              data-cursor="Başla"
               aria-label="Şimdi Oyna"
               className="group relative flex h-40 w-40 sm:h-48 sm:w-48 items-center justify-center rounded-full"
             >
@@ -83,8 +82,10 @@ export function FinalCTA() {
                 <defs>
                   <path id="cta-ring" d="M100,100 m-82,0 a82,82 0 1,1 164,0 a82,82 0 1,1 -164,0" />
                 </defs>
-                <text className="fill-slate-400 font-mono text-[13px] uppercase tracking-[0.34em]">
-                  <textPath href="#cta-ring">şimdi oyna • ücretsiz • üyelik yok • </textPath>
+                <text className="fill-slate-300 font-sans text-[15px] font-semibold tracking-[0.04em]">
+                  <textPath href="#cta-ring" textLength="508" lengthAdjust="spacing">
+                    Şimdi Oyna ✦ Üyelik Yok ✦ Kalemini Al ✦ Hemen Başla ✦
+                  </textPath>
                 </text>
               </motion.svg>
               <span className="relative flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-[var(--marker)] text-[#04070d] shadow-[0_0_60px_rgba(200,245,96,0.35)] transition-transform duration-700 ease-expo group-hover:scale-110">

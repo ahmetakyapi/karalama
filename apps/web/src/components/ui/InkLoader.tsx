@@ -19,7 +19,7 @@ export function InkLoader({
       <div className="flex h-[120px] w-[120px] items-center justify-center">
         <Doodle loop gradientId={gradientId} style={{ transform: 'scale(0.6)' }} />
       </div>
-      <span className="ink-dots font-mono text-[11px] uppercase tracking-[0.3em] text-slate-500">
+      <span className="ink-dots text-[13px] font-medium text-slate-400">
         {label}
         <span>.</span>
         <span>.</span>

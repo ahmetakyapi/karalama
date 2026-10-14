@@ -7,7 +7,7 @@ import { AVATAR_CHARACTERS } from '@karalama/shared';
 import { cn } from '@/lib/utils';
 import { useIntroDone } from '@/lib/intro';
 import { loadSavedPlayer, savePlayer } from '@/lib/player';
-import { EXPO } from '@/components/motion/hooks';
+import { EXPO, useMediaQuery } from '@/components/motion/hooks';
 import { useTransitionRouter } from '@/components/motion/PageTransition';
 import { useSmoothScroll } from '@/components/motion/SmoothScroll';
 import { SectionPlaceholder } from '@/components/landing/common';
@@ -99,17 +99,23 @@ export default function HomePage() {
   const { scrollTo } = useSmoothScroll();
   const ready = useIntroDone();
 
-  const saved = useRef(loadSavedPlayer());
-  const hasSaved = !!saved.current?.name;
-
-  const [playerName, setPlayerName] = useState(saved.current?.name || '');
+  const [hasSaved, setHasSaved] = useState(false);
+  const [playerName, setPlayerName] = useState('');
   const [roomCode, setRoomCode] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState(
-    () => AVATAR_CHARACTERS.find((a) => a.id === saved.current?.avatarId) || AVATAR_CHARACTERS[0]
-  );
-  const [selectedColor, setSelectedColor] = useState<string>(
-    () => saved.current?.color || AVATAR_CHARACTERS[0].color
-  );
+  const [selectedAvatar, setSelectedAvatar] = useState(AVATAR_CHARACTERS[0]);
+  const [selectedColor, setSelectedColor] = useState<string>(AVATAR_CHARACTERS[0].color);
+
+  // Fill in last time's player after mount: reading localStorage during the
+  // first render made the server and client HTML differ for returning
+  // players, and React threw the whole page away to re-render it
+  useEffect(() => {
+    const saved = loadSavedPlayer();
+    if (!saved) return;
+    setPlayerName(saved.name);
+    setSelectedAvatar(AVATAR_CHARACTERS.find((a) => a.id === saved.avatarId) || AVATAR_CHARACTERS[0]);
+    setSelectedColor(saved.color);
+    setHasSaved(true);
+  }, []);
 
   const handleJoin = useCallback(() => {
     if (!playerName.trim() || !roomCode.trim()) return;
@@ -131,26 +137,31 @@ export default function HomePage() {
     navigate(`/oda/olustur?${params}`);
   }, [playerName, selectedAvatar.id, selectedColor, navigate]);
 
+  // Real people online (the server counts humans only). Unknown or
+  // unreachable → the chip simply stays hidden; no placeholder number.
   const [liveCount, setLiveCount] = useState<number | null>(null);
   useEffect(() => {
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://karalama-server.up.railway.app';
     let stopped = false;
     const poll = async () => {
+      if (document.hidden) return;
       try {
         const r = await fetch(`${socketUrl}/health`, { cache: 'no-store' });
-        if (!r.ok) return;
-        const data = (await r.json()) as { players?: number };
-        if (!stopped && typeof data.players === 'number') {
-          setLiveCount(data.players);
-        }
-      } catch { /* network error, keep last */ }
+        const data = r.ok ? ((await r.json()) as { players?: number }) : null;
+        if (!stopped) setLiveCount(typeof data?.players === 'number' ? data.players : null);
+      } catch {
+        if (!stopped) setLiveCount(null);
+      }
     };
     poll();
     const id = setInterval(poll, 30_000);
     return () => { stopped = true; clearInterval(id); };
   }, []);
 
-  // Hero drifts up and dims as you scroll past it
+  // Hero drifts up and dims as you scroll past it — side-by-side layout only;
+  // stacked on phones the copy and the preview drifted apart and opened a
+  // ~200px hole between the form and the preview
+  const wide = useMediaQuery('(min-width: 1024px)');
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress: heroProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const copyY = useTransform(heroProgress, [0, 1], [0, -140]);
@@ -181,20 +192,30 @@ export default function HomePage() {
 
           <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
             {/* LEFT: copy + form */}
-            <motion.div style={{ y: copyY, opacity: heroFade }} className="flex max-w-2xl flex-col justify-center">
-              <div className="intro-fade mb-7 flex" style={enter(0.05)}>
+            <motion.div style={wide ? { y: copyY, opacity: heroFade } : undefined} className="flex max-w-2xl flex-col justify-center">
+              {/* Space is kept so the headline doesn't jump when the count lands */}
+              <div
+                className={cn('intro-fade mb-7 flex h-8 transition-opacity duration-700', liveCount === null && 'pointer-events-none opacity-0')}
+                style={enter(0.05)}
+                aria-hidden={liveCount === null}
+              >
                 <a
                   href="#topluluk"
-                  className="group inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-300 transition-all hover:border-white/[0.15]"
+                  tabIndex={liveCount === null ? -1 : undefined}
+                  className="group inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[13px] font-medium text-slate-300 transition-all hover:border-white/[0.15]"
                 >
                   <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                   </span>
-                  <span className="font-semibold tabular-nums text-slate-200">{liveCount ?? '…'}</span>
-                  <span className="text-slate-500">
-                    {liveCount === 0 ? 'İlk Oyuncu Sen Ol' : 'Oyuncu Çevrimiçi'}
-                  </span>
+                  {liveCount ? (
+                    <>
+                      <span className="font-semibold tabular-nums text-slate-100">{liveCount}</span>
+                      <span className="text-slate-400">Kişi Şu An Oynuyor</span>
+                    </>
+                  ) : (
+                    <span className="text-slate-300">Şu An Sakin, İlk Odayı Sen Kur</span>
+                  )}
                   <svg aria-hidden="true" className="h-3 w-3 text-slate-500 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
@@ -209,7 +230,7 @@ export default function HomePage() {
                 </Line>
                 <span className="relative block w-fit">
                   <Line delay={0.3}>
-                    <span className="text-gradient pr-2">Eğlen.</span>
+                    <span className="text-gradient pr-2">Eğlen</span>
                   </Line>
                   <Doodle play={ready} />
                   <svg
@@ -240,8 +261,7 @@ export default function HomePage() {
               </h1>
 
               <p style={enter(0.5)} className="intro-fade mb-9 max-w-lg text-base leading-relaxed text-slate-400 sm:text-lg">
-                Arkadaşlarınla saniyeler içinde oyna. Üyelik yok, indirme yok, reklam yok; tamamen{' '}
-                <span className="font-semibold text-slate-200">ücretsiz</span>.
+                Arkadaşlarınla saniyeler içinde oyna. Üyelik yok, indirme yok; adını yaz, bağlantıyı paylaş, çizmeye başla.
               </p>
 
               <div className="intro-fade relative w-full max-w-md" style={enter(0.6)}>
@@ -286,7 +306,7 @@ export default function HomePage() {
                 </motion.div>
               </div>
 
-              <div style={enter(0.85)} className="intro-fade mt-6 flex items-center gap-4 text-xs text-slate-500">
+              <div style={enter(0.85)} className="intro-fade mt-6 flex items-center gap-4 text-[13px] text-slate-400">
                 <div className="flex items-center gap-1.5">
                   <svg aria-hidden="true" className="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -303,7 +323,7 @@ export default function HomePage() {
             </motion.div>
 
             {/* RIGHT: animated preview */}
-            <motion.div style={{ y: demoY }}>
+            <motion.div style={wide ? { y: demoY } : undefined}>
               <HeroDemo />
             </motion.div>
           </div>
@@ -314,15 +334,11 @@ export default function HomePage() {
             type="button"
             onClick={() => scrollTo('#nasil')}
             style={enter(1.2)}
-            className="intro-fade flex flex-col items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500 transition-colors hover:text-slate-300"
+            className="intro-fade flex flex-col items-center gap-2 text-[13px] font-medium text-slate-400 transition-colors hover:text-slate-200"
           >
-            Aşağı Kaydır
+            Nasıl Oynanır?
             <span className="relative block h-10 w-px overflow-hidden bg-white/10">
-              <motion.span
-                className="absolute inset-x-0 top-0 h-1/2 bg-[var(--marker)]"
-                animate={{ y: ['-100%', '200%'] }}
-                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-              />
+              <span className="cue-drop absolute inset-x-0 top-0 h-1/2 bg-[var(--marker)]" />
             </span>
           </button>
           </div>

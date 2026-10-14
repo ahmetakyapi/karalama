@@ -37,7 +37,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-6 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div>
           <p className="max-w-xs font-display text-3xl font-bold leading-tight tracking-[-0.03em] text-slate-100">
-            Arkadaşlarınla eğlencenin <span className="font-hand text-4xl font-bold text-[var(--marker)]">adresi.</span>
+            Arkadaşlarınla eğlencenin <span className="font-hand text-4xl font-bold text-[var(--marker)]">adresi</span>
           </p>
           <button
             type="button"
@@ -50,7 +50,7 @@ export function SiteFooter() {
         </div>
         {COLS.map((c) => (
           <nav key={c.title} aria-label={c.title}>
-            <h3 className="mb-4 font-mono text-[11px] uppercase tracking-[0.25em] text-slate-500">{c.title}</h3>
+            <h3 className="mb-4 text-[13px] font-semibold text-slate-400">{c.title}</h3>
             <ul className="space-y-2.5">
               {c.links.map((l) => (
                 <li key={l.href}>
@@ -81,7 +81,7 @@ export function SiteFooter() {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 border-t border-white/[0.06] px-5 py-6 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-600 sm:flex-row sm:px-6">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 border-t border-white/[0.06] px-5 py-6 text-[13px] text-slate-400 sm:flex-row sm:px-6">
         <span>© {new Date().getFullYear()} Karalama</span>
         <span>Türkiye&apos;de sevgiyle karalandı ✎</span>
       </div>

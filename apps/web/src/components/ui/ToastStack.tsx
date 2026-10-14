@@ -85,7 +85,7 @@ export function ToastStack() {
   }, [level, lastLevel]);
 
   return (
-    <div className="fixed top-3 right-3 z-[100] flex flex-col gap-2 max-w-[340px] pointer-events-none">
+    <div role="status" aria-live="polite" className="fixed top-3 right-3 z-[100] flex flex-col gap-2 max-w-[340px] pointer-events-none">
       <AnimatePresence initial={false}>
         {toasts.map((t) => {
           const tierStyle = t.tier ? TIER_STYLE[t.tier] : null;
@@ -111,7 +111,7 @@ export function ToastStack() {
             >
               {/* Shimmer highlight for achievement / level-up */}
               {(t.kind === 'achievement' || t.kind === 'levelUp') && (
-                <div className="absolute inset-0 shimmer-bg pointer-events-none" />
+                <div className="absolute inset-0 shimmer-bg pointer-events-none motion-reduce:hidden" />
               )}
               <div className="relative flex items-start gap-3 p-3.5">
                 <div
@@ -122,9 +122,11 @@ export function ToastStack() {
                   {t.icon || (t.kind === 'levelUp' ? '⭐' : '🔔')}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] uppercase tracking-wider font-bold text-white/50 mb-0.5">
-                    {t.kind === 'achievement' ? 'Başarım Açıldı' : t.kind === 'levelUp' ? 'Seviye Atladın' : ''}
-                  </p>
+                  {(t.kind === 'achievement' || t.kind === 'levelUp') && (
+                    <p className="text-xs font-medium text-slate-300 mb-0.5">
+                      {t.kind === 'achievement' ? 'Başarım Açıldı' : 'Seviye Atladın'}
+                    </p>
+                  )}
                   <p className="text-sm font-bold text-white leading-tight truncate">{t.title}</p>
                   {t.body && <p className="text-xs text-white/60 mt-0.5 leading-snug">{t.body}</p>}
                 </div>

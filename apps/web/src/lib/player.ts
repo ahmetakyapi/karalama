@@ -1,5 +1,3 @@
-import { AVATAR_CHARACTERS } from '@karalama/shared';
-
 /** Who you are on this device — name, character and colour, no account. */
 export type SavedPlayer = { name: string; avatarId: string; color: string };
 
@@ -11,8 +9,9 @@ export function loadSavedPlayer(): SavedPlayer | null {
     const raw = localStorage.getItem(KEY);
     const parsed = raw ? (JSON.parse(raw) as Partial<SavedPlayer>) : null;
     if (!parsed?.name) return null;
-    const avatar = AVATAR_CHARACTERS.find((a) => a.id === parsed.avatarId) ?? AVATAR_CHARACTERS[0];
-    return { name: parsed.name, avatarId: avatar.id, color: parsed.color || avatar.color };
+    // Callers match avatarId against AVATAR_CHARACTERS (kept out of here so
+    // the profile page doesn't pull in the shared game package)
+    return { name: parsed.name, avatarId: parsed.avatarId || 'robot', color: parsed.color || '#6366f1' };
   } catch {
     return null;
   }

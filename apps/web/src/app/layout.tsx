@@ -7,6 +7,7 @@ import { RoomExit } from '@/components/game/RoomExit';
 import { MotionProvider } from '@/components/motion/MotionProvider';
 import { Preloader } from '@/components/motion/Preloader';
 import { INTRO_BOOT_SCRIPT } from '@/lib/intro';
+import { CATEGORY_COUNT, WORD_COUNT_LABEL } from '@karalama/shared';
 
 const inter = Inter({
   subsets: ['latin', 'latin-ext'],
@@ -40,7 +41,7 @@ export const metadata: Metadata = {
     template: '%s · Karalama',
   },
   description:
-    'Arkadaşlarınla saniyeler içinde oyna. 1070+ Türkçe kelime, gerçek zamanlı çizim, bot desteği. Üyelik yok, indirme yok, ücretsiz.',
+    `Arkadaşlarınla saniyeler içinde oyna. ${WORD_COUNT_LABEL} Türkçe kelime, gerçek zamanlı çizim, bot desteği. Üyelik yok, indirme yok.`,
   applicationName: 'Karalama',
   keywords: [
     'karalama',
@@ -64,7 +65,7 @@ export const metadata: Metadata = {
     siteName: 'Karalama',
     title: 'Karalama — Çiz, Tahmin Et, Eğlen',
     description:
-      'Arkadaşlarınla saniyeler içinde oyna. 1070+ Türkçe kelime, gerçek zamanlı çizim. Üyelik yok, ücretsiz.',
+      `Arkadaşlarınla saniyeler içinde oyna. ${WORD_COUNT_LABEL} Türkçe kelime, gerçek zamanlı çizim. Üyelik yok.`,
     images: [
       {
         url: '/opengraph-image',
@@ -78,7 +79,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Karalama — Çiz, Tahmin Et, Eğlen',
     description:
-      'Arkadaşlarınla saniyeler içinde oyna. 1070+ Türkçe kelime, gerçek zamanlı çizim. Ücretsiz.',
+      `Arkadaşlarınla saniyeler içinde oyna. ${WORD_COUNT_LABEL} Türkçe kelime, gerçek zamanlı çizim.`,
     images: ['/opengraph-image'],
   },
   robots: {
@@ -120,7 +121,7 @@ const jsonLd = {
   name: 'Karalama',
   url: SITE_URL,
   description:
-    'Gerçek zamanlı, çok oyunculu Türkçe çizim ve tahmin oyunu. 1070+ kelime, 18 kategori.',
+    `Gerçek zamanlı, çok oyunculu Türkçe çizim ve tahmin oyunu. ${WORD_COUNT_LABEL} kelime, ${CATEGORY_COUNT} kategori.`,
   applicationCategory: 'GameApplication',
   operatingSystem: 'Any (Web)',
   inLanguage: 'tr-TR',

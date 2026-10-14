@@ -157,7 +157,6 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
               className="font-display text-[13vw] sm:text-[9vw] font-extrabold leading-[0.9] tracking-[-0.05em] text-slate-50"
             >
               {label}
-              <span className="text-[var(--marker)]">.</span>
             </motion.div>
           </div>
           <motion.svg
@@ -191,7 +190,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
             transition={{ duration: 0.3, delay: phase === 'covered' ? 0.5 : 0 }}
             className="mt-4"
           >
-            {phase === 'covered' && <InkLoader label="yükleniyor" gradientId="dd-grad-transition" />}
+            {phase === 'covered' && <InkLoader label="Yükleniyor" gradientId="dd-grad-transition" />}
           </motion.div>
         </div>
       </div>

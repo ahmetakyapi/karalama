@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { CATEGORY_COUNT, WORD_COUNT_LABEL } from '@karalama/shared';
 import { SectionHeading } from '@/components/motion/primitives';
 
 type Note = {
@@ -21,8 +22,8 @@ const NOTES: Note[] = [
     icon: ['M8 38 L30 16 L36 22 L14 44 L6 46 Z', 'M28 18 L34 24', 'M30 8 C 36 4, 44 10, 40 16'],
   },
   {
-    title: '1.070+ Türkçe Kelime',
-    text: '18 kategori, üç zorluk seviyesi. İstersen kendi kelimelerini de ekleyebilirsin.',
+    title: `${WORD_COUNT_LABEL} Türkçe Kelime`,
+    text: `${CATEGORY_COUNT} kategori, üç zorluk seviyesi. İstersen kendi kelimelerini de ekleyebilirsin.`,
     paper: '#bae6fd',
     tilt: 2,
     icon: ['M6 40 L16 10 L26 40', 'M10 30 L22 30', 'M32 24 C 44 20, 44 40, 32 38 C 26 37, 28 28, 40 30 L40 40'],
@@ -113,7 +114,7 @@ export default function BentoFeatures() {
     <section id="ozellikler" className="cv-auto relative z-10 mx-auto max-w-6xl px-5 sm:px-6 pb-12 pt-4 sm:pb-16 sm:pt-6">
       <SectionHeading
         title={['Neden', { text: 'Karalama?', className: 'text-gradient' }]}
-        desc="Güzel bir oyun gecesi için ihtiyacın olan her şey burada: hızlı, Türkçe ve ücretsiz."
+        desc="Güzel bir oyun gecesi için ihtiyacın olan her şey burada: hızlı, Türkçe ve kurulumsuz."
       />
       <ul className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
         {NOTES.map((n, i) => (

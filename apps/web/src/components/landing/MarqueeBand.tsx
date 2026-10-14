@@ -1,11 +1,12 @@
 'use client';
 
+import { WORD_COUNT_LABEL } from '@karalama/shared';
 import { VelocityMarquee } from '@/components/motion/primitives';
 
 const BIG = ['Çiz', 'Tahmin Et', 'Kazan', 'Gül', 'Tekrarla'];
 const SMALL = [
   { emoji: '🎨', label: 'Gerçek Zamanlı Çizim' },
-  { emoji: '🇹🇷', label: '1.070+ Türkçe Kelime' },
+  { emoji: '🇹🇷', label: `${WORD_COUNT_LABEL} Türkçe Kelime` },
   { emoji: '⚡', label: 'Anında Bağlan' },
   { emoji: '📱', label: 'Her Cihazda' },
   { emoji: '🤖', label: 'Bot Desteği' },
@@ -40,7 +41,7 @@ export function MarqueeBand() {
           {SMALL.map((it) => (
             <span key={it.label} className="flex items-center gap-3 px-6">
               <span className="text-xl">{it.emoji}</span>
-              <span className="font-mono text-xs sm:text-sm uppercase tracking-[0.22em] text-slate-300">{it.label}</span>
+              <span className="text-sm font-semibold text-slate-200 sm:text-base">{it.label}</span>
               <span className="pl-3 text-[var(--marker)]">✦</span>
             </span>
           ))}

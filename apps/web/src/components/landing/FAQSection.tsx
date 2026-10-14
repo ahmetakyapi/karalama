@@ -144,7 +144,7 @@ export default function FAQSection() {
             </span>
             <div>
               <div className="text-sm font-bold text-slate-100">Karalama</div>
-              <div className="flex items-center gap-1.5 text-[11px] text-emerald-400">
+              <div className="flex items-center gap-1.5 text-xs text-emerald-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 Çevrimiçi
               </div>

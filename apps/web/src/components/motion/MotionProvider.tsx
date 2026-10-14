@@ -7,7 +7,6 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { SmoothScroll } from './SmoothScroll';
 import { TransitionProvider } from './PageTransition';
 import { IntroClock } from './IntroClock';
-import { Cursor } from './Cursor';
 import { isGameRoute } from './hooks';
 
 function ScrollProgress() {
@@ -32,7 +31,6 @@ export function MotionProvider({ children }: { children: ReactNode }) {
         <TransitionProvider>
           {children}
           <ScrollProgress />
-          <Cursor />
           <IntroClock />
         </TransitionProvider>
       </SmoothScroll>

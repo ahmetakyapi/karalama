@@ -5,4 +5,5 @@ export * from './types/word';
 export * from './types/socket';
 export * from './constants/game';
 export * from './constants/words';
+export * from './constants/stats';
 export * from './scoring';

@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useLowMotion } from '@/components/motion/hooks';
 import { EASE } from './common';
 
 const HERO_STEPS = [
@@ -14,27 +15,44 @@ const HERO_STEPS = [
 
 export default function HeroDemo() {
   const [step, setStep] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  // Autoplay only while someone can see it: not off-screen, not in a
+  // background tab, not when motion is turned down (tabs still work)
+  const inView = useInView(rootRef, { margin: '-10% 0px' });
+  const lowMotion = useLowMotion();
+  const [tabVisible, setTabVisible] = useState(true);
+  useEffect(() => {
+    const onVis = () => setTabVisible(!document.hidden);
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, []);
+  const playing = inView && tabVisible && !lowMotion;
 
   useEffect(() => {
+    if (!playing) return;
     const timer = setInterval(() => setStep((s) => (s + 1) % 4), 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [playing, step]);
 
   return (
     <div
+      ref={rootRef}
       className="intro-pop relative flex flex-col mt-8 lg:mt-0"
       style={{ ['--d' as string]: '0.45s' }}
+      role="region"
       aria-label="Oyun önizlemesi"
     >
       {/* Rotating sticker */}
       <div className="pointer-events-none absolute -right-3 -top-8 z-30 hidden sm:block">
-        <div className="relative h-24 w-24">
+        <div className="relative h-28 w-28">
           <svg viewBox="0 0 100 100" className="spin-slow absolute inset-0 h-full w-full" aria-hidden="true">
             <defs>
               <path id="sticker-circle" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0" />
             </defs>
-            <text className="fill-slate-300 font-mono text-[9.5px] uppercase tracking-[0.32em]">
-              <textPath href="#sticker-circle">canlı önizleme • canlı önizleme •</textPath>
+            <text className="fill-slate-200 font-sans text-[11px] font-semibold tracking-[0.04em]">
+              <textPath href="#sticker-circle" textLength="236" lengthAdjust="spacing">
+                Oyunun Önizlemesi ✦ Oyunun Önizlemesi ✦
+              </textPath>
             </text>
           </svg>
           <div className="absolute inset-[30%] flex items-center justify-center rounded-full bg-[var(--marker)] text-lg text-[#04070d] shadow-[0_0_30px_rgba(200,245,96,0.35)]">
@@ -47,7 +65,10 @@ export default function HeroDemo() {
         {HERO_STEPS.map((s, i) => (
           <button
             key={s.id}
+            type="button"
             onClick={() => setStep(i)}
+            aria-pressed={step === i}
+            aria-label={s.label}
             className={cn(
               'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300',
               step === i
@@ -55,7 +76,7 @@ export default function HeroDemo() {
                 : 'text-slate-500 hover:text-slate-300'
             )}
           >
-            <span className="text-sm">{s.icon}</span>
+            <span aria-hidden="true" className="text-sm">{s.icon}</span>
             {step === i && (
               <motion.span
                 initial={{ width: 0, opacity: 0 }}
@@ -94,12 +115,13 @@ export default function HeroDemo() {
           {HERO_STEPS.map((s, i) => (
             <div key={s.id} className="flex-1 h-1 rounded-full bg-white/[0.06] overflow-hidden">
               {step === i && (
+                // scaleX, not width: no layout work on every frame
                 <motion.div
                   key={`p-${step}`}
-                  initial={{ width: '0%' }}
-                  animate={{ width: '100%' }}
-                  transition={{ duration: 6, ease: 'linear' }}
-                  className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: playing ? 1 : 0 }}
+                  transition={{ duration: playing ? 6 : 0, ease: 'linear' }}
+                  className="h-full origin-left bg-gradient-to-r from-indigo-500 to-cyan-400"
                 />
               )}
             </div>
@@ -129,7 +151,7 @@ function HeroLobby() {
     <motion.div {...heroTransition} className="absolute inset-0 flex flex-col p-6 pt-10">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <div className="text-[10px] text-slate-500 mb-0.5">Oda Kodu</div>
+          <div className="text-xs text-slate-400 mb-0.5">Oda Kodu</div>
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -163,7 +185,7 @@ function HeroLobby() {
             </div>
             <span className="text-xs font-medium text-slate-300 flex-1">{p.name}</span>
             {i === 0 && (
-              <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/15 px-1.5 py-0.5 rounded-md">KURUCU</span>
+              <span className="text-xs font-semibold text-indigo-300 bg-indigo-500/15 px-1.5 py-0.5 rounded-md">Kurucu</span>
             )}
             <div className={cn(
               'w-5 h-5 rounded-full flex items-center justify-center text-[10px]',
@@ -201,8 +223,8 @@ function HeroDraw() {
             <div key={c} className="w-5 h-5 rounded-full border border-white/10" style={{ background: c }} />
           ))}
         </div>
-        <div className="text-[10px] font-mono text-slate-500 tabular-nums">
-          0:<motion.span initial={{ opacity: 0.6 }} animate={{ opacity: [0.6, 1, 0.6] }} transition={{ duration: 1, repeat: Infinity }}>54</motion.span>
+        <div className="text-xs font-mono text-slate-400 tabular-nums">
+          0:<motion.span initial={{ opacity: 0.6 }} animate={{ opacity: [0.6, 1, 0.6] }} transition={{ duration: 1, repeat: 5 }}>54</motion.span>
         </div>
       </div>
 
@@ -277,7 +299,7 @@ function HeroGuess() {
         <div className="absolute top-1.5 right-2 flex gap-1">
           {['V', '_', '_', '_', '_', 'N'].map((ch, i) => (
             <div key={i} className={cn(
-              'w-4 h-5 rounded text-[8px] font-bold flex items-center justify-center',
+              'w-5 h-6 rounded text-[11px] font-bold flex items-center justify-center',
               ch !== '_' ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20' : 'bg-white/[0.04] text-slate-600 border border-white/[0.06]'
             )}>
               {ch}
@@ -305,8 +327,8 @@ function HeroGuess() {
               {m.emoji}
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-[9px] font-medium text-slate-500 mr-1.5">{m.name}</span>
-              <span className={cn('text-[10px]', m.correct ? 'font-bold text-emerald-400' : 'text-slate-300')}>
+              <span className="text-xs font-medium text-slate-400 mr-1.5">{m.name}</span>
+              <span className={cn('text-xs', m.correct ? 'font-bold text-emerald-400' : 'text-slate-200')}>
                 {m.text}
               </span>
             </div>
@@ -315,7 +337,7 @@ function HeroGuess() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: m.delay + 0.3, type: 'spring', stiffness: 400, damping: 15 }}
-                className="text-[9px] font-bold text-emerald-400 shrink-0"
+                className="text-xs font-bold text-emerald-400 shrink-0"
               >
                 +850
               </motion.span>
@@ -349,7 +371,7 @@ function HeroWinners() {
           transition={{
             duration: 2 + Math.random() * 2,
             delay: Math.random() * 1,
-            repeat: Infinity,
+            repeat: 2,
             repeatDelay: Math.random() * 2,
           }}
           className="absolute top-0 w-1.5 h-1.5 rounded-sm"
@@ -395,7 +417,7 @@ function HeroWinners() {
             >
               {p.emoji}
             </div>
-            <span className="text-[9px] font-semibold text-slate-300 mb-1">{p.name}</span>
+            <span className="text-xs font-semibold text-slate-200 mb-1">{p.name}</span>
             <motion.div
               initial={{ height: 0 }}
               animate={{ height: 'auto' }}
@@ -409,14 +431,14 @@ function HeroWinners() {
                 borderTop: `2px solid ${p.color}60`,
               }}
             >
-              <span className="text-[9px] font-bold" style={{ color: p.color }}>
-                #{p.rank}
+              <span className="text-xs font-bold" style={{ color: p.color }}>
+                {p.rank}.
               </span>
               <motion.span
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.2 + i * 0.2 }}
-                className="text-[8px] font-mono text-slate-400 mt-0.5"
+                className="text-xs font-mono text-slate-300 mt-0.5"
               >
                 {p.score}
               </motion.span>

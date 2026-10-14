@@ -38,7 +38,7 @@ export default function GlobalError({
           Beklenmedik Bir Hata Oluştu
         </h1>
         <p className="text-sm text-slate-400 leading-relaxed mb-8">
-          Sorunu kaydettik. Sayfayı yeniden deneyebilir ya da ana sayfaya dönebilirsin.
+          Bu ekran yüklenirken bir şeyler ters gitti. Yeniden deneyebilir ya da ana sayfaya dönebilirsin.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <button
@@ -56,8 +56,8 @@ export default function GlobalError({
           </a>
         </div>
         {error.digest && (
-          <p className="mt-6 text-[10px] font-mono text-slate-600">
-            ref: {error.digest}
+          <p className="mt-6 text-xs font-mono text-slate-500">
+            Hata kodu: {error.digest}
           </p>
         )}
       </div>

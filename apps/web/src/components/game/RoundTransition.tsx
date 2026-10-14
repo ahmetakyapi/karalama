@@ -46,10 +46,11 @@ function MiniReplay({ strokes }: { strokes: DrawStroke[] }) {
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     let strokeIdx = 0;
-    const totalTime = 2000; // replay in 2 seconds
-    const interval = totalTime / strokes.length;
+    // Replay within ~2 s, first stroke right away (a single stroke used to
+    // leave the card blank for the whole 2 s)
+    const interval = Math.min(2000 / strokes.length, 250);
 
-    const timer = setInterval(() => {
+    const drawNext = () => {
       if (strokeIdx >= strokes.length) {
         clearInterval(timer);
         return;
@@ -73,7 +74,9 @@ function MiniReplay({ strokes }: { strokes: DrawStroke[] }) {
         ctx.restore();
       }
       strokeIdx++;
-    }, interval);
+    };
+    const timer = setInterval(drawNext, interval);
+    drawNext();
 
     return () => clearInterval(timer);
   }, [strokes]);

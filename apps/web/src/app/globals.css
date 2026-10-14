@@ -219,7 +219,7 @@ kbd {
 }
 
 /* ============================================================
-   Motion system — preloader, smooth scroll, cursor
+   Motion system — preloader, smooth scroll
    ============================================================ */
 
 :root {
@@ -648,16 +648,8 @@ html.lenis body {
 }
 
 /* Film grain is baked into the body background (see `body`) — a fixed,
-   animated full-screen overlay forced a full recomposite on every frame. */
-/* Custom cursor only on fine pointers */
-.cursor-layer {
-  display: none;
-}
-@media (hover: hover) and (pointer: fine) {
-  .cursor-layer {
-    display: block;
-  }
-}
+   animated full-screen overlay forced a full recomposite on every frame.
+   No custom cursor: the normal mouse pointer everywhere. */
 
 /* Letter-roll hover (nav links, footer links) */
 .roll {
@@ -778,7 +770,9 @@ html.lenis body {
   .line-mask > span,
   .intro-fade,
   .intro-drop,
-  .intro-pop {
+  .intro-pop,
+  .cue-drop,
+  .spin-slow {
     animation: none !important;
   }
 }
@@ -805,6 +799,18 @@ html.past-hero .aurora {
 @keyframes aurora {
   0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
   50% { transform: translate3d(var(--ax, 40px), var(--ay, -30px), 0) scale(var(--as, 1.1)); }
+}
+
+/* Hero scroll cue: CSS loop that stops once the hero is out of view */
+.cue-drop {
+  animation: cue-drop 1.6s ease-in-out infinite;
+}
+html.past-hero .cue-drop {
+  animation-play-state: paused;
+}
+@keyframes cue-drop {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(200%); }
 }
 
 /* Off-screen work is wasted work */

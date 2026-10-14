@@ -7,6 +7,7 @@ import { useProgressStore, getXPForNextLevel } from '@/stores/progressStore';
 import { useAchievementsStore, ACHIEVEMENTS, type Achievement } from '@/stores/achievementsStore';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { cn } from '@/lib/utils';
+import { loadSavedPlayer } from '@/lib/player';
 
 const TIER_COLORS: Record<Achievement['tier'], { border: string; bg: string; text: string }> = {
   bronze: { border: 'border-amber-700/60', bg: 'from-amber-800/20 to-amber-900/10', text: 'text-amber-400' },
@@ -29,18 +30,11 @@ export default function ProfilPage() {
   if (!mounted) return null;
 
   const unlockedCount = Object.keys(unlocked).length;
-  const winRate = gamesPlayed > 0 ? Math.round((totalCorrectGuesses / gamesPlayed) * 10) / 10 : 0;
+  // Turkish decimal comma: 2,5
+  const perGame = gamesPlayed > 0 ? Math.round((totalCorrectGuesses / gamesPlayed) * 10) / 10 : 0;
+  const winRate = perGame.toLocaleString('tr-TR');
 
-  let playerName = 'Oyuncu';
-  if (typeof window !== 'undefined') {
-    try {
-      const raw = localStorage.getItem('karalama_player');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed?.name) playerName = parsed.name;
-      }
-    } catch {}
-  }
+  const playerName = loadSavedPlayer()?.name || 'Oyuncu';
 
   const groupedAchievements: Record<Achievement['tier'], Achievement[]> = {
     bronze: [],
@@ -79,8 +73,7 @@ export default function ProfilPage() {
           <div className="relative">
             <div className="flex items-end justify-between gap-4 mb-4 flex-wrap">
               <div>
-                <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Oyuncu</p>
-                <h2 className="text-2xl font-bold text-white mb-1">{playerName}</h2>
+                <h2 className="text-2xl font-bold text-white mb-1.5">{playerName}</h2>
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded-md bg-gradient-to-r from-violet-500/20 to-cyan-400/20 border border-white/10 text-xs font-bold text-white">
                     Seviye {level}
@@ -91,8 +84,8 @@ export default function ProfilPage() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[10px] text-white/40 uppercase tracking-wider">XP</p>
-                <p className="text-lg font-mono font-bold text-white">{xp}<span className="text-white/30 text-sm"> / {xpForNext}</span></p>
+                <p className="text-xs font-medium text-slate-400">Sonraki Seviyeye</p>
+                <p className="text-lg font-mono font-bold text-white">{xp}<span className="text-slate-500 text-sm"> / {xpForNext} XP</span></p>
               </div>
             </div>
             <div className="w-full h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
@@ -117,7 +110,7 @@ export default function ProfilPage() {
         <StatCard icon="🎮" label="Oyun" value={gamesPlayed} />
         <StatCard icon="🎯" label="Doğru Tahmin" value={totalCorrectGuesses} />
         <StatCard icon="🔥" label="En İyi Seri" value={bestStreak} accent />
-        <StatCard icon="📊" label="Oyun Başı" value={winRate} subtitle="ortalama" />
+        <StatCard icon="📊" label="Oyun Başına Doğru" value={winRate} subtitle="ortalama" />
       </motion.div>
 
       {/* Achievements */}
@@ -129,7 +122,7 @@ export default function ProfilPage() {
         <GlassCard className="p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold text-white">Başarımlar</h2>
-            <span className="text-xs text-white/50">
+            <span className="text-[13px] text-slate-400 tabular-nums">
               <span className="text-white font-bold">{unlockedCount}</span> / {ACHIEVEMENTS.length}
             </span>
           </div>
@@ -146,10 +139,10 @@ export default function ProfilPage() {
             if (list.length === 0) return null;
             return (
               <div key={tier} className="mb-5 last:mb-0">
-                <p className={cn('text-xs font-bold uppercase tracking-wider mb-2', TIER_COLORS[tier].text)}>
+                <h3 className={cn('text-[13px] font-semibold mb-2', TIER_COLORS[tier].text)}>
                   {tier === 'platinum' ? 'Platin' : tier === 'gold' ? 'Altın' : tier === 'silver' ? 'Gümüş' : 'Bronz'}
-                </p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                </h3>
+                <div className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 gap-2">
                   {list.map((a) => {
                     const isUnlocked = Boolean(unlocked[a.id]);
                     const style = TIER_COLORS[a.tier];
@@ -160,7 +153,7 @@ export default function ProfilPage() {
                           'flex items-center gap-3 p-3 rounded-lg border transition-all',
                           isUnlocked
                             ? `bg-gradient-to-br ${style.bg} ${style.border}`
-                            : 'bg-white/[0.02] border-white/[0.06] opacity-50',
+                            : 'bg-white/[0.02] border-white/[0.06]',
                         )}
                       >
                         <div
@@ -172,11 +165,11 @@ export default function ProfilPage() {
                           {isUnlocked ? a.icon : '🔒'}
                         </div>
                         <div className="min-w-0">
-                          <p className={cn('text-xs font-bold truncate', isUnlocked ? 'text-white' : 'text-white/50')}>
+                          <p className={cn('text-[13px] font-bold leading-snug', isUnlocked ? 'text-white' : 'text-slate-300')}>
                             {a.title}
                           </p>
-                          <p className="text-[10px] text-white/50 truncate">{a.description}</p>
-                          <p className={cn('text-[10px] font-mono mt-0.5', isUnlocked ? style.text : 'text-white/30')}>
+                          <p className="text-xs leading-snug text-slate-400">{a.description}</p>
+                          <p className={cn('text-xs font-mono mt-0.5', isUnlocked ? style.text : 'text-slate-500')}>
                             +{a.xpReward} XP
                           </p>
                         </div>
@@ -190,7 +183,7 @@ export default function ProfilPage() {
         </GlassCard>
       </motion.div>
 
-      <p className="text-center text-xs text-white/25 mt-8">
+      <p className="text-center text-[13px] text-slate-500 mt-8">
         İlerleme bu cihazda saklanıyor
       </p>
     </div>
@@ -213,9 +206,9 @@ function StatCard({
   return (
     <GlassCard className="p-4">
       <div className="text-2xl mb-1">{icon}</div>
-      <p className="text-[10px] text-white/40 uppercase tracking-wider mb-0.5">{label}</p>
+      <p className="text-xs font-medium text-slate-400 mb-0.5">{label}</p>
       <p className={cn('text-xl font-bold', accent ? 'text-amber-400' : 'text-white')}>{value}</p>
-      {subtitle && <p className="text-[10px] text-white/30">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
     </GlassCard>
   );
 }

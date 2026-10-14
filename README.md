@@ -4,7 +4,7 @@ Türkçe, çok oyunculu çizim oyunu. Oda kur, bağlantıyı paylaş, saniyeler 
 
 ## Özellikler
 
-- 18 kategori, 1070+ Türkçe kelime
+- 18 kategori, 980+ farklı Türkçe kelime
 - Gerçek zamanlı çizim (Socket.io)
 - Mobil uyumlu
 - İpucu sistemi
@@ -24,7 +24,7 @@ npm install
 npm run dev
 ```
 
-Web: http://localhost:3000
+Web: http://localhost:3100
 Server: http://localhost:3001
 
 ## Deploy

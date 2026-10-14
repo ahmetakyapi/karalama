@@ -37,7 +37,7 @@ export function LegalLayout({
         >
           {title}
         </h1>
-        <p className="animate-rise font-mono text-[11px] uppercase tracking-[0.25em] text-slate-500 mb-14" style={{ animationDelay: '0.16s' }}>
+        <p className="animate-rise text-[13px] text-slate-400 mb-14" style={{ animationDelay: '0.16s' }}>
           Son güncelleme: {updated}
         </p>
 

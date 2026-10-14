@@ -266,7 +266,7 @@ function Stat({ label, value, accent }: { label: string; value: number; accent?:
   return (
     <div>
       <p className={cn('text-sm font-bold', accent ? 'text-amber-400' : 'text-white/80')}>{value}</p>
-      <p className="text-[9px] text-white/30 uppercase tracking-wider">{label}</p>
+      <p className="text-xs text-slate-400">{label}</p>
     </div>
   );
 }
@@ -290,7 +290,7 @@ function ToggleRow({
     >
       <div className="min-w-0">
         <p className="text-sm text-white/80">{label}</p>
-        {hint && <p className="text-[10px] text-white/40 mt-0.5">{hint}</p>}
+        {hint && <p className="text-xs text-slate-400 mt-0.5">{hint}</p>}
       </div>
       <button
         type="button"
