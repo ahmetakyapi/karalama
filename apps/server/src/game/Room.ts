@@ -59,6 +59,12 @@ export class Room {
   timeLeft: number;
 
   private timerRef: ReturnType<typeof setInterval> | null;
+  /**
+   * The one pending phase change (round result -> next turn, game over ->
+   * lobby). Kept so a newer phase can cancel it: an untracked timeout used to
+   * fire into the next game and throw everyone back to the lobby mid-turn.
+   */
+  private phaseTimeout: ReturnType<typeof setTimeout> | null = null;
   private wordPicker: WordPicker;
   private hintRevealed1: boolean;
   private hintRevealed2: boolean;
@@ -107,6 +113,13 @@ export class Room {
     return [...this.players.values()].filter((p) => p.isConnected);
   }
 
+  /** Real people in the room; bots alone never keep a room alive. */
+  get humanCount(): number {
+    let n = 0;
+    for (const p of this.players.values()) if (!p.isBot) n++;
+    return n;
+  }
+
   get currentDrawerId(): string | null {
     if (this.drawOrder.length === 0) return null;
     return this.drawOrder[this.currentTurnIndex] ?? null;
@@ -146,7 +159,7 @@ export class Room {
 
     // Reassign host
     if (player.isHost && this.players.size > 0) {
-      const next = this.connectedPlayers[0];
+      const next = this.connectedPlayers.find((p) => !p.isBot) ?? this.connectedPlayers[0];
       if (next) {
         next.isHost = true;
         this.hostId = next.id;
@@ -195,10 +208,10 @@ export class Room {
             scores,
             roundScores: roundScoresObj,
           });
-          setTimeout(() => {
-            this.advanceGame();
-          }, ROUND_RESULT_TIME * 1000);
+          this.schedulePhase(() => this.advanceGame(), ROUND_RESULT_TIME * 1000);
         } else {
+          // Skip the rest of the result screen; its pending timer is now stale
+          this.clearPhaseTimeout();
           this.advanceGame();
         }
       }
@@ -212,6 +225,7 @@ export class Room {
   startGame(): void {
     if (this.connectedPlayers.length < 2) return;
     if (this.phase !== 'WAITING') return;
+    this.clearPhaseTimeout();
 
     // Reset all scores
     for (const p of this.players.values()) {
@@ -275,7 +289,7 @@ export class Room {
     if (drawer?.isBot) {
       // Bot auto-picks a word after a short delay
       setTimeout(() => {
-        if (this.phase !== 'PICKING') return;
+        if (this.phase !== 'PICKING' || this.currentDrawerId !== drawerId) return;
         const pick = options[Math.floor(Math.random() * options.length)];
         if (pick) this.selectWord(pick.word, pick.difficulty);
       }, 1500 + Math.random() * 1500);
@@ -453,12 +467,12 @@ export class Room {
 
     this.io.to(this.code).emit('game:roundEnd', data);
 
-    setTimeout(() => {
-      this.advanceGame();
-    }, ROUND_RESULT_TIME * 1000);
+    this.schedulePhase(() => this.advanceGame(), ROUND_RESULT_TIME * 1000);
   }
 
   private advanceGame(): void {
+    // Only a finished turn moves the game on (never a lobby or a new game)
+    if (this.phase !== 'ROUND_RESULT') return;
     this.currentTurnIndex++;
 
     if (this.currentTurnIndex >= this.drawOrder.length) {
@@ -501,8 +515,8 @@ export class Room {
     const data: GameEndData = { finalScores, podium };
     this.io.to(this.code).emit('game:ended', data);
 
-    setTimeout(() => {
-      this.resetToLobby();
+    this.schedulePhase(() => {
+      if (this.phase === 'GAME_OVER') this.resetToLobby();
     }, GAME_OVER_TIME * 1000);
   }
 
@@ -519,6 +533,7 @@ export class Room {
   }
 
   private resetToLobby(): void {
+    this.clearPhaseTimeout();
     this.phase = 'WAITING';
     this.currentRound = 0;
     this.currentTurnIndex = 0;
@@ -719,6 +734,31 @@ export class Room {
       clearInterval(this.timerRef);
       this.timerRef = null;
     }
+  }
+
+  private schedulePhase(fn: () => void, ms: number): void {
+    this.clearPhaseTimeout();
+    this.phaseTimeout = setTimeout(() => {
+      this.phaseTimeout = null;
+      fn();
+    }, ms);
+  }
+
+  private clearPhaseTimeout(): void {
+    if (this.phaseTimeout) {
+      clearTimeout(this.phaseTimeout);
+      this.phaseTimeout = null;
+    }
+  }
+
+  /** Stops every timer; called when the room is thrown away. */
+  dispose(): void {
+    this.clearTimer();
+    this.clearPhaseTimeout();
+    this.botController.clearAllTimers();
+    for (const t of this.voteKickTimers.values()) clearTimeout(t);
+    this.voteKickTimers.clear();
+    this.voteKicks.clear();
   }
 
   // --- Settings ---

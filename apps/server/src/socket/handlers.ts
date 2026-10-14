@@ -28,6 +28,23 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
   io.on('connection', (socket: GameSocket) => {
     console.log(`[connect] ${socket.id}`);
 
+    /** One socket sits in one room: leave the old one (with a goodbye). */
+    const leaveCurrentRoom = () => {
+      const prev = manager.getSocketRoom(socket.id);
+      if (!prev) return;
+      const player = prev.players.get(socket.id);
+      socket.leave(prev.code);
+      manager.removeSocket(socket.id);
+      if (player) {
+        io.to(prev.code).emit('chat:message', {
+          id: nanoid(10),
+          type: 'system',
+          text: `${player.name} ayrıldı`,
+          timestamp: Date.now(),
+        });
+      }
+    };
+
     // --- Room: Create ---
     socket.on('room:create', ({ playerName, avatarColor, settings }) => {
       const nameCheck = sanitizePlayerName(playerName);
@@ -40,6 +57,7 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
       }
       const color = sanitizeAvatarColor(avatarColor);
 
+      leaveCurrentRoom();
       const room = manager.createRoom(settings);
       const player = room.addPlayer(socket, nameCheck.name, color);
       manager.setSocketRoom(socket.id, room.code);
@@ -70,6 +88,13 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
         });
         return;
       }
+
+      // Asked twice for the room it's already in: just resend the state
+      if (manager.getSocketRoom(socket.id) === room && room.players.has(socket.id)) {
+        socket.emit('room:joined', { room: room.toState(), playerId: socket.id });
+        return;
+      }
+      leaveCurrentRoom();
 
       if (room.playerCount >= room.settings.maxPlayers) {
         socket.emit('room:error', {
@@ -102,7 +127,7 @@ export function registerHandlers(io: GameServer, manager: GameManager): void {
 
     // --- Room: Leave ---
     socket.on('room:leave', () => {
-      manager.removeSocket(socket.id);
+      leaveCurrentRoom();
     });
 
     // --- Room: Kick ---

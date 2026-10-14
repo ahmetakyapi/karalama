@@ -136,7 +136,12 @@ export class BotController {
     const idx = this.botCounter++;
     const botId = `bot_${nanoid(8)}`;
     const name = BOT_NAMES[idx % BOT_NAMES.length];
-    const color = BOT_COLORS[idx % BOT_COLORS.length];
+    // A colour nobody in the room wears yet, so avatars stay tellable apart
+    const taken = new Set([...this.room.players.values()].map((p) => p.avatarColor.toLowerCase()));
+    const color =
+      BOT_COLORS.find((c, i) => i >= idx % BOT_COLORS.length && !taken.has(c)) ??
+      BOT_COLORS.find((c) => !taken.has(c)) ??
+      BOT_COLORS[idx % BOT_COLORS.length];
 
     const bot = new Player(botId, botId, `${name}`, color, false, true);
     bot.isReady = true;

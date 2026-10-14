@@ -61,7 +61,10 @@ export class GameManager {
           newHostId,
         });
 
-        if (room.playerCount === 0) {
+        // Bots can't play on their own: once the last person leaves, the
+        // room (and its timers) goes too
+        if (room.humanCount === 0) {
+          room.dispose();
           this.rooms.delete(code);
         }
       }
@@ -70,7 +73,8 @@ export class GameManager {
 
   private cleanup(): void {
     for (const [code, room] of this.rooms.entries()) {
-      if (room.isExpired(ROOM_EXPIRE_MINUTES) && room.playerCount === 0) {
+      if (room.isExpired(ROOM_EXPIRE_MINUTES) && room.humanCount === 0) {
+        room.dispose();
         this.rooms.delete(code);
       }
     }
@@ -80,10 +84,11 @@ export class GameManager {
     return this.rooms.size;
   }
 
+  /** People online right now — the landing page shows this, so no bots. */
   get totalPlayers(): number {
     let count = 0;
     for (const room of this.rooms.values()) {
-      count += room.playerCount;
+      count += room.humanCount;
     }
     return count;
   }
