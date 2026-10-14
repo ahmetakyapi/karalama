@@ -15,14 +15,16 @@ export function ScoreBoard() {
   const sorted = Object.values(players).sort(
     (a, b) => (scores[b.id] || 0) - (scores[a.id] || 0)
   );
+  // The server only runs a kick vote with 3+ people; don't offer it before
+  const canVoteKick = sorted.filter((p) => !p.isBot).length >= 3;
 
   return (
     <div className="glass rounded-xl overflow-hidden">
       <div className="px-3 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-        <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider">
+        <h2 className="text-[13px] font-semibold text-slate-300">
           Puan Tablosu
-        </h3>
-        <span className="text-[10px] text-white/20 font-mono">
+        </h2>
+        <span className="text-xs text-slate-500 tabular-nums">
           {sorted.length} oyuncu
         </span>
       </div>
@@ -55,7 +57,7 @@ export function ScoreBoard() {
                   {i === 0 && score > 0 ? (
                     <span className="text-amber-400 text-xs">👑</span>
                   ) : (
-                    <span className="text-[11px] text-white/25 font-mono font-bold">
+                    <span className="text-xs text-slate-500 font-bold tabular-nums">
                       {i + 1}
                     </span>
                   )}
@@ -68,34 +70,35 @@ export function ScoreBoard() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1">
                     <span className={cn(
-                      'truncate text-xs font-medium',
-                      isMe ? 'text-white' : 'text-white/70'
+                      'truncate text-[13px] font-medium',
+                      isMe ? 'text-white' : 'text-slate-300'
                     )}>
                       {player.name}
                     </span>
                     {isMe && (
-                      <span className="text-[9px] text-white/20 font-medium">(sen)</span>
+                      <span className="shrink-0 text-xs text-slate-500">(Sen)</span>
                     )}
                     {player.isBot && (
-                      <span className="text-[9px] text-accent-cyan/40 font-medium ml-0.5">bot</span>
+                      <span className="shrink-0 text-xs text-cyan-300/70 ml-0.5">Bot</span>
                     )}
                   </div>
                   {isDrawer && (
-                    <span className="text-[10px] text-indigo-400 font-medium">Çiziyor ✏️</span>
+                    <span className="text-xs text-indigo-300 font-medium">Çiziyor ✏️</span>
                   )}
                   {hasGuessed && !isDrawer && (
-                    <span className="text-[10px] text-emerald-400 font-medium">Bildi ✓</span>
+                    <span className="text-xs text-emerald-300 font-medium">Bildi ✓</span>
                   )}
                 </div>
 
                 {/* Vote kick button */}
-                {!isMe && !player.isBot && !isDrawer && (
+                {canVoteKick && !isMe && !player.isBot && !isDrawer && (
                   <button
                     onClick={() => getSocket().emit('room:voteKick', { targetId: player.id })}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all"
-                    title={`${player.name} oyuncusunu at`}
+                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100 p-1.5 rounded text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-[opacity,color,background-color]"
+                    title={`${player.name} için atma oylaması başlat`}
+                    aria-label={`${player.name} için atma oylaması başlat`}
                   >
-                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <svg aria-hidden="true" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                     </svg>
                   </button>
@@ -118,7 +121,7 @@ export function ScoreBoard() {
                         initial={{ opacity: 0, y: -4 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
-                        className="text-[10px] font-mono font-bold text-emerald-400"
+                        className="text-xs font-bold tabular-nums text-emerald-400"
                       >
                         +{roundScore}
                       </motion.span>

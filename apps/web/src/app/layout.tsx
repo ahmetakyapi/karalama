@@ -3,6 +3,7 @@ import { Inter, Bricolage_Grotesque, Caveat } from 'next/font/google';
 import './globals.css';
 import { ThemeApplier } from '@/components/ui/ThemeApplier';
 import { ToastStack } from '@/components/ui/ToastStack';
+import { RoomExit } from '@/components/game/RoomExit';
 import { MotionProvider } from '@/components/motion/MotionProvider';
 import { Preloader } from '@/components/motion/Preloader';
 import { INTRO_BOOT_SCRIPT } from '@/lib/intro';
@@ -158,6 +159,7 @@ export default function RootLayout({
         <MotionProvider>
           {children}
           <ToastStack />
+          <RoomExit />
         </MotionProvider>
       </body>
     </html>

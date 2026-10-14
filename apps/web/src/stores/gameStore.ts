@@ -13,6 +13,8 @@ import { DEFAULT_ROOM_SETTINGS } from '@karalama/shared';
 interface GameStore {
   // Connection
   isConnected: boolean;
+  /** The game server can't be reached (repeated connect errors). */
+  connectionFailed: boolean;
   playerId: string | null;
   roomCode: string | null;
 
@@ -47,6 +49,7 @@ interface GameStore {
 
   // Actions
   setConnected: (connected: boolean) => void;
+  setConnectionFailed: (failed: boolean) => void;
   setPlayerId: (id: string) => void;
   setRoomCode: (code: string) => void;
   setRoomError: (error: string | null) => void;
@@ -72,10 +75,13 @@ interface GameStore {
   undoStroke: () => void;
   clearDrawing: () => void;
   reset: () => void;
+  /** Forget the room entirely (after leaving it). */
+  leaveRoom: () => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
   isConnected: false,
+  connectionFailed: false,
   playerId: null,
   roomCode: null,
   phase: 'WAITING',
@@ -96,7 +102,9 @@ export const useGameStore = create<GameStore>((set) => ({
   hasGuessedCorrectly: false,
   roomError: null,
 
-  setConnected: (connected) => set({ isConnected: connected }),
+  setConnected: (connected) =>
+    set(connected ? { isConnected: true, connectionFailed: false } : { isConnected: false }),
+  setConnectionFailed: (failed) => set({ connectionFailed: failed }),
   setPlayerId: (id) => set({ playerId: id }),
   setRoomCode: (code) => set({ roomCode: code }),
   setRoomError: (error) => set({ roomError: error }),
@@ -213,6 +221,28 @@ export const useGameStore = create<GameStore>((set) => ({
       currentDrawerId: null,
       hint: '',
       timeLeft: 0,
+      guessedPlayerIds: [],
+      drawHistory: [],
+      lastRoundData: null,
+      podium: [],
+      wordOptions: [],
+      hasGuessedCorrectly: false,
+    }),
+
+  leaveRoom: () =>
+    set({
+      playerId: null,
+      roomCode: null,
+      roomError: null,
+      phase: 'WAITING',
+      hostId: '',
+      settings: DEFAULT_ROOM_SETTINGS,
+      players: {},
+      currentRound: 0,
+      currentDrawerId: null,
+      hint: '',
+      timeLeft: 0,
+      scores: {},
       guessedPlayerIds: [],
       drawHistory: [],
       lastRoundData: null,

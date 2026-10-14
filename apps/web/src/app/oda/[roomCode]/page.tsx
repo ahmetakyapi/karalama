@@ -1,14 +1,19 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useSocket } from '@/hooks/useSocket';
 import { useGameStore } from '@/stores/gameStore';
 import { LobbyView } from '@/components/lobby/LobbyView';
+import { JoinGate } from '@/components/lobby/JoinGate';
 import { GameView } from '@/components/game/GameView';
 import { GameOverScreen } from '@/components/game/GameOverScreen';
 import { getSocket } from '@/lib/socket';
+import { loadSavedPlayer } from '@/lib/player';
 import { InkLoader } from '@/components/ui/InkLoader';
+import { ServerUnreachable } from '@/components/ui/ServerUnreachable';
+
+type Identity = { name: string; color: string };
 
 export default function RoomPage() {
   return (
@@ -19,62 +24,80 @@ export default function RoomPage() {
 }
 
 function RoomContent() {
-  const { roomCode } = useParams<{ roomCode: string }>();
+  const { roomCode: rawCode } = useParams<{ roomCode: string }>();
+  const roomCode = rawCode.toUpperCase();
   const params = useSearchParams();
-  const { socket } = useSocket();
+  useSocket();
   const store = useGameStore();
 
-  const playerName = params.get('name') || 'Oyuncu';
-  const playerColor = params.get('color') || '#6366f1';
+  // Who joins: the landing page passes ?name=…; the host arrives already in
+  // the room; anyone opening a shared link is asked first (JoinGate). Kept in
+  // state so reconnects rejoin under the same name after the URL is cleaned.
+  const [identity, setIdentity] = useState<Identity | null>(() => {
+    const name = params.get('name');
+    if (name) return { name, color: params.get('color') || '#6366f1' };
+    const st = useGameStore.getState();
+    if (st.playerId && st.roomCode === roomCode) {
+      const saved = loadSavedPlayer();
+      return { name: saved?.name || 'Oyuncu', color: saved?.color || '#6366f1' };
+    }
+    return null;
+  });
+  const identityRef = useRef(identity);
+  identityRef.current = identity;
 
   useEffect(() => {
+    if (!identity) return;
     const s = getSocket();
-    if (!s.connected) {
-      s.connect();
-    }
 
     const joinRoom = () => {
-      s.emit('room:join', {
-        roomCode: roomCode.toUpperCase(),
-        playerName,
-        avatarColor: playerColor,
-      });
-      store.setRoomCode(roomCode.toUpperCase());
+      const me = identityRef.current;
+      if (!me) return;
+      s.emit('room:join', { roomCode, playerName: me.name, avatarColor: me.color });
+      useGameStore.getState().setRoomCode(roomCode);
     };
 
-    // Join on connect (initial + reconnect)
-    const onConnect = () => {
-      joinRoom();
-    };
-
-    if (s.connected && !store.playerId) {
-      joinRoom();
-    }
-    s.on('connect', onConnect);
-
+    const st = useGameStore.getState();
+    const alreadyIn = !!st.playerId && st.roomCode === roomCode;
+    if (s.connected && !alreadyIn) joinRoom();
+    if (!s.connected) s.connect();
+    // Initial connect and every reconnect (a new socket is a new seat)
+    s.on('connect', joinRoom);
     return () => {
-      s.off('connect', onConnect);
+      s.off('connect', joinRoom);
     };
-  }, [roomCode, playerName, playerColor]);
+  }, [identity, roomCode]);
 
-  const { phase, isConnected, roomError } = store;
+  // Once in, drop ?name=&color= from the address bar: people copy it to
+  // invite friends, and the next person would join under this name.
+  const { playerId } = store;
+  useEffect(() => {
+    if (playerId && window.location.search) {
+      window.history.replaceState(window.history.state, '', `/oda/${roomCode}`);
+    }
+  }, [playerId, roomCode]);
+
+  const { phase, isConnected, connectionFailed, roomError } = store;
   const [wasConnected, setWasConnected] = useState(false);
 
   useEffect(() => {
     if (isConnected) setWasConnected(true);
   }, [isConnected]);
 
-  // Room error (e.g. game in progress, room full, kicked)
+  // Room error (e.g. room not found, room full, kicked)
   if (roomError) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[100dvh] flex items-center justify-center">
         <div className="text-center space-y-4 animate-rise px-6">
           <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto">
-            <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg aria-hidden="true" className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
           </div>
-          <p className="font-display text-2xl font-bold tracking-[-0.02em] text-slate-100">{roomError}</p>
+          <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-slate-100">{roomError}</h1>
+          <p className="mx-auto max-w-xs text-sm text-slate-400">
+            Oda kodunu kontrol et ya da ana sayfadan yeni bir oda kur.
+          </p>
           <a
             href="/"
             className="inline-block px-6 py-2.5 rounded-xl bg-accent-indigo text-white font-medium text-sm hover:bg-accent-indigo/80 transition-colors"
@@ -86,16 +109,24 @@ function RoomContent() {
     );
   }
 
+  if (!identity) {
+    return <JoinGate roomCode={roomCode} onJoin={(name, color) => setIdentity({ name, color })} />;
+  }
+
   // First time connecting
   if (!isConnected && !wasConnected) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center animate-rise">
-          <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.3em] text-slate-500">
-            Oda <span className="text-[var(--marker)]">{roomCode.toUpperCase()}</span>
-          </p>
-          <InkLoader label="Bağlanıyor" />
-        </div>
+      <div className="min-h-[100dvh] flex items-center justify-center px-6">
+        {connectionFailed ? (
+          <ServerUnreachable />
+        ) : (
+          <div className="text-center animate-rise">
+            <p className="mb-6 text-[13px] font-medium text-slate-400">
+              <span className="font-mono font-bold tracking-[0.18em] text-[var(--marker)]">{roomCode}</span> Odası
+            </p>
+            <InkLoader label="Bağlanıyor" />
+          </div>
+        )}
       </div>
     );
   }
@@ -104,7 +135,7 @@ function RoomContent() {
     <>
       {/* Reconnecting banner */}
       {!isConnected && wasConnected && (
-        <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500/90 text-center py-2 px-4">
+        <div role="status" className="fixed top-0 left-0 right-0 z-[100] bg-amber-500/90 text-center py-2 px-4">
           <div className="flex items-center justify-center gap-2">
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             <span className="text-sm font-medium text-white">Bağlantı koptu, yeniden bağlanılıyor…</span>

@@ -15,6 +15,13 @@ import {
 import { nanoid } from 'nanoid';
 import { haptic } from '@/lib/haptics';
 import { playSfx } from '@/hooks/useSoundEffects';
+import { useGameStore } from '@/stores/gameStore';
+
+/** Mirror the drawer's own strokes into the store so the round-result
+ *  replay shows them too (the server only relays strokes to others). */
+function mirrorHistory(strokes: DrawStroke[]) {
+  useGameStore.getState().setDrawHistory([...strokes]);
+}
 
 function isShapeTool(tool: string): boolean {
   return SHAPE_TOOLS.includes(tool as any);
@@ -417,6 +424,7 @@ export function DrawingCanvas() {
         };
         strokeHistoryRef.current.push(stroke);
         redoStackRef.current = [];
+        mirrorHistory(strokeHistoryRef.current);
         getSocket().emit('draw:stroke', stroke);
         haptic('tap');
         return;
@@ -522,6 +530,7 @@ export function DrawingCanvas() {
       strokeHistoryRef.current.push(stroke);
       redoStackRef.current = [];
       redrawAll();
+      mirrorHistory(strokeHistoryRef.current);
       getSocket().emit('draw:stroke', stroke);
       currentStrokeRef.current = [];
       rawStrokeRef.current = [];
@@ -537,6 +546,7 @@ export function DrawingCanvas() {
       haptic('tap');
     }
     redrawAll();
+    mirrorHistory(strokeHistoryRef.current);
     getSocket().emit('draw:undo');
   }, [redrawAll]);
 
@@ -545,6 +555,7 @@ export function DrawingCanvas() {
     if (stroke) {
       strokeHistoryRef.current.push(stroke);
       redrawAll();
+      mirrorHistory(strokeHistoryRef.current);
       getSocket().emit('draw:stroke', stroke);
       haptic('tap');
     }
@@ -554,6 +565,7 @@ export function DrawingCanvas() {
     strokeHistoryRef.current = [];
     redoStackRef.current = [];
     redrawAll();
+    mirrorHistory(strokeHistoryRef.current);
     getSocket().emit('draw:clear');
     haptic('warn');
   }, [redrawAll]);
@@ -768,10 +780,10 @@ export function DrawingCanvas() {
       {zoom !== 1 || panX !== 0 || panY !== 0 ? (
         <button
           onClick={() => resetView()}
-          className="absolute top-2 left-2 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-sm border border-white/10 text-[11px] font-mono text-white/70 hover:text-white hover:bg-black/80 transition-all z-10"
+          className="absolute top-2 left-2 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-sm border border-white/10 text-xs font-medium tabular-nums text-white/80 hover:text-white hover:bg-black/80 transition-all z-10"
           title="Görünümü sıfırla (Ctrl+0)"
         >
-          {Math.round(zoom * 100)}% · sıfırla
+          %{Math.round(zoom * 100)} · Sıfırla
         </button>
       ) : null}
 
@@ -800,11 +812,11 @@ export function DrawingCanvas() {
         aria-label="Klavye kısayolları"
         title="Klavye kısayolları"
       >
-        <span className="text-[10px] font-bold">?</span>
+        <span aria-hidden="true" className="text-sm font-bold">?</span>
       </button>
 
       {showHelp && (
-        <div className="absolute bottom-12 right-2 hidden lg:block z-20 w-64 p-3 rounded-xl glass text-[11px] text-white/80 space-y-1.5">
+        <div className="absolute bottom-12 right-2 hidden lg:block z-20 w-64 p-3 rounded-xl glass text-xs text-white/80 space-y-1.5">
           <p className="font-bold text-white/90 mb-2">Klavye Kısayolları</p>
           <div className="flex justify-between"><span>Kalem</span><kbd>B</kbd></div>
           <div className="flex justify-between"><span>Silgi</span><kbd>E</kbd></div>

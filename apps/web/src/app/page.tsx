@@ -6,6 +6,7 @@ import { motion, useMotionValueEvent, useScroll, useTransform } from 'framer-mot
 import { AVATAR_CHARACTERS } from '@karalama/shared';
 import { cn } from '@/lib/utils';
 import { useIntroDone } from '@/lib/intro';
+import { loadSavedPlayer, savePlayer } from '@/lib/player';
 import { EXPO } from '@/components/motion/hooks';
 import { useTransitionRouter } from '@/components/motion/PageTransition';
 import { useSmoothScroll } from '@/components/motion/SmoothScroll';
@@ -91,23 +92,6 @@ function Doodle({ play }: { play: boolean }) {
 }
 
 /* ============================================================
-   Local helpers
-   ============================================================ */
-function loadSavedPlayer() {
-  if (typeof window === 'undefined') return null;
-  try {
-    const saved = localStorage.getItem('karalama_player');
-    return saved ? JSON.parse(saved) : null;
-  } catch { return null; }
-}
-
-function savePlayer(name: string, avatarId: string, color: string) {
-  try {
-    localStorage.setItem('karalama_player', JSON.stringify({ name, avatarId, color }));
-  } catch { /* quota exceeded */ }
-}
-
-/* ============================================================
    Main Page
    ============================================================ */
 export default function HomePage() {
@@ -129,7 +113,7 @@ export default function HomePage() {
 
   const handleJoin = useCallback(() => {
     if (!playerName.trim() || !roomCode.trim()) return;
-    savePlayer(playerName.trim(), selectedAvatar.id, selectedColor);
+    savePlayer({ name: playerName.trim(), avatarId: selectedAvatar.id, color: selectedColor });
     const params = new URLSearchParams({
       name: playerName.trim(),
       color: selectedColor,
@@ -139,7 +123,7 @@ export default function HomePage() {
 
   const handleCreate = useCallback(() => {
     if (!playerName.trim()) return;
-    savePlayer(playerName.trim(), selectedAvatar.id, selectedColor);
+    savePlayer({ name: playerName.trim(), avatarId: selectedAvatar.id, color: selectedColor });
     const params = new URLSearchParams({
       name: playerName.trim(),
       color: selectedColor,

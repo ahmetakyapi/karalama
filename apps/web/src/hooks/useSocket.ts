@@ -24,8 +24,17 @@ export function useSocket() {
       socket.connect();
     }
 
+    // Two failed attempts in a row means the server is down or unreachable;
+    // say so instead of showing "Bağlanıyor…" forever. Retries continue.
+    let failures = 0;
     socket.on('connect', () => {
+      failures = 0;
       store.setConnected(true);
+    });
+
+    socket.on('connect_error', () => {
+      failures++;
+      if (failures >= 2 && !socket.connected) store.setConnectionFailed(true);
     });
 
     socket.on('disconnect', () => {

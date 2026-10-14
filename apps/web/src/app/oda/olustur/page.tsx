@@ -13,7 +13,9 @@ import {
 } from '@karalama/shared';
 import { cn } from '@/lib/utils';
 import { InkLoader } from '@/components/ui/InkLoader';
+import { ServerUnreachable } from '@/components/ui/ServerUnreachable';
 import { useTransitionRouter } from '@/components/motion/PageTransition';
+import { loadSavedPlayer } from '@/lib/player';
 
 const enter = (d: number) => ({ ['--d' as string]: `${d}s` }) as React.CSSProperties;
 
@@ -36,8 +38,11 @@ function CreateRoomContent() {
   const { socket } = useSocket();
   const store = useGameStore();
 
-  const playerName = params.get('name') || 'Oyuncu';
-  const playerColor = params.get('color') || '#6366f1';
+  // ?name= from the landing page, else this device's saved player
+  const [saved] = useState(loadSavedPlayer);
+  const playerName = params.get('name') || saved?.name || 'Oyuncu';
+  const playerColor = params.get('color') || saved?.color || '#6366f1';
+  const [creating, setCreating] = useState(false);
 
   const [rounds, setRounds] = useState(DEFAULT_ROOM_SETTINGS.totalRounds);
   const [drawTime, setDrawTime] = useState(DEFAULT_ROOM_SETTINGS.drawTime);
@@ -55,6 +60,7 @@ function CreateRoomContent() {
 
   useEffect(() => {
     if (store.roomError) {
+      setCreating(false);
       // Give user a chance to read, then bounce home
       const t = setTimeout(() => {
         store.setRoomError(null);
@@ -72,7 +78,8 @@ function CreateRoomContent() {
 
   const handleCreate = () => {
     const s = socket.current;
-    if (!s) return;
+    if (!s || !s.connected || creating) return;
+    setCreating(true);
 
     const customWords = customWordsText
       .split(/[,\n]/)
@@ -112,7 +119,7 @@ function CreateRoomContent() {
       <div className="relative z-10 w-full max-w-lg">
         <h1 className="mb-10 flex justify-center gap-[0.25em] text-center font-display text-6xl sm:text-7xl font-extrabold tracking-[-0.05em] text-slate-50">
           <span className="line-mask"><span style={enter(0.1)}>Odanı</span></span>
-          <span className="line-mask"><span style={enter(0.18)} className="text-gradient">Kur.</span></span>
+          <span className="line-mask"><span style={enter(0.18)} className="text-gradient pr-[0.04em]">Kur</span></span>
         </h1>
 
         {store.roomError && (
@@ -130,11 +137,12 @@ function CreateRoomContent() {
         <GlassCard className="p-6 sm:p-8 space-y-7">
           {/* Rounds */}
           <div>
-            <label className="flex items-end justify-between text-xs font-semibold uppercase tracking-[0.14em] text-white/50 mb-3">
+            <label htmlFor="opt-rounds" className="mb-3 flex items-end justify-between text-[13px] font-medium text-slate-300">
               <span>Tur Sayısı</span>
               <span className="font-display text-xl font-bold text-white tabular-nums">{rounds}</span>
             </label>
             <input
+              id="opt-rounds"
               type="range"
               min={1}
               max={10}
@@ -147,11 +155,14 @@ function CreateRoomContent() {
 
           {/* Draw Time */}
           <div>
-            <label className="flex items-end justify-between text-xs font-semibold uppercase tracking-[0.14em] text-white/50 mb-3">
+            <label htmlFor="opt-time" className="mb-3 flex items-end justify-between text-[13px] font-medium text-slate-300">
               <span>Çizim Süresi</span>
-              <span className="font-display text-xl font-bold text-white tabular-nums">{drawTime}s</span>
+              <span className="font-display text-xl font-bold text-white tabular-nums">
+                {drawTime} <span className="text-sm font-semibold text-slate-400">sn</span>
+              </span>
             </label>
             <input
+              id="opt-time"
               type="range"
               min={30}
               max={120}
@@ -165,11 +176,12 @@ function CreateRoomContent() {
 
           {/* Max Players */}
           <div>
-            <label className="flex items-end justify-between text-xs font-semibold uppercase tracking-[0.14em] text-white/50 mb-3">
+            <label htmlFor="opt-players" className="mb-3 flex items-end justify-between text-[13px] font-medium text-slate-300">
               <span>En Fazla Oyuncu</span>
               <span className="font-display text-xl font-bold text-white tabular-nums">{maxPlayers}</span>
             </label>
             <input
+              id="opt-players"
               type="range"
               min={2}
               max={12}
@@ -182,10 +194,11 @@ function CreateRoomContent() {
 
           {/* Categories */}
           <div>
-            <label className="block text-sm text-white/50 mb-3">
+            <p id="opt-categories" className="mb-3 flex items-baseline justify-between text-[13px] font-medium text-slate-300">
               Kategoriler
-            </label>
-            <div className="flex flex-wrap gap-2">
+              <span className="tabular-nums text-slate-500">{selectedCategories.length} Seçili</span>
+            </p>
+            <div className="flex flex-wrap gap-2" role="group" aria-labelledby="opt-categories">
               {Object.entries(categories).map(([key, cat]) => (
                 <motion.button
                   key={key}
@@ -209,10 +222,11 @@ function CreateRoomContent() {
 
           {/* Custom Words */}
           <div>
-            <label className="block text-sm text-white/50 mb-2">
-              Özel Kelimeler <span className="text-white/30">(İsteğe Bağlı)</span>
+            <label htmlFor="opt-words" className="mb-2 block text-[13px] font-medium text-slate-300">
+              Özel Kelimeler <span className="text-slate-500">(İsteğe Bağlı)</span>
             </label>
             <textarea
+              id="opt-words"
               value={customWordsText}
               onChange={(e) => setCustomWordsText(e.target.value)}
               placeholder="Kelimeleri virgülle ya da alt alta yaz…&#10;Örnek: pizza, astronot, kaykay"
@@ -220,26 +234,41 @@ function CreateRoomContent() {
               className={cn(
                 'w-full px-3 py-2 rounded-lg text-sm resize-none',
                 'bg-white/[0.03] border border-white/[0.06]',
-                'text-white placeholder:text-white/20',
+                'text-white placeholder:text-slate-500',
                 'focus:outline-none focus:border-accent-indigo/40',
                 'transition-all duration-200'
               )}
             />
             {customWordsText.trim() && (
-              <p className="text-xs text-white/30 mt-1">
+              <p className="mt-1.5 text-[13px] text-slate-400">
                 {customWordsText.split(/[,\n]/).filter((w) => w.trim()).length} özel kelime
               </p>
             )}
           </div>
 
-          <Button
-            size="lg"
-            onClick={handleCreate}
-            disabled={selectedCategories.length === 0 && !customWordsText.trim()}
-            className="w-full"
-          >
-            Oda Oluştur →
-          </Button>
+          {store.connectionFailed && !store.isConnected ? (
+            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-6">
+              <ServerUnreachable heading="h2" />
+            </div>
+          ) : (
+            <Button
+              size="lg"
+              onClick={handleCreate}
+              disabled={
+                !store.isConnected || creating || (selectedCategories.length === 0 && !customWordsText.trim())
+              }
+              aria-busy={creating || !store.isConnected}
+              className="w-full"
+            >
+              {!store.isConnected
+                ? 'Sunucuya Bağlanıyor…'
+                : creating
+                  ? 'Oda Kuruluyor…'
+                  : selectedCategories.length === 0 && !customWordsText.trim()
+                    ? 'En Az Bir Kategori Seç'
+                    : 'Oda Oluştur →'}
+            </Button>
+          )}
         </GlassCard>
         </div>
       </div>

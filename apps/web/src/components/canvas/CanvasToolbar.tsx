@@ -5,7 +5,7 @@ import { COLOR_PALETTE, BRUSH_SIZES } from '@karalama/shared';
 import type { DrawTool } from '@karalama/shared';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const TOOL_GROUPS: { tool: DrawTool; label: string; shortcut: string; icon: JSX.Element }[][] = [
   [
@@ -126,6 +126,13 @@ export function CanvasToolbar() {
   const [showColors, setShowColors] = useState(false);
   const [showShapes, setShowShapes] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  // Clearing can't be undone, so it takes a second tap (no native confirm())
+  const [confirmClear, setConfirmClear] = useState(false);
+  useEffect(() => {
+    if (!confirmClear) return;
+    const t = setTimeout(() => setConfirmClear(false), 3000);
+    return () => clearTimeout(t);
+  }, [confirmClear]);
 
   const handleUndo = () => {
     const fn = (window as unknown as Record<string, unknown>).__canvasUndo;
@@ -136,7 +143,11 @@ export function CanvasToolbar() {
     if (typeof fn === 'function') fn();
   };
   const handleClear = () => {
-    if (!window.confirm('Tüm çizimi silmek istediğine emin misin?')) return;
+    if (!confirmClear) {
+      setConfirmClear(true);
+      return;
+    }
+    setConfirmClear(false);
     const fn = (window as unknown as Record<string, unknown>).__canvasClear;
     if (typeof fn === 'function') fn();
   };
@@ -218,6 +229,7 @@ export function CanvasToolbar() {
           style={{ backgroundColor: color }}
           title="Renk Seç"
           aria-label="Renk paleti"
+          aria-expanded={showColors}
         >
           <span className="sr-only">{color}</span>
         </button>
@@ -230,7 +242,7 @@ export function CanvasToolbar() {
               className="absolute bottom-full left-0 mb-2 p-3 glass rounded-xl z-50 w-[260px]"
             >
               {/* Palette */}
-              <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Palet</p>
+              <p className="text-xs font-medium text-slate-400 mb-1.5">Palet</p>
               <div className="grid grid-cols-11 gap-1 mb-3">
                 {COLOR_PALETTE.map((c, i) => (
                   <button
@@ -245,6 +257,8 @@ export function CanvasToolbar() {
                     )}
                     style={{ backgroundColor: c }}
                     title={`${c} · kısayol: ${i === 9 ? 0 : i + 1}`}
+                    aria-label={`Renk ${c}`}
+                    aria-pressed={color === c}
                   />
                 ))}
               </div>
@@ -252,7 +266,7 @@ export function CanvasToolbar() {
               {/* Recent colors */}
               {recentColors.length > 0 && (
                 <>
-                  <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Son Kullanılan</p>
+                  <p className="text-xs font-medium text-slate-400 mb-1.5">Son Kullanılan</p>
                   <div className="flex gap-1 mb-3">
                     {recentColors.map((c) => (
                       <button
@@ -267,6 +281,7 @@ export function CanvasToolbar() {
                         )}
                         style={{ backgroundColor: c }}
                         title={c}
+                        aria-label={`Renk ${c}`}
                       />
                     ))}
                   </div>
@@ -274,7 +289,7 @@ export function CanvasToolbar() {
               )}
 
               {/* Custom color */}
-              <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Özel Renk</p>
+              <p className="text-xs font-medium text-slate-400 mb-1.5">Özel Renk</p>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -293,6 +308,7 @@ export function CanvasToolbar() {
                   className="flex-1 px-2 py-1 text-xs font-mono bg-white/[0.04] border border-white/10 rounded-md text-white/80 focus:outline-none focus:border-accent-indigo/50"
                   maxLength={7}
                   placeholder="#000000"
+                  aria-label="Renk kodu"
                 />
               </div>
             </motion.div>
@@ -316,6 +332,7 @@ export function CanvasToolbar() {
             )}
             title={`${size}px · [  ]`}
             aria-label={`Fırça ${size} piksel`}
+            aria-pressed={brushSize === size}
           >
             <div
               className="rounded-full bg-white"
@@ -354,7 +371,8 @@ export function CanvasToolbar() {
         />
         <ToolBtn
           onClick={handleClear}
-          label="Temizle"
+          label={confirmClear ? 'Silinsin mi?' : 'Temizle'}
+          danger={confirmClear}
           shortcut=""
           icon={
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -387,14 +405,14 @@ export function CanvasToolbar() {
               exit={{ opacity: 0, scale: 0.9, y: -5 }}
               className="absolute bottom-full right-0 mb-2 p-3 glass rounded-xl z-50 w-[240px]"
             >
-              <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-2">Titreme Düzelt</p>
+              <p className="text-xs font-medium text-slate-400 mb-2">Titreme Düzeltme</p>
               <div className="grid grid-cols-4 gap-1 mb-3">
                 {STABILIZER_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() => setStabilizer(opt.value)}
                     className={cn(
-                      'py-1.5 rounded-md text-[11px] font-medium transition-all',
+                      'py-1.5 rounded-md text-xs font-medium transition-all',
                       stabilizer === opt.value
                         ? 'bg-accent-indigo/20 text-accent-indigo border border-accent-indigo/30'
                         : 'bg-white/[0.03] text-white/50 border border-white/[0.06] hover:bg-white/[0.06]',
@@ -415,8 +433,8 @@ export function CanvasToolbar() {
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
                 </svg>
-                PNG olarak indir
-                <span className="ml-auto text-[10px] text-white/30 font-mono">Ctrl+S</span>
+                PNG Olarak İndir
+                <span className="ml-auto text-xs text-slate-500">Ctrl+S</span>
               </button>
             </motion.div>
           )}
@@ -428,6 +446,7 @@ export function CanvasToolbar() {
 
 function ToolBtn({
   active,
+  danger,
   onClick,
   label,
   shortcut,
@@ -435,6 +454,7 @@ function ToolBtn({
   hasDropdown,
 }: {
   active?: boolean;
+  danger?: boolean;
   onClick: () => void;
   label: string;
   shortcut?: string;
@@ -447,22 +467,25 @@ function ToolBtn({
       onClick={onClick}
       className={cn(
         'relative group flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all',
-        active
-          ? 'bg-accent-indigo/20 text-accent-indigo border border-accent-indigo/30'
-          : 'text-white/60 hover:text-white hover:bg-white/[0.05]',
+        danger
+          ? 'bg-red-500/20 text-red-300 border border-red-500/40'
+          : active
+            ? 'bg-accent-indigo/20 text-accent-indigo border border-accent-indigo/30'
+            : 'text-white/60 hover:text-white hover:bg-white/[0.05]',
       )}
       title={shortcut ? `${label} (${shortcut})` : label}
       aria-label={label}
+      aria-pressed={hasDropdown ? undefined : active}
     >
       {icon}
-      <span className="hidden sm:inline">{label}</span>
+      <span className={danger ? 'inline' : 'hidden sm:inline'}>{label}</span>
       {hasDropdown && (
         <svg className="w-3 h-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       )}
       {shortcut && (
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block px-1.5 py-0.5 text-[10px] bg-black/80 text-white/70 rounded whitespace-nowrap pointer-events-none z-50">
+        <span className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block px-1.5 py-0.5 text-xs bg-black/80 text-white/80 rounded whitespace-nowrap pointer-events-none z-50">
           {shortcut}
         </span>
       )}

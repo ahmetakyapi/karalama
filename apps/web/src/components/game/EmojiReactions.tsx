@@ -5,6 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getSocket } from '@/lib/socket';
 
 const REACTION_EMOJIS = ['👏', '🔥', '😂', '😮', '❤️', '💀'] as const;
+const REACTION_LABELS: Record<(typeof REACTION_EMOJIS)[number], string> = {
+  '👏': 'Alkış',
+  '🔥': 'Ateş',
+  '😂': 'Kahkaha',
+  '😮': 'Şaşkınlık',
+  '❤️': 'Kalp',
+  '💀': 'Öldüm',
+};
 
 interface FloatingEmoji {
   id: number;
@@ -47,7 +55,7 @@ export function EmojiReactions() {
           >
             {f.emoji}
             {f.playerName && (
-              <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] font-medium text-white/50 whitespace-nowrap">
+              <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-xs font-medium text-white/70 whitespace-nowrap">
                 {f.playerName}
               </span>
             )}
@@ -65,12 +73,15 @@ export function ReactionBar() {
   };
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1" role="group" aria-label="Tepki gönder">
       {REACTION_EMOJIS.map((emoji) => (
         <button
           key={emoji}
+          type="button"
           onClick={() => sendReaction(emoji)}
-          className="w-7 h-7 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-xs transition-all hover:scale-110 active:scale-95"
+          aria-label={REACTION_LABELS[emoji]}
+          title={REACTION_LABELS[emoji]}
+          className="w-8 h-8 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-sm transition-transform hover:scale-110 active:scale-95"
         >
           {emoji}
         </button>

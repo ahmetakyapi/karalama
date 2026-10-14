@@ -85,9 +85,10 @@ function MiniReplay({ strokes }: { strokes: DrawStroke[] }) {
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, delay: 0.1 }}
-      className="w-32 h-24 rounded-lg overflow-hidden border border-white/[0.08] bg-white/[0.02] mb-3"
+      className="w-36 h-[108px] rounded-lg overflow-hidden border border-white/[0.08] bg-white mb-3 shadow-[0_8px_24px_rgba(0,0,0,0.35)]"
     >
-      <canvas ref={canvasRef} className="w-full h-full" />
+      {/* Paper, like the real canvas — dark ink was invisible on the dark card */}
+      <canvas ref={canvasRef} aria-label="Bu turun çiziminin tekrarı" role="img" className="w-full h-full" />
     </motion.div>
   );
 }
@@ -98,8 +99,12 @@ export function RoundTransition() {
 
   const show = phase === 'ROUND_RESULT' && !!lastRoundData;
 
+  // Only people who earned something: the drawer's +0 used to hide the
+  // "Kimse Bilemedi" state behind a lonely "+0" row
   const sortedEntries = show
-    ? Object.entries(lastRoundData!.roundScores).sort(([, a], [, b]) => b - a)
+    ? Object.entries(lastRoundData!.roundScores)
+        .filter(([, score]) => score > 0)
+        .sort(([, a], [, b]) => b - a)
     : [];
 
   const nobodyGuessed = sortedEntries.length === 0;
@@ -114,17 +119,17 @@ export function RoundTransition() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4, ease: easeCurve }}
-          className="absolute inset-0 z-40 flex items-center justify-center overflow-hidden rounded-xl"
+          className="fixed inset-0 z-40 flex items-center justify-center overflow-y-auto lg:absolute lg:overflow-hidden lg:rounded-xl"
         >
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-[#04070d]/85 backdrop-blur-xl" />
+          <div className="fixed inset-0 bg-[#04070d]/90 backdrop-blur-xl lg:absolute" />
 
           {/* Ambient glow effects */}
           <div className="absolute top-1/4 left-1/3 w-64 h-64 text-indigo-500/10 pointer-events-none glow" />
-          <div className="absolute bottom-1/4 right-1/3 w-48 h-48 text-emerald-500/8 pointer-events-none glow" />
+          <div className="absolute bottom-1/4 right-1/3 w-48 h-48 text-emerald-500/10 pointer-events-none glow" />
 
           {/* Content */}
-          <div className="relative z-10 flex flex-col items-center w-full max-w-md px-6 py-8">
+          <div className="relative z-10 my-auto flex flex-col items-center w-full max-w-md px-6 py-8">
 
             {/* Mini Replay */}
             <MiniReplay strokes={drawHistory} />
@@ -136,7 +141,7 @@ export function RoundTransition() {
               transition={{ duration: 0.5, delay: 0.1, ease: easeCurve }}
               className="text-center mb-8"
             >
-              <span className="text-[11px] uppercase tracking-[0.2em] text-white/30 font-medium">
+              <span className="text-[13px] font-medium text-slate-400">
                 Kelime
               </span>
 
@@ -186,7 +191,7 @@ export function RoundTransition() {
                 <p className="font-hand text-3xl font-bold text-[var(--marker)]">
                   Kimse Bilemedi!
                 </p>
-                <p className="text-sm text-white/30">
+                <p className="text-sm text-slate-400">
                   Bu tur kimse doğru tahmin edemedi
                 </p>
               </motion.div>
@@ -265,8 +270,8 @@ export function RoundTransition() {
                         >
                           {player.name}
                           {isMe && (
-                            <span className="ml-1.5 text-[10px] text-indigo-400/70 uppercase tracking-wider">
-                              sen
+                            <span className="ml-1.5 text-xs text-indigo-300">
+                              (Sen)
                             </span>
                           )}
                         </span>
@@ -277,10 +282,10 @@ export function RoundTransition() {
                         </span>
 
                         {/* Separator dot */}
-                        <span className="text-white/10">|</span>
+                        <span aria-hidden="true" className="text-white/10">|</span>
 
                         {/* Total score */}
-                        <span className="text-white/40 font-mono text-xs tabular-nums w-12 text-right">
+                        <span className="text-slate-400 font-mono text-xs tabular-nums w-12 text-right" title="Toplam puan">
                           <AnimatedScore target={totalScore} duration={1.4 + index * 0.15} />
                         </span>
                       </div>
@@ -297,11 +302,9 @@ export function RoundTransition() {
               transition={{ duration: 0.5, delay: 0.9, ease: easeCurve }}
               className="mt-8 w-full"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] uppercase tracking-[0.15em] text-white/25 font-medium">
-                  İlerleme
-                </span>
-                <span className="text-xs font-mono text-white/40">
+              <div className="flex items-center justify-between mb-2 text-[13px] font-medium text-slate-400">
+                <span>Oyun İlerlemesi</span>
+                <span className="tabular-nums">
                   Tur {currentRound} / {totalRounds}
                 </span>
               </div>

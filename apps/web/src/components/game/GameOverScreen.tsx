@@ -9,6 +9,9 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { getSocket } from '@/lib/socket';
 import { easeCurve } from '@/styles/animations';
 import { useProgressStore, getXPForNextLevel } from '@/stores/progressStore';
+import { GAME_OVER_TIME } from '@karalama/shared';
+import { useLowMotion } from '@/components/motion/hooks';
+import { roomLink } from '@/lib/player';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -18,7 +21,8 @@ type EaseCurve = typeof easeCurve;
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-const CONFETTI_COUNT = 60;
+// One shower, not an endless one: 36 pieces falling for a few seconds
+const CONFETTI_COUNT = 36;
 const CONFETTI_COLORS = [
   '#6366f1', // indigo
   '#06b6d4', // cyan
@@ -107,7 +111,7 @@ function ConfettiParticle({ index }: { index: number }) {
       transition={{
         duration: style.duration,
         delay: style.delay,
-        repeat: Infinity,
+        repeat: 1,
         ease: 'linear',
       }}
     />
@@ -213,7 +217,7 @@ function Sparkle({ delay, x, y }: { delay: number; x: string; y: string }) {
       transition={{
         duration: 1.5,
         delay,
-        repeat: Infinity,
+        repeat: 3,
         repeatDelay: randomBetween(0.5, 2),
       }}
     />
@@ -224,10 +228,24 @@ function Sparkle({ delay, x, y }: { delay: number; x: string; y: string }) {
 // Main component
 // ---------------------------------------------------------------------------
 export function GameOverScreen() {
-  const { podium, players, scores, playerId, hostId, roomCode } = useGameStore();
+  const { podium, players, scores, playerId, hostId, roomCode, totalRounds } = useGameStore();
   const isHost = playerId === hostId;
   const containerRef = useRef<HTMLDivElement>(null);
   const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
+  const lowMotion = useLowMotion();
+
+  // The server sends everyone back to the lobby after GAME_OVER_TIME; show
+  // it as a countdown instead of a button that only the host could use
+  const [secondsLeft, setSecondsLeft] = useState<number>(GAME_OVER_TIME);
+  useEffect(() => {
+    const started = Date.now();
+    const id = setInterval(() => {
+      const left = Math.max(0, GAME_OVER_TIME - Math.floor((Date.now() - started) / 1000));
+      setSecondsLeft(left);
+      if (left === 0) clearInterval(id);
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
 
   const { xp, level, gamesPlayed, totalCorrectGuesses, currentStreak, bestStreak } = useProgressStore();
   const xpForNext = getXPForNextLevel(level);
@@ -239,7 +257,7 @@ export function GameOverScreen() {
 
   const handleShare = async () => {
     if (typeof window === 'undefined') return;
-    const url = roomCode ? `${window.location.origin}/oda/${roomCode}` : window.location.href;
+    const url = roomCode ? roomLink(roomCode) : window.location.origin;
     const text = `Karalama'da oynadım! Katıl: ${url}`;
     try {
       if (navigator.share) {
@@ -335,7 +353,7 @@ export function GameOverScreen() {
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute bottom-[15%] right-[15%] w-[400px] h-[400px] text-accent-emerald/12 glow"
+          className="absolute bottom-[15%] right-[15%] w-[400px] h-[400px] text-accent-emerald/10 glow"
           animate={{
             scale: [1, 1.15, 1],
             opacity: [0.12, 0.2, 0.12],
@@ -353,11 +371,13 @@ export function GameOverScreen() {
       </div>
 
       {/* ---- Confetti ---- */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {Array.from({ length: CONFETTI_COUNT }).map((_, i) => (
-          <ConfettiParticle key={i} index={i} />
-        ))}
-      </div>
+      {!lowMotion && (
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none overflow-hidden">
+          {Array.from({ length: CONFETTI_COUNT }).map((_, i) => (
+            <ConfettiParticle key={i} index={i} />
+          ))}
+        </div>
+      )}
 
       {/* ---- Main content ---- */}
       <motion.div
@@ -379,9 +399,9 @@ export function GameOverScreen() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          className="text-white/40 text-sm mb-6"
+          className="text-slate-400 text-sm mb-6"
         >
-          Puan tablosu aşağıda
+          {totalRounds} tur · {Object.keys(players).length} oyuncu
         </motion.p>
 
         {/* ---- Trophy + Winner ---- */}
@@ -505,10 +525,10 @@ export function GameOverScreen() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1.5 + visualIdx * 0.1 }}
-                    className="text-xs font-mono font-bold text-accent-cyan mb-2"
+                    className="text-[13px] font-bold tabular-nums text-accent-cyan mb-2"
                   >
                     <AnimatedScore value={entry.score} delay={1.6 + visualIdx * 0.15} />
-                    <span className="text-white/30 ml-1">puan</span>
+                    <span className="font-medium text-slate-400 ml-1">puan</span>
                   </motion.p>
 
                   {/* Podium bar */}
@@ -554,7 +574,7 @@ export function GameOverScreen() {
           className="w-full mb-6"
         >
           <GlassCard className="p-5" glowColor="rgba(99, 102, 241, 0.08)">
-            <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-4">
+            <h2 className="text-[15px] font-semibold text-slate-200 mb-4">
               Puan Tablosu
             </h2>
             <div className="space-y-1.5">
@@ -629,7 +649,7 @@ export function GameOverScreen() {
             transition={{ delay: 2.6, duration: 0.5, ease: easeCurve as unknown as EaseCurve }}
             className="w-full mb-8"
           >
-            <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-3 text-center">
+            <h2 className="text-[15px] font-semibold text-slate-200 mb-3 text-center">
               Bu Oyunun Öne Çıkanları
             </h2>
             <div className="grid grid-cols-2 gap-3">
@@ -648,9 +668,9 @@ export function GameOverScreen() {
                   <div className="flex items-center gap-2.5">
                     <div className="text-2xl leading-none">{card.icon}</div>
                     <div className="min-w-0">
-                      <p className="text-[10px] text-white/50 uppercase tracking-wider">{card.title}</p>
+                      <p className="text-xs font-medium text-slate-300">{card.title}</p>
                       <p className="text-sm font-bold text-white truncate">{card.playerName}</p>
-                      <p className="text-[10px] text-white/60 truncate">{card.subtitle}</p>
+                      <p className="text-xs text-slate-300 truncate">{card.subtitle}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -668,7 +688,7 @@ export function GameOverScreen() {
         >
           <GlassCard className="p-5" glowColor="rgba(139, 92, 246, 0.06)">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider">
+              <h2 className="text-[15px] font-semibold text-slate-200">
                 Seviye {level}
               </h2>
               <div className="flex items-center gap-2">
@@ -677,7 +697,7 @@ export function GameOverScreen() {
                     &#x1F525; {currentStreak} seri
                   </span>
                 )}
-                <span className="text-xs text-white/30 font-mono">
+                <span className="text-xs text-slate-400 tabular-nums">
                   {xp}/{xpForNext} XP
                 </span>
               </div>
@@ -693,15 +713,15 @@ export function GameOverScreen() {
             <div className="grid grid-cols-3 gap-3 text-center">
               <div>
                 <p className="text-lg font-bold text-white/80">{gamesPlayed}</p>
-                <p className="text-[10px] text-white/30 uppercase">Oyun</p>
+                <p className="text-xs font-medium text-slate-400">Oyun</p>
               </div>
               <div>
                 <p className="text-lg font-bold text-white/80">{totalCorrectGuesses}</p>
-                <p className="text-[10px] text-white/30 uppercase">Bilinen</p>
+                <p className="text-xs font-medium text-slate-400">Doğru Tahmin</p>
               </div>
               <div>
                 <p className="text-lg font-bold text-amber-400">{bestStreak}</p>
-                <p className="text-[10px] text-white/30 uppercase">En İyi Seri</p>
+                <p className="text-xs font-medium text-slate-400">En İyi Seri</p>
               </div>
             </div>
           </GlassCard>
@@ -714,28 +734,14 @@ export function GameOverScreen() {
           transition={{ delay: 3, duration: 0.5, ease: easeCurve as unknown as EaseCurve }}
           className="flex flex-col sm:flex-row gap-3 w-full max-w-sm"
         >
-          {isHost ? (
+          {isHost && (
             <Button
               size="lg"
               variant="primary"
               onClick={handleBackToLobby}
-              className="flex-1 relative overflow-hidden"
-            >
-              <motion.span
-                className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0"
-                animate={{ x: ['-100%', '200%'] }}
-                transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: 'easeInOut' }}
-              />
-              <span className="relative">Tekrar Oyna</span>
-            </Button>
-          ) : (
-            <Button
-              size="lg"
-              variant="secondary"
-              onClick={handleBackToLobby}
               className="flex-1"
             >
-              Lobiye Dön
+              Tekrar Oyna
             </Button>
           )}
           <Button
@@ -748,17 +754,30 @@ export function GameOverScreen() {
           </Button>
         </motion.div>
 
-        {/* Host hint */}
-        {!isHost && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 3.2 }}
-            className="text-xs text-white/30 mt-3 text-center"
-          >
-            Yeni oyunu başlatmak için oda kurucusunu bekle
-          </motion.p>
-        )}
+        {/* Everyone returns to the lobby on the server's clock */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 3.2 }}
+          className="mt-4 w-full max-w-sm"
+        >
+          <p role="status" className="text-center text-[13px] text-slate-400">
+            {secondsLeft > 0 ? (
+              <>
+                <span className="tabular-nums text-slate-200">{secondsLeft} sn</span> sonra herkes lobiye dönüyor
+                {isHost ? '' : '; yeni oyunu kurucu başlatır'}
+              </>
+            ) : (
+              'Lobiye dönülüyor…'
+            )}
+          </p>
+          <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]">
+            <div
+              className="h-full origin-left rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 transition-transform duration-1000 ease-linear"
+              style={{ transform: `scaleX(${secondsLeft / GAME_OVER_TIME})` }}
+            />
+          </div>
+        </motion.div>
       </motion.div>
     </div>
   );

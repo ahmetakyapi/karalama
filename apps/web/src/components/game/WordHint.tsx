@@ -11,7 +11,7 @@ export function WordHint() {
   if (phase === 'PICKING') {
     return (
       <div className="text-center">
-        <p className="text-white/40 text-sm">
+        <p className="text-slate-400 text-sm">
           {isDrawer ? 'Bir kelime seç…' : 'Çizen oyuncu kelime seçiyor…'}
         </p>
       </div>
@@ -35,10 +35,10 @@ export function WordHint() {
             initial={isRevealed ? { scale: 1.3, color: '#22d3ee' } : {}}
             animate={isRevealed ? { scale: 1, color: '#f0f2f5' } : {}}
             className={cn(
-              'w-7 h-8 flex items-center justify-center rounded-md text-sm font-bold font-mono',
+              'w-6 h-7 sm:w-7 sm:h-8 flex items-center justify-center rounded-md text-sm font-bold font-mono',
               isRevealed
                 ? 'bg-accent-indigo/20 text-white'
-                : 'bg-white/[0.05] text-white/40'
+                : 'bg-white/[0.05] text-slate-500'
             )}
           >
             {ch}

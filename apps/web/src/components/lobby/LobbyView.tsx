@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { easeCurve } from '@/styles/animations';
 import { MAX_BOTS } from '@karalama/shared';
+import { roomLink } from '@/lib/player';
 
 export function LobbyView() {
   const { players, hostId, playerId, roomCode, settings } = useGameStore();
@@ -20,9 +21,9 @@ export function LobbyView() {
   const playerList = Object.values(players);
   const botList = playerList.filter((p) => p.isBot);
   const isHost = playerId === hostId;
-  const allReady =
-    playerList.length >= 2 &&
-    playerList.filter((p) => p.id !== hostId && !p.isBot).every((p) => p.isReady);
+  const notReady = playerList.filter((p) => p.id !== hostId && !p.isBot && !p.isReady);
+  const allReady = playerList.length >= 2 && notReady.length === 0;
+  const link = () => roomLink(roomCode ?? '');
 
   const handleReady = () => {
     getSocket().emit('player:ready');
@@ -41,7 +42,7 @@ export function LobbyView() {
   };
 
   const handleCopy = async () => {
-    const url = window.location.href;
+    const url = link();
     try {
       await navigator.clipboard.writeText(url);
     } catch {
@@ -58,7 +59,7 @@ export function LobbyView() {
   };
 
   const handleNativeShare = async () => {
-    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const url = link();
     const text = `Karalama'da çizim oyunu oynayalım! Oda: ${roomCode}`;
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
@@ -70,11 +71,19 @@ export function LobbyView() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
+    <div className="relative min-h-[100dvh] overflow-hidden flex flex-col items-center justify-center px-4 py-10">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[400px] h-[400px] text-accent-indigo/10 glow" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] text-accent-cyan/10 glow" />
       </div>
+
+      <a
+        href="/"
+        className="group absolute left-5 top-6 z-10 inline-flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-slate-100 sm:left-8"
+      >
+        <span aria-hidden="true" className="transition-transform duration-500 ease-expo group-hover:-translate-x-1">←</span>
+        Odadan Çık
+      </a>
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -84,9 +93,8 @@ export function LobbyView() {
       >
         {/* Room Code */}
         <div className="text-center">
-          <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.3em] text-white/40">
-            <span className="text-[var(--marker)]">●</span> Oda Kodu
-          </p>
+          <h1 className="sr-only">{roomCode} Odası</h1>
+          <p className="mb-1 text-[13px] font-medium text-slate-400">Oda Kodu</p>
           <div className="flex items-center justify-center gap-3">
             <span className="flex overflow-hidden font-display text-5xl font-extrabold tracking-[0.12em]" aria-label={roomCode ?? undefined}>
               {(roomCode ?? '').split('').map((ch, i) => (
@@ -132,7 +140,7 @@ export function LobbyView() {
             >
               <div className="p-3 rounded-2xl bg-white">
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&data=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&data=${encodeURIComponent(link())}`}
                   alt={`Oda ${roomCode} için QR kodu`}
                   width={200}
                   height={200}
@@ -140,7 +148,7 @@ export function LobbyView() {
                   loading="lazy"
                 />
               </div>
-              <p className="text-[11px] text-white/40">
+              <p className="text-[13px] text-slate-400">
                 Telefonla tara, doğrudan katıl
               </p>
             </motion.div>
@@ -156,9 +164,9 @@ export function LobbyView() {
 
         {/* Player List */}
         <GlassCard className="p-4">
-          <h3 className="text-sm text-white/40 mb-3">
-            Oyuncular ({playerList.length}/{settings.maxPlayers})
-          </h3>
+          <h2 className="mb-3 text-[13px] font-medium text-slate-400">
+            Oyuncular <span className="tabular-nums">({playerList.length}/{settings.maxPlayers})</span>
+          </h2>
           <div className="space-y-2">
             {playerList.map((player, i) => (
               <motion.div
@@ -177,19 +185,17 @@ export function LobbyView() {
                   color={player.avatarColor}
                   isHost={player.isHost}
                 />
-                <span className="flex-1 font-medium">
+                <span className="min-w-0 flex-1 truncate font-medium">
                   {player.name}
                   {player.id === playerId && (
-                    <span className="text-white/30 text-sm ml-1">(Sen)</span>
-                  )}
-                  {player.isBot && (
-                    <span className="text-accent-cyan/60 text-sm ml-1">Bot</span>
+                    <span className="text-slate-400 text-sm ml-1">(Sen)</span>
                   )}
                 </span>
                 {player.isBot && isHost ? (
                   <button
                     onClick={() => handleRemoveBot(player.id)}
-                    className="text-red-400/60 hover:text-red-400 text-xs transition-colors px-1.5 py-0.5 rounded hover:bg-red-500/10"
+                    aria-label={`${player.name} botunu kaldır`}
+                    className="text-red-300/80 hover:text-red-300 text-[13px] transition-colors px-2 py-1 rounded-md hover:bg-red-500/10"
                   >
                     Kaldır
                   </button>
@@ -226,8 +232,8 @@ export function LobbyView() {
                 Bot Ekle ({botList.length}/{MAX_BOTS})
               </button>
               {botList.length === 0 && (
-                <p className="text-[11px] text-white/25 text-center mt-1.5">
-                  Tek başına oynamak için bot ekleyebilirsin
+                <p className="mt-2 text-center text-[13px] text-slate-500">
+                  Arkadaşların gelene kadar bot ekleyip oynayabilirsin
                 </p>
               )}
             </div>
@@ -235,7 +241,7 @@ export function LobbyView() {
         </GlassCard>
 
         {/* Actions */}
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-2">
           {isHost ? (
             <Button
               size="lg"
@@ -261,38 +267,62 @@ export function LobbyView() {
               {players[playerId ?? '']?.isReady ? 'Hazır (İptal)' : 'Hazırım'}
             </Button>
           )}
+          {/* Tell the host what they're waiting for, not just that they wait */}
+          {isHost && playerList.length >= 2 && notReady.length > 0 && (
+            <p role="status" className="text-center text-[13px] text-slate-400">
+              Hazır olması beklenen: <span className="text-slate-200">{notReady.map((p) => p.name).join(', ')}</span>
+            </p>
+          )}
+          {isHost && playerList.length < 2 && (
+            <p className="text-center text-[13px] text-slate-400">
+              Bağlantıyı arkadaşlarına gönder ya da bot ekle
+            </p>
+          )}
+          {!isHost && players[playerId ?? '']?.isReady && (
+            <p role="status" className="text-center text-[13px] text-slate-400">
+              Kurucunun oyunu başlatması bekleniyor
+            </p>
+          )}
         </div>
 
         {/* Share buttons */}
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           <button
             onClick={() => {
-              const url = window.location.href;
+              const url = link();
               const text = `Karalama'da çizim oyunu oynayalım! Oda kodu: ${roomCode}`;
               window.open(`https://wa.me/?text=${encodeURIComponent(text + '\n' + url)}`, '_blank');
             }}
-            className="flex items-center gap-1.5 rounded-xl bg-[#25D366]/10 border border-[#25D366]/20 px-3 py-2 text-xs font-medium text-[#25D366] hover:bg-[#25D366]/20 transition-colors"
+            className="flex items-center gap-1.5 whitespace-nowrap rounded-xl bg-[#25D366]/10 border border-[#25D366]/20 px-3 py-2.5 text-[13px] font-medium text-[#25D366] hover:bg-[#25D366]/20 transition-colors"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            <svg aria-hidden="true" className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             WhatsApp
           </button>
           <button
             onClick={() => {
-              const url = window.location.href;
+              const url = link();
               const text = `Karalama'da çizim oyunu oynayalım! Oda: ${roomCode}`;
               window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
             }}
-            className="flex items-center gap-1.5 rounded-xl bg-[#26A5E4]/10 border border-[#26A5E4]/20 px-3 py-2 text-xs font-medium text-[#26A5E4] hover:bg-[#26A5E4]/20 transition-colors"
+            className="flex items-center gap-1.5 whitespace-nowrap rounded-xl bg-[#26A5E4]/10 border border-[#26A5E4]/20 px-3 py-2.5 text-[13px] font-medium text-[#26A5E4] hover:bg-[#26A5E4]/20 transition-colors"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+            <svg aria-hidden="true" className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
             Telegram
           </button>
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] px-3 py-2 text-xs font-medium text-white/60 hover:bg-white/[0.08] transition-colors"
+            aria-live="polite"
+            className="flex items-center gap-1.5 whitespace-nowrap rounded-xl bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-[13px] font-medium text-slate-300 hover:bg-white/[0.08] transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></svg>
-            {copied ? 'Kopyalandı!' : 'Bağlantıyı Kopyala'}
+            <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></svg>
+            {copied ? (
+              'Kopyalandı!'
+            ) : (
+              <>
+                <span className="sm:hidden">Kopyala</span>
+                <span className="hidden sm:inline">Bağlantıyı Kopyala</span>
+              </>
+            )}
           </button>
         </div>
       </motion.div>
