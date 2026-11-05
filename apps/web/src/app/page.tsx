@@ -19,6 +19,8 @@ import { Manifesto } from '@/components/landing/Manifesto';
 import { FinalCTA } from '@/components/landing/FinalCTA';
 import { SiteFooter } from '@/components/landing/SiteFooter';
 import HeroDemo from '@/components/landing/HeroDemo';
+import { Glyph, PointerLight, SketchDivider, type GlyphName } from '@/components/ui/Sketch';
+import type { MotionValue } from 'framer-motion';
 
 const GameDemo = dynamic(() => import('@/components/landing/GameDemo'), {
   loading: () => <SectionPlaceholder minHeight={600} />,
@@ -43,10 +45,9 @@ function AuroraBackground() {
           background:
             'radial-gradient(420px circle at 18% 14%, rgba(79,70,229,0.22), transparent 70%),' +
             'radial-gradient(360px circle at 88% 46%, rgba(6,182,212,0.16), transparent 70%),' +
-            'radial-gradient(330px circle at 50% 96%, rgba(217,70,239,0.11), transparent 70%)',
+            'radial-gradient(330px circle at 50% 96%, rgba(200,245,96,0.06), transparent 70%)',
         }}
       />
-      <div className="absolute inset-0 bg-grid opacity-40" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#04070d]" />
     </div>
   );
@@ -88,6 +89,40 @@ function Doodle({ play }: { play: boolean }) {
         transition={{ duration: 1.1, ease: 'easeInOut', delay: 1.4 }}
       />
     </motion.svg>
+  );
+}
+
+/* ============================================================
+   Hero doodles — margin scribbles that drift apart as you scroll
+   ============================================================ */
+const DOODLES: { name: GlyphName; className: string; depth: number; r: number }[] = [
+  { name: 'spiral', className: 'left-[3%] top-[18%] h-12 w-12 text-slate-600', depth: -120, r: -20 },
+  { name: 'heart', className: 'left-[44%] top-[10%] h-8 w-8 text-rose-400/40', depth: -60, r: 12 },
+  { name: 'cloud', className: 'right-[4%] top-[14%] h-14 w-14 text-slate-600', depth: -160, r: 0 },
+  { name: 'bolt', className: 'left-[48%] bottom-[18%] h-10 w-10 text-amber-300/40', depth: 120, r: 10 },
+  { name: 'smile', className: 'right-[6%] bottom-[14%] h-12 w-12 text-cyan-300/30', depth: 200, r: -12 },
+  { name: 'squiggle', className: 'left-[2%] bottom-[8%] h-12 w-12 text-lime-300/30', depth: 90, r: 0 },
+];
+
+function HeroDoodle({ d, progress, i }: { d: (typeof DOODLES)[number]; progress: MotionValue<number>; i: number }) {
+  const y = useTransform(progress, [0, 1], [0, d.depth]);
+  const rotate = useTransform(progress, [0, 1], [d.r, d.r + (i % 2 ? 40 : -40)]);
+  return (
+    <motion.div aria-hidden="true" style={{ y, rotate }} className={cn('absolute', d.className)}>
+      <div className="pop-in" style={{ ['--d' as string]: `${1.4 + i * 0.12}s` }}>
+        <Glyph name={d.name} className="float-slow h-full w-full" style={{ animationDelay: `${-i * 1.1}s` }} />
+      </div>
+    </motion.div>
+  );
+}
+
+function HeroDoodles({ progress }: { progress: MotionValue<number> }) {
+  return (
+    <div className="pointer-events-none absolute inset-0 hidden overflow-hidden md:block">
+      {DOODLES.map((d, i) => (
+        <HeroDoodle key={d.name} d={d} progress={progress} i={i} />
+      ))}
+    </div>
   );
 }
 
@@ -186,9 +221,11 @@ export default function HomePage() {
           ref={heroRef}
           id="oyna"
           aria-label="Başlangıç"
-          className="relative z-10 min-h-[100svh] px-5 pb-20 pt-28 sm:px-6 lg:pt-36"
+          className="dot-paper relative z-10 min-h-[100svh] px-5 pb-20 pt-28 sm:px-6 lg:pt-36"
         >
+          <PointerLight />
           <InkTrail className="pointer-events-none absolute inset-0 h-full w-full" />
+          <HeroDoodles progress={heroProgress} />
 
           <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
             {/* LEFT: copy + form */}
@@ -346,9 +383,13 @@ export default function HomePage() {
 
         <MarqueeBand />
         <Manifesto />
+        <SketchDivider variant="loop" label="şimdi nasıl oynanır?" className="mt-4" />
         <GameDemo />
+        <SketchDivider variant="wave" color="#22d3ee" className="my-10" />
         <BentoFeatures />
+        <SketchDivider variant="zig" color="#f9a8d4" label="sorular mı var?" className="mt-10" />
         <FAQSection />
+        <SketchDivider variant="wave" label="son bir şey…" className="mt-6" />
         <FinalCTA />
       </main>
 

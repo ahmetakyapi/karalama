@@ -13,7 +13,6 @@ import { WordHint } from './WordHint';
 import { WordSelection } from './WordSelection';
 import { RoundTransition } from './RoundTransition';
 import { Avatar } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui/Badge';
 import { EmojiReactions } from './EmojiReactions';
 import { CorrectGuessEffect } from './CorrectGuessEffect';
 import { DrawingRules } from './DrawingRules';
@@ -22,6 +21,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useProgressStore, getXPForNextLevel } from '@/stores/progressStore';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/components/motion/hooks';
+import { Glyph, Tape } from '@/components/ui/Sketch';
 
 const DESKTOP = '(min-width: 1024px)';
 
@@ -83,22 +83,27 @@ export function GameView() {
       <CorrectGuessEffect />
 
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 sm:px-4 border-b border-white/[0.06] bg-bg-secondary/50 gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <Badge variant="info">
-            Tur {currentRound}/{totalRounds}
-          </Badge>
+      <div className="relative flex items-center justify-between gap-3 border-b border-white/[0.06] bg-bg-secondary/60 px-3 py-2 sm:px-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <RoundTally current={currentRound} total={totalRounds} />
           {drawer && (
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex min-w-0 items-center gap-2 rounded-full border border-white/[0.07] bg-white/[0.03] py-1 pl-1 pr-3">
               <Avatar name={drawer.name} color={drawer.avatarColor} size="sm" />
-              <span className="text-sm text-slate-300 truncate">
-                {isDrawer ? 'Sen Çiziyorsun!' : `${drawer.name} Çiziyor`}
+              <span className="truncate text-sm text-slate-200">
+                {isDrawer ? (
+                  <span className="font-hand text-lg font-bold leading-none text-[var(--marker)]">sen çiziyorsun!</span>
+                ) : (
+                  <>
+                    <span className="font-semibold">{drawer.name}</span> <span className="text-slate-400">çiziyor</span>
+                  </>
+                )}
               </span>
+              <Glyph name="pencil" className="wobble hidden h-4 w-4 shrink-0 text-slate-400 sm:block" strokeWidth={3} />
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex shrink-0 items-center gap-3">
           <div className="hidden lg:block">
             <WordHint />
           </div>
@@ -106,7 +111,7 @@ export function GameView() {
           {/* Compact XP bar - desktop only */}
           <Link
             href="/profil"
-            className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all group"
+            className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-colors group"
             title="Profilim"
           >
             <span className="flex items-center justify-center w-6 h-6 rounded-md bg-gradient-to-br from-violet-500/30 to-cyan-400/30 border border-white/10 text-xs font-bold text-white">
@@ -114,12 +119,15 @@ export function GameView() {
             </span>
             <div className="w-16 h-1 rounded-full bg-white/[0.08] overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 transition-all duration-500"
-                style={{ width: `${xpPercent}%` }}
+                className="h-full w-full origin-left rounded-full bg-[var(--marker)] transition-transform duration-500"
+                style={{ transform: `scaleX(${xpPercent / 100})` }}
               />
             </div>
             {currentStreak >= 3 && (
-              <span className="text-xs font-bold text-amber-400 whitespace-nowrap">🔥 {currentStreak}</span>
+              <span className="flex items-center gap-0.5 whitespace-nowrap text-xs font-bold text-amber-400" aria-label={`${currentStreak} seri`}>
+                <Glyph name="bolt" className="h-3.5 w-3.5" strokeWidth={3} />
+                {currentStreak}
+              </span>
             )}
           </Link>
 
@@ -136,16 +144,24 @@ export function GameView() {
 
       {desktop ? (
         <div className="flex-1 flex gap-3 p-3 overflow-hidden">
-          <div className="w-52 shrink-0">
+          <div className="flex w-56 shrink-0 flex-col gap-3 overflow-y-auto">
             <ScoreBoard />
+            <RoundCard current={currentRound} total={totalRounds} />
           </div>
 
-          <div className="flex-1 flex flex-col min-w-0">
-            <div className="flex-1 relative">
-              {isDrawer ? <DrawingCanvas /> : <SpectatorCanvas />}
-              {phase === 'DRAWING' && isDrawer && <DrawingRules />}
-              {phase === 'PICKING' && isDrawer && <WordSelection />}
-              {phase === 'ROUND_RESULT' && <RoundTransition />}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="flex min-h-0 flex-1 items-center justify-center">
+              <div
+                className="paper-frame relative w-full"
+                style={{ maxWidth: `calc((100dvh - ${isDrawer && phase === 'DRAWING' ? '12.5rem' : '7.5rem'}) * 4 / 3)` }}
+              >
+                <Tape className="-left-6 -top-2 z-20 -rotate-[24deg]" />
+                <Tape className="-right-6 -top-2 z-20 rotate-[22deg]" />
+                {isDrawer ? <DrawingCanvas /> : <SpectatorCanvas />}
+                {phase === 'DRAWING' && isDrawer && <DrawingRules />}
+                {phase === 'PICKING' && isDrawer && <WordSelection />}
+                {phase === 'ROUND_RESULT' && <RoundTransition />}
+              </div>
             </div>
             {isDrawer && phase === 'DRAWING' && <CanvasToolbar />}
           </div>
@@ -206,6 +222,56 @@ export function GameView() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/** Rounds as pencil tally marks: done rounds inked, the current one in marker. */
+function RoundTally({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="flex items-center gap-2" aria-label={`Tur ${current}/${total}`} role="img">
+      <span className="font-display text-sm font-bold tabular-nums text-slate-100">
+        Tur {current}
+        <span className="text-slate-500">/{total}</span>
+      </span>
+      <span className="hidden items-end gap-[3px] sm:flex" aria-hidden="true">
+        {Array.from({ length: total }).map((_, i) => (
+          <span
+            key={i}
+            className={cn(
+              'block w-[3px] rounded-full transition-colors duration-500',
+              i < current - 1 ? 'h-3.5 bg-slate-300' : i === current - 1 ? 'h-4 bg-[var(--marker)]' : 'h-3 bg-white/[0.12]'
+            )}
+            style={{ rotate: `${((i * 37) % 9) - 4}deg` }}
+          />
+        ))}
+      </span>
+    </div>
+  );
+}
+
+/** Fills the space under the scoreboard with something worth reading. */
+function RoundCard({ current, total }: { current: number; total: number }) {
+  const left = Math.max(0, total - current);
+  return (
+    <div className="glass relative overflow-hidden rounded-xl p-4">
+      <Glyph name="star" className="float-slow absolute -right-2 -top-2 h-12 w-12 text-lime-300/20" />
+      <p className="text-[13px] font-semibold text-slate-300">Oyun Durumu</p>
+      <p className="mt-2 font-display text-3xl font-extrabold tabular-nums tracking-[-0.04em] text-slate-50">
+        {current}
+        <span className="ml-1.5 font-sans text-sm font-semibold tracking-normal text-slate-400">/ {total} tur</span>
+      </p>
+      <div className="mt-3 flex gap-1" aria-hidden="true">
+        {Array.from({ length: total }).map((_, i) => (
+          <span
+            key={i}
+            className={cn('h-1.5 flex-1 rounded-full', i < current ? 'bg-[var(--marker)]' : 'bg-white/[0.08]')}
+          />
+        ))}
+      </div>
+      <p className="mt-3 font-hand text-lg leading-tight text-slate-400">
+        {left === 0 ? 'son tur, hepsi ya da hiç!' : left === 1 ? 'bir tur kaldı' : `${left} tur daha var`}
+      </p>
     </div>
   );
 }

@@ -75,12 +75,12 @@ function StickyNote({ note, i }: { note: Note; i: number }) {
         style={{ clipPath: 'polygon(4% 0, 96% 8%, 100% 90%, 0 100%)', rotate: `${-note.tilt * 2}deg` }}
       />
       <article
-        className="relative h-full min-h-[230px] rounded-[3px] p-6 text-[#1f2430] shadow-[0_18px_30px_-12px_rgba(0,0,0,0.7)] transition-shadow duration-500 group-hover:shadow-[0_30px_50px_-16px_rgba(0,0,0,0.75)]"
+        className="relative h-full min-h-[200px] rounded-[3px] p-4 text-[#1f2430] sm:min-h-[230px] sm:p-6 shadow-[0_18px_30px_-12px_rgba(0,0,0,0.7)] transition-shadow duration-500 group-hover:shadow-[0_30px_50px_-16px_rgba(0,0,0,0.75)]"
         style={{
           background: `linear-gradient(180deg, ${note.paper}, color-mix(in srgb, ${note.paper} 88%, #000))`,
         }}
       >
-        <svg viewBox="0 0 48 48" className="mb-5 h-11 w-11" fill="none" aria-hidden="true">
+        <svg viewBox="0 0 48 48" className="mb-3 h-8 w-8 sm:mb-5 sm:h-11 sm:w-11" fill="none" aria-hidden="true">
           {note.icon.map((d, k) => (
             <motion.path
               key={k}
@@ -96,8 +96,8 @@ function StickyNote({ note, i }: { note: Note; i: number }) {
             />
           ))}
         </svg>
-        <h3 className="mb-2 font-display text-2xl font-bold leading-tight tracking-[-0.03em]">{note.title}</h3>
-        <p className="font-hand text-xl leading-snug text-[#3b4050]">{note.text}</p>
+        <h3 className="mb-2 font-display text-lg font-bold leading-tight sm:text-2xl tracking-[-0.03em]">{note.title}</h3>
+        <p className="font-hand text-[17px] leading-snug text-[#3b4050] sm:text-xl">{note.text}</p>
         {/* curled corner */}
         <span
           aria-hidden="true"
@@ -116,7 +116,7 @@ export default function BentoFeatures() {
         title={['Neden', { text: 'Karalama?', className: 'text-gradient' }]}
         desc="Güzel bir oyun gecesi için ihtiyacın olan her şey burada: hızlı, Türkçe ve kurulumsuz."
       />
-      <ul className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-9 sm:gap-x-8 sm:gap-y-12 lg:grid-cols-3">
         {NOTES.map((n, i) => (
           <StickyNote key={n.title} note={n} i={i} />
         ))}

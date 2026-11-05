@@ -79,6 +79,29 @@ export function SiteFooter() {
             </span>
           ))}
         </div>
+        {/* The outline gets scribbled in (karalanır) as the footer scrolls in */}
+        <div
+          aria-hidden="true"
+          className="hatch-on-scroll pointer-events-none absolute inset-0 flex justify-center overflow-hidden px-2 font-display text-[20.5vw] font-extrabold leading-[0.8] tracking-[-0.07em] sm:px-4"
+        >
+          {WORD.split('').map((ch, i) => (
+            <span key={i} className="inline-block pb-[0.04em]">
+              <span
+                className="inline-block text-transparent"
+                style={{
+                  backgroundImage: 'repeating-linear-gradient(-38deg, rgba(200,245,96,0.75) 0 2px, transparent 2px 9px)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                }}
+              >
+                {ch}
+              </span>
+            </span>
+          ))}
+        </div>
+        <p aria-hidden="true" className="rise-on-scroll pointer-events-none absolute -top-10 right-[6%] rotate-[-6deg] font-hand text-2xl text-[var(--marker)] sm:text-3xl">
+          — imza: herkes ✎
+        </p>
       </div>
 
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 border-t border-white/[0.06] px-5 py-6 text-[13px] text-slate-400 sm:flex-row sm:px-6">
