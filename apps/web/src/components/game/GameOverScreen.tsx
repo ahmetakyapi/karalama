@@ -33,10 +33,11 @@ const CONFETTI_COLORS = [
   '#f43f5e', // rose
 ];
 
+// Revealed one by one, third place first: the winner is the last thing you see
 const PODIUM_CONFIG = [
-  { orderIdx: 1, label: '2', height: 120, gradient: 'from-slate-400 to-slate-500', glowColor: '#94a3b8', ringColor: 'ring-slate-400/40' },
-  { orderIdx: 0, label: '1', height: 160, gradient: 'from-amber-400 to-yellow-500', glowColor: '#f59e0b', ringColor: 'ring-amber-400/40' },
-  { orderIdx: 2, label: '3', height: 90, gradient: 'from-orange-500 to-amber-700', glowColor: '#c2410c', ringColor: 'ring-orange-500/40' },
+  { orderIdx: 1, label: '2', height: 128, ink: '#94a3b8', paper: '#e2e8f0', reveal: 1.3, ringColor: 'ring-slate-300/50' },
+  { orderIdx: 0, label: '1', height: 176, ink: '#d9a514', paper: '#fde68a', reveal: 2.1, ringColor: 'ring-amber-300/60' },
+  { orderIdx: 2, label: '3', height: 96, ink: '#c2410c', paper: '#fed7aa', reveal: 0.6, ringColor: 'ring-orange-400/50' },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -391,9 +392,10 @@ export function GameOverScreen() {
           initial={{ opacity: 0, y: -30, scale: 0.8 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.7, ease: easeCurve as unknown as EaseCurve }}
-          className="font-display text-6xl sm:text-7xl font-extrabold tracking-[-0.05em] text-center mb-2 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 bg-clip-text text-transparent drop-shadow-lg"
+          className="relative mb-2 text-center font-display text-6xl font-extrabold tracking-[-0.05em] text-slate-50 sm:text-7xl"
         >
-          Oyun Bitti!
+          Oyun <span className="ml-1 inline-block -rotate-2 rounded-md bg-[var(--marker)] px-3 pb-1 text-[#04070d]">Bitti</span>
+          <span className="font-hand font-bold tracking-normal text-[var(--marker)]">!</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
@@ -447,7 +449,7 @@ export function GameOverScreen() {
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.5, ease: easeCurve as unknown as EaseCurve }}
+              transition={{ delay: 2.9, duration: 0.5, ease: easeCurve as unknown as EaseCurve }}
               className="text-amber-300 font-bold text-lg mt-2"
             >
               {winner.playerName} kazandı!
@@ -473,7 +475,7 @@ export function GameOverScreen() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{
-                    delay: 0.6 + visualIdx * 0.2,
+                    delay: config.reveal,
                     duration: 0.5,
                     ease: easeCurve as unknown as EaseCurve,
                   }}
@@ -484,7 +486,7 @@ export function GameOverScreen() {
                     initial={{ opacity: 0, y: 30, scale: 0.5 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{
-                      delay: 1.2 + visualIdx * 0.15,
+                      delay: config.reveal + 0.45,
                       duration: 0.6,
                       type: 'spring',
                       stiffness: 300,
@@ -496,7 +498,7 @@ export function GameOverScreen() {
                         className="absolute -top-5 left-1/2 -translate-x-1/2 z-20"
                         initial={{ opacity: 0, y: -10, rotate: -15 }}
                         animate={{ opacity: 1, y: 0, rotate: 0 }}
-                        transition={{ delay: 1.8, duration: 0.5, type: 'spring' }}
+                        transition={{ delay: config.reveal + 0.8, duration: 0.5, type: 'spring' }}
                       >
                         <CrownIcon className="w-7 h-7" />
                       </motion.div>
@@ -514,8 +516,8 @@ export function GameOverScreen() {
                   <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 1.4 + visualIdx * 0.1 }}
-                    className="text-sm font-semibold text-white/90 mb-0.5 text-center truncate max-w-[80px]"
+                    transition={{ delay: config.reveal + 0.55 }}
+                    className="mb-0.5 max-w-[96px] truncate text-center text-sm font-semibold text-white/90"
                   >
                     {entry.playerName}
                   </motion.p>
@@ -524,38 +526,26 @@ export function GameOverScreen() {
                   <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 1.5 + visualIdx * 0.1 }}
-                    className="text-[13px] font-bold tabular-nums text-accent-cyan mb-2"
+                    transition={{ delay: config.reveal + 0.6 }}
+                    className="mb-2 text-[13px] font-bold tabular-nums text-accent-cyan"
                   >
-                    <AnimatedScore value={entry.score} delay={1.6 + visualIdx * 0.15} />
+                    <AnimatedScore value={entry.score} delay={config.reveal + 0.6} />
                     <span className="font-medium text-slate-400 ml-1">puan</span>
                   </motion.p>
 
-                  {/* Podium bar */}
+                  {/* Podium block: a taped paper block, its hatching inked in the medal colour.
+                      It rises with clip-path (no height animation, no relayout) */}
                   <motion.div
-                    className={`w-full rounded-t-xl bg-gradient-to-t ${config.gradient} relative overflow-hidden`}
-                    initial={{ height: 0 }}
-                    animate={{ height: config.height }}
-                    transition={{
-                      delay: 0.8 + visualIdx * 0.2,
-                      duration: 0.8,
-                      ease: easeCurve as unknown as EaseCurve,
-                    }}
+                    className="relative w-full rounded-t-lg shadow-[0_20px_40px_-18px_rgba(0,0,0,0.8)]"
+                    style={{ height: config.height, background: config.paper }}
+                    initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                    animate={{ clipPath: 'inset(0% 0 0 0)' }}
+                    transition={{ delay: config.reveal, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    {/* Shine overlay */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0"
-                      initial={{ x: '-100%' }}
-                      animate={{ x: '200%' }}
-                      transition={{
-                        delay: 1.8 + visualIdx * 0.2,
-                        duration: 1,
-                        ease: 'easeInOut',
-                      }}
-                    />
-                    {/* Rank label */}
-                    <div className="flex items-start justify-center pt-3">
-                      <span className="text-2xl font-extrabold text-white/90 drop-shadow-md">
+                    <span aria-hidden="true" className="hatch absolute inset-x-0 bottom-0 top-10 opacity-50" style={{ color: config.ink }} />
+                    <span aria-hidden="true" className="tape -top-2 left-1/2 h-5 w-16 -translate-x-1/2 -rotate-3" />
+                    <div className="relative flex items-start justify-center pt-2">
+                      <span className="font-hand text-4xl font-bold leading-none" style={{ color: '#1f2430' }}>
                         {config.label}.
                       </span>
                     </div>

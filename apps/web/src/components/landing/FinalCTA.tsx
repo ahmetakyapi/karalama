@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Magnetic } from '@/components/motion/primitives';
 import { useSmoothScroll } from '@/components/motion/SmoothScroll';
+import { Glyph } from '@/components/ui/Sketch';
 
 export function FinalCTA() {
   const ref = useRef<HTMLElement>(null);
@@ -25,6 +26,14 @@ export function FinalCTA() {
       aria-labelledby="cta-title"
       className="relative z-10 overflow-hidden px-5 py-28 sm:py-44"
     >
+      {/* Doodles that land around the headline as it scrolls in */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 mx-auto max-w-7xl">
+        <Glyph name="star" className="rise-on-scroll absolute left-[12%] top-[14%] h-10 w-10 text-[var(--marker)] sm:h-14 sm:w-14" />
+        <Glyph name="heart" className="rise-on-scroll absolute right-[10%] top-[10%] h-9 w-9 text-rose-400/70 sm:h-12 sm:w-12" />
+        <Glyph name="spiral" className="rise-on-scroll absolute right-[16%] top-[52%] hidden h-14 w-14 text-slate-500 md:block" />
+        <Glyph name="bolt" className="rise-on-scroll absolute left-[20%] top-[44%] hidden h-10 w-10 text-amber-300/70 md:block" />
+        <Glyph name="smile" className="rise-on-scroll absolute bottom-[10%] right-[24%] hidden h-12 w-12 text-cyan-300/60 md:block" />
+      </div>
       <motion.div style={{ scale }} className="relative mx-auto max-w-7xl text-center">
         <h2
           id="cta-title"

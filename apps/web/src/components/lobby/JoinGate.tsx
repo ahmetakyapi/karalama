@@ -6,6 +6,7 @@ import { AVATAR_CHARACTERS } from '@karalama/shared';
 import { cn } from '@/lib/utils';
 import { EXPO } from '@/components/motion/hooks';
 import { loadSavedPlayer, nameProblem, savePlayer } from '@/lib/player';
+import { Glyph, PointerLight, ScribbleUnderline } from '@/components/ui/Sketch';
 
 /**
  * Someone opened a shared room link: ask who they are before joining, instead
@@ -35,8 +36,12 @@ export function JoinGate({
   };
 
   return (
-    <main className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-4 py-16">
-      <div className="pointer-events-none absolute inset-0">
+    <main className="dot-paper relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-4 py-16">
+      <PointerLight />
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <Glyph name="star" className="float-slow absolute left-[14%] top-[22%] hidden h-12 w-12 text-lime-300/40 md:block" />
+        <Glyph name="heart" className="float-slow absolute bottom-[20%] right-[14%] hidden h-12 w-12 text-rose-400/40 md:block" style={{ animationDelay: '-3s' }} />
+        <Glyph name="arrow" className="absolute right-[18%] top-[26%] hidden h-16 w-16 rotate-[100deg] text-slate-600 md:block" />
         <div className="glow absolute -left-24 -top-24 h-[360px] w-[360px] text-accent-indigo/10" />
         <div className="glow absolute -bottom-24 -right-24 h-[360px] w-[360px] text-accent-cyan/10" />
       </div>
@@ -57,10 +62,14 @@ export function JoinGate({
         className="relative z-10 w-full max-w-md"
       >
         <h1 className="text-center font-display text-5xl font-extrabold tracking-[-0.045em] text-slate-50 sm:text-6xl">
-          Odaya Katıl
+          Odaya{' '}
+          <span className="relative inline-block">
+            Katıl
+            <ScribbleUnderline delay={0.5} />
+          </span>
         </h1>
         <p className="mt-3 text-center text-[15px] text-slate-400">
-          <span className="font-mono font-bold tracking-[0.18em] text-[var(--marker)]">{roomCode}</span> odası seni
+          <span className="mx-0.5 inline-block -rotate-2 rounded-md bg-[var(--paper)] px-2 py-0.5 font-display font-extrabold tracking-[0.16em] text-[var(--paper-ink)]">{roomCode}</span> odası seni
           bekliyor. Adını yaz, karakterini seç.
         </p>
 

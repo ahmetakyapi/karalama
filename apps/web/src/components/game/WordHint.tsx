@@ -21,30 +21,41 @@ export function WordHint() {
   if (!hint) return null;
 
   const chars = hint.split(' ');
+  const letters = chars.filter((c) => c !== '').length;
 
   return (
-    <div className="flex items-center justify-center gap-1 flex-wrap">
-      {chars.map((ch, i) => {
-        if (ch === '') {
-          return <div key={i} className="w-3" />;
-        }
-        const isRevealed = ch !== '_';
-        return (
-          <motion.div
-            key={i}
-            initial={isRevealed ? { scale: 1.3, color: '#22d3ee' } : {}}
-            animate={isRevealed ? { scale: 1, color: '#f0f2f5' } : {}}
-            className={cn(
-              'w-6 h-7 sm:w-7 sm:h-8 flex items-center justify-center rounded-md text-sm font-bold font-mono',
-              isRevealed
-                ? 'bg-accent-indigo/20 text-white'
-                : 'bg-white/[0.05] text-slate-500'
-            )}
-          >
-            {ch}
-          </motion.div>
-        );
-      })}
+    <div className="flex items-center justify-center gap-3">
+      <div className="flex flex-wrap items-end justify-center gap-1" aria-label={`${letters} harfli kelime`}>
+        {chars.map((ch, i) => {
+          if (ch === '') {
+            return <div key={i} className="w-3" />;
+          }
+          const isRevealed = ch !== '_';
+          return (
+            <span key={i} className="relative flex h-8 w-6 items-end justify-center sm:w-7">
+              {isRevealed && (
+                <motion.span
+                  initial={{ y: -10, opacity: 0, rotate: -12 }}
+                  animate={{ y: 0, opacity: 1, rotate: 0 }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 18 }}
+                  className="mb-1 font-display text-lg font-extrabold uppercase leading-none text-slate-50"
+                >
+                  {ch}
+                </motion.span>
+              )}
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'absolute inset-x-0.5 bottom-0 h-[3px] rounded-full',
+                  isRevealed ? 'bg-[var(--marker)]' : 'bg-slate-500/60'
+                )}
+                style={{ rotate: `${((i * 53) % 7) - 3}deg` }}
+              />
+            </span>
+          );
+        })}
+      </div>
+      <span className="font-hand text-lg leading-none text-slate-400">{letters} harf</span>
     </div>
   );
 }

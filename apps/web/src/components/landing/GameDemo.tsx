@@ -84,15 +84,52 @@ function StepCard({ step, i, className }: { step: Step; i: number; className?: s
 }
 
 function ProgressDots({ progress }: { progress: MotionValue<number> }) {
-  // scaleX instead of width: the scroll-linked bar no longer relayouts per frame
+  // A pencil line that draws itself with the scroll (clip-path only), a
+  // star popping at each step as you reach it
+  const clip = useTransform(progress, (v) => `inset(-40% ${(1 - v) * 100}% -40% 0)`);
+  const nodes = DEMO_STEPS.map((_, i) => (i + 0.5) / DEMO_STEPS.length);
   return (
     <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-6">
-      <span className="text-[13px] font-medium text-slate-400">Kaydırmaya Devam</span>
-      <div className="relative h-px flex-1 bg-white/10">
-        <motion.div className="absolute inset-y-0 left-0 w-full origin-left bg-gradient-to-r from-indigo-500 via-cyan-400 to-[#c8f560]" style={{ scaleX: progress }} />
+      <span className="shrink-0 font-hand text-xl text-slate-400">kaydırmaya devam</span>
+      <div className="relative h-8 flex-1">
+        <svg viewBox="0 0 1000 32" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
+          <path d={SQUIGGLE} stroke="rgba(255,255,255,0.1)" strokeWidth="2" strokeDasharray="2 8" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        </svg>
+        <motion.svg style={{ clipPath: clip }} viewBox="0 0 1000 32" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="track-ink" x1="0" x2="1000" y1="0" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stopColor="#6366f1" />
+              <stop offset="0.5" stopColor="#22d3ee" />
+              <stop offset="1" stopColor="#c8f560" />
+            </linearGradient>
+          </defs>
+          <path d={SQUIGGLE} stroke="url(#track-ink)" strokeWidth="3" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        </motion.svg>
+        {nodes.map((at, i) => (
+          <TrackStar key={i} at={at} progress={progress} color={DEMO_STEPS[i].accent} />
+        ))}
       </div>
-      <span className="text-[13px] font-medium tabular-nums text-slate-400">{DEMO_STEPS.length} Adım</span>
+      <span className="shrink-0 text-[13px] font-medium tabular-nums text-slate-400">{DEMO_STEPS.length} Adım</span>
     </div>
+  );
+}
+
+const SQUIGGLE = 'M2 18 C 60 6, 110 28, 170 16 S 280 4, 340 18 S 450 30, 520 14 S 640 4, 700 18 S 820 30, 880 14 S 960 8, 998 16';
+
+function TrackStar({ at, progress, color }: { at: number; progress: MotionValue<number>; color: string }) {
+  const scale = useTransform(progress, [at - 0.06, at], [0.6, 1], { clamp: true });
+  const opacity = useTransform(progress, [at - 0.06, at], [0.25, 1], { clamp: true });
+  const rotate = useTransform(progress, [at - 0.06, at], [-40, 0], { clamp: true });
+  return (
+    <motion.svg
+      aria-hidden="true"
+      viewBox="0 0 48 48"
+      className="absolute top-1/2 h-5 w-5"
+      style={{ left: `${at * 100}%`, x: "-50%", y: "-50%", scale, opacity, rotate, color }}
+      fill="currentColor"
+    >
+      <path d="M24 4 L28 18 L43 19 L31 28 L35 43 L24 34 L13 43 L17 28 L5 19 L20 18 Z" stroke="#04070d" strokeWidth="3" strokeLinejoin="round" />
+    </motion.svg>
   );
 }
 

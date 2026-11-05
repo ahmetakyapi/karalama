@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Bricolage_Grotesque, Caveat } from 'next/font/google';
 import './globals.css';
+import './craft.css';
 import { ThemeApplier } from '@/components/ui/ThemeApplier';
 import { ToastStack } from '@/components/ui/ToastStack';
 import { RoomExit } from '@/components/game/RoomExit';
